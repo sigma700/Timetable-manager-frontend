@@ -16,7 +16,7 @@ const SignUp = () => {
 		e.preventDefault();
 		try {
 			await signUp(email, password, firstName, lastName);
-			navigate('/home');
+			navigate('/verify');
 		} catch (error) {}
 	};
 	return (

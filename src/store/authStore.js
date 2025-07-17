@@ -46,7 +46,7 @@ export const useAuthStore = create((set) => ({
 	},
 
 	//action for email verification
-	verify: async (verToken) => {
+	verify: async (code) => {
 		set({ isLoading: true, isAuthenticated: false, error: null });
 
 		try {
@@ -54,10 +54,10 @@ export const useAuthStore = create((set) => ({
 			const response = await fetch(`${fetchurl}/api/verify`, {
 				method: 'POST',
 				headers: {
-					'Contetnt-Type': 'application/json',
+					'Content-Type': 'application/json',
 				},
 				credentials: 'include',
-				body: JSON.stringify({ verToken }),
+				body: JSON.stringify({ code }),
 			});
 
 			const data = await response.json();
@@ -73,6 +73,7 @@ export const useAuthStore = create((set) => ({
 		} catch (error) {
 			set({
 				error: error.message,
+				isLoading: false,
 			});
 			console.log(error);
 
