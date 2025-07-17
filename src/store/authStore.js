@@ -3,7 +3,7 @@ import { create } from 'zustand';
 export const useAuthStore = create((set) => ({
 	user: null,
 	value: null,
-	isLoading: true,
+	isLoading: false,
 	error: null,
 	isAuthenticated: false,
 	isCheckingAuth: false,
@@ -39,6 +39,7 @@ export const useAuthStore = create((set) => ({
 
 			set({
 				error: error.message,
+				isLoading: false,
 			});
 			throw error;
 		}
