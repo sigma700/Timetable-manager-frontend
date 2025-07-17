@@ -24,6 +24,7 @@ const SignUp = () => {
 			<div className="flex flex-col lg:flex-row items-center bg-gradient-to-r from-slate-900 to-slate-700 p-[20px] rounded-2xl">
 				<img src="src/assets/undraw_security_0ubl.svg" alt="" />
 				<form onSubmit={handleSubmit} className="flex-col flex lg:block" action="">
+					<small className="text-red-500 font-bold">{error}</small>
 					<div className="flex items-center gap-[10px] p-[] lg:w-full">
 						<div className="flex flex-col">
 							<label className="text-white font-light" htmlFor="">
@@ -78,7 +79,7 @@ const SignUp = () => {
 						type="submit"
 						className="text-white bg-gradient-to-r from-slate-500 to-slate-800 p-[10px] w-full mt-[20px] hover:cursor-pointer hover:border hover:transition-all duration-[0.4s] hover:duration-[0.4s]"
 					>
-						Create account
+						{isLoading ? 'Creating Account' : 'Create Account'}
 					</button>
 				</form>
 			</div>
