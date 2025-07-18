@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import Otp from './components/otp';
 import { useAuthStore } from '../store/authStore';
+import { useNavigate } from 'react-router-dom';
 
 const Verif = () => {
 	const [code, setCode] = useState('');
 	const { verify, isLoading, error, user } = useAuthStore();
 
+	const navigate = useNavigate();
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
 			await verify(code);
+			navigate('/create');
 		} catch (error) {
 			// Handle error
 		}
