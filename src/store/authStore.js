@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export const useAuthStore = create((set) => ({
+export const useAuthStore = create((set, get) => ({
 	user: null,
 	value: null,
 	isLoading: false,
@@ -8,6 +8,16 @@ export const useAuthStore = create((set) => ({
 	isAuthenticated: false,
 	isCheckingAuth: false,
 
+	initialize: async () => {
+		if (get().isAuthenticated) return;
+
+		set({ isCheckingAuth: true });
+		try {
+			await get().checkAuth(); // Reuse your existing checkAuth function
+		} finally {
+			set({ isCheckingAuth: false });
+		}
+	},
 	//actions
 	signUp: async (email, password, firstName, lastName) => {
 		set({ isLoading: true, error: null, isAuthenticated: false });
@@ -81,5 +91,39 @@ export const useAuthStore = create((set) => ({
 		}
 	},
 
-	//i will add one for login right after making creating the endpoint in the backend
+	checkAuth: async () => {
+		set({ isLoading: true, error: null, isAuthenticated: false, user: null });
+		try {
+			const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/checkAuth`, {
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include',
+			});
+
+			if (!response.ok) {
+				throw new Error('Authentication check failed !');
+			}
+
+			const data = await response.json();
+
+			set({
+				isLoading: false,
+				error: null,
+				isAuthenticated: true,
+				user: data.message,
+			});
+
+			return true;
+		} catch (error) {
+			set({
+				isLoading: false,
+				error: data.message,
+			});
+
+			return false;
+		}
+	},
 }));
+
+useAuthStore.getState().initialize();
