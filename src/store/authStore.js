@@ -1,3 +1,4 @@
+// import { isCSSRequest } from 'vite';
 import { create } from 'zustand';
 
 export const useAuthStore = create((set, get) => ({
@@ -31,6 +32,7 @@ export const useAuthStore = create((set, get) => ({
 				body: JSON.stringify({ email, firstName, lastName, password }),
 				credentials: 'include',
 			});
+
 			const fetchedData = await response.json();
 
 			if (!response.ok) {
@@ -51,7 +53,7 @@ export const useAuthStore = create((set, get) => ({
 				error: error.message,
 				isLoading: false,
 			});
-			throw error;
+			return Promise.reject(error); // More explicit than throw
 		}
 	},
 
@@ -92,26 +94,27 @@ export const useAuthStore = create((set, get) => ({
 	},
 
 	checkAuth: async () => {
-		set({ isLoading: true, error: null, isAuthenticated: false, user: null });
+		set({ isCheckingAuth: true, error: null });
 		try {
-			const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/checkAuth`, {
+			const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/check-Auth`, {
+				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
 				},
 				credentials: 'include',
 			});
 
+			const data = await response.json();
+
 			if (!response.ok) {
 				throw new Error('Authentication check failed !');
 			}
 
-			const data = await response.json();
-
 			set({
-				isLoading: false,
+				isCheckingAuth: false,
 				error: null,
 				isAuthenticated: true,
-				user: data.message,
+				user: data.user,
 			});
 
 			return true;
