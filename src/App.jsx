@@ -31,7 +31,11 @@ const PublicOnlyRoute = ({ children }) => {
 	const { isAuthenticated, isCheckingAuth } = useAuthStore();
 
 	if (isCheckingAuth) {
-		return <div>Loading...</div>;
+		return (
+			<div>
+				<LoadingSpinner />
+			</div>
+		);
 	}
 
 	if (isAuthenticated) {
