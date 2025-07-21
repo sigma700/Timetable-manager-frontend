@@ -39,7 +39,7 @@ const PublicOnlyRoute = ({ children }) => {
 	}
 
 	if (isAuthenticated) {
-		return <Navigate to="/create" replace />;
+		return <Navigate to="/home" replace />;
 	}
 
 	return children;
@@ -71,7 +71,7 @@ const router = createBrowserRouter([
 		),
 	},
 	{
-		path: '/create',
+		path: '/home',
 		element: (
 			<ProtectedRoute>
 				<MainPg />
