@@ -5,7 +5,7 @@ export const FullMenu = () => {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<div className="relative h-screen bg-gradient-to-r from-slate-900 to-slate-900 overflow-hidden">
+		<div className="">
 			<AnimatedHamburgerBtn active={isOpen} setActive={setIsOpen} />
 
 			{/* Menu Content */}
