@@ -5,47 +5,14 @@ export const FullMenu = () => {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<div className="">
+		<div className="relative h-screen bg-gradient-to-r from-slate-900 to-slate-900 overflow-hidden">
+			{/* Hamburger Button - Always visible */}
 			<AnimatedHamburgerBtn active={isOpen} setActive={setIsOpen} />
 
-			{/* Menu Content */}
+			{/* Menu Content - Only visible when open */}
 			<AnimatePresence>
 				{isOpen && (
 					<>
-						<motion.div
-							initial={{ x: -300, opacity: 0 }}
-							animate={{
-								x: 0,
-								opacity: 1,
-								transition: { type: 'spring', stiffness: 100, damping: 15 },
-							}}
-							exit={{
-								x: -300,
-								opacity: 0,
-								transition: { duration: 0.3 },
-							}}
-							className="absolute left-24 top-0 p-8 z-20"
-						>
-							<NavigatorCont />
-						</motion.div>
-
-						<motion.div
-							initial={{ x: -300, opacity: 0 }}
-							animate={{
-								x: 0,
-								opacity: 1,
-								transition: { delay: 0.1, type: 'spring', stiffness: 100, damping: 15 },
-							}}
-							exit={{
-								x: -300,
-								opacity: 0,
-								transition: { duration: 0.2 },
-							}}
-							className="absolute left-24 bottom-4 p-8 z-20"
-						>
-							<Socials />
-						</motion.div>
-
 						{/* Backdrop */}
 						<motion.div
 							initial={{ opacity: 0 }}
@@ -54,6 +21,56 @@ export const FullMenu = () => {
 							className="fixed inset-0 bg-black z-10"
 							onClick={() => setIsOpen(false)}
 						/>
+
+						{/* Main Content */}
+						<motion.div
+							initial={{ width: 0, opacity: 0 }}
+							animate={{
+								width: '100%',
+								opacity: 1,
+								transition: { duration: 0.5, ease: 'easeInOut' },
+							}}
+							exit={{
+								width: 0,
+								opacity: 0,
+								transition: { duration: 0.5, ease: 'easeInOut' },
+							}}
+							className="fixed inset-0 z-20 flex items-center justify-center"
+						>
+							<motion.div
+								initial={{ x: -100, opacity: 0 }}
+								animate={{
+									x: 0,
+									opacity: 1,
+									transition: { delay: 0.3, duration: 0.5 },
+								}}
+								exit={{
+									x: -100,
+									opacity: 0,
+									transition: { duration: 0.3 },
+								}}
+								className="w-full max-w-2xl px-4"
+							>
+								<NavigatorCont />
+							</motion.div>
+
+							<motion.div
+								initial={{ x: -100, opacity: 0 }}
+								animate={{
+									x: 0,
+									opacity: 1,
+									transition: { delay: 0.5, duration: 0.5 },
+								}}
+								exit={{
+									x: -100,
+									opacity: 0,
+									transition: { duration: 0.2 },
+								}}
+								className="absolute bottom-8 left-0 right-0 flex justify-center"
+							>
+								<Socials />
+							</motion.div>
+						</motion.div>
 					</>
 				)}
 			</AnimatePresence>
@@ -65,8 +82,8 @@ const NavigatorCont = () => {
 	const menuItems = ['Home', 'Contact Us', 'Request Demo', 'Settings'];
 
 	return (
-		<motion.main className="lg:absolute top-1/3 lg:left-4">
-			<ul className="text-[30px] lg:text-[40px] font-extrabold text-gray-400 space-y-4">
+		<main>
+			<ul className="text-[30px] lg:text-[40px] font-extrabold text-gray-400 space-y-6">
 				{menuItems.map((item, index) => (
 					<motion.li
 						key={item}
@@ -74,20 +91,20 @@ const NavigatorCont = () => {
 						animate={{
 							x: 0,
 							opacity: 1,
-							transition: { delay: 0.2 + index * 0.1 },
+							transition: { delay: 0.7 + index * 0.1, duration: 0.5 },
 						}}
 						exit={{
 							x: -50,
 							opacity: 0,
 							transition: { duration: 0.2 },
 						}}
-						className="hover:text-white hover:transition-colors hover:duration-[0.3s] duration-[0.3s] hover:cursor-pointer"
+						className="hover:text-white hover:transition-colors hover:duration-[0.3s] duration-[0.3s] hover:cursor-pointer text-center"
 					>
 						{item}
 					</motion.li>
 				))}
 			</ul>
-		</motion.main>
+		</main>
 	);
 };
 
@@ -100,7 +117,7 @@ const Socials = () => {
 	];
 
 	return (
-		<motion.main className="left-4">
+		<main>
 			<ul className="flex gap-[20px]">
 				{socialIcons.map((icon, index) => (
 					<motion.li
@@ -109,7 +126,7 @@ const Socials = () => {
 						animate={{
 							x: 0,
 							opacity: 1,
-							transition: { delay: 0.5 + index * 0.1 },
+							transition: { delay: 1.1 + index * 0.1, duration: 0.5 },
 						}}
 						exit={{
 							x: -20,
@@ -125,7 +142,7 @@ const Socials = () => {
 					</motion.li>
 				))}
 			</ul>
-		</motion.main>
+		</main>
 	);
 };
 
