@@ -94,7 +94,7 @@ export const useAuthStore = create((set, get) => ({
 	},
 
 	checkAuth: async () => {
-		set({ isCheckingAuth: true, error: null });
+		set({ isCheckingAuth: true, error: null, user: null });
 		try {
 			const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/check-Auth`, {
 				method: 'GET',
@@ -114,14 +114,14 @@ export const useAuthStore = create((set, get) => ({
 				isCheckingAuth: false,
 				error: null,
 				isAuthenticated: true,
-				user: data.user,
+				user: data.data.firstName,
 			});
 
 			return true;
 		} catch (error) {
 			set({
 				isLoading: false,
-				error: data.message,
+				error: error.message,
 			});
 
 			return false;

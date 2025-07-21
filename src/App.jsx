@@ -28,7 +28,7 @@ const ProtectedRoute = ({ children }) => {
 
 // Public-only route component
 const PublicOnlyRoute = ({ children }) => {
-	const { isAuthenticated, isCheckingAuth } = useAuthStore();
+	const { isAuthenticated, isCheckingAuth, user } = useAuthStore();
 
 	if (isCheckingAuth) {
 		return (
@@ -81,7 +81,8 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
-	const { checkAuth } = useAuthStore();
+	const { checkAuth, user } = useAuthStore();
+	// console.log(user); got back allan
 
 	useEffect(() => {
 		checkAuth();
