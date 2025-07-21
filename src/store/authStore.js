@@ -40,7 +40,6 @@ export const useAuthStore = create((set, get) => ({
 			}
 
 			set({
-				user: fetchedData.data,
 				isAuthenticated: true,
 				isLoading: false,
 			});

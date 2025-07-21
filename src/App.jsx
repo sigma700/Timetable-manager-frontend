@@ -6,6 +6,7 @@ import Verif from './pages/Verif';
 import MainPg from './pages/MainPg';
 import { useAuthStore } from './store/authStore';
 import LoadingSpinner from './pages/components/spinner';
+import Create from './pages/Create';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -47,6 +48,14 @@ const PublicOnlyRoute = ({ children }) => {
 
 const router = createBrowserRouter([
 	{
+		path: '/home/create-table',
+		element: (
+			<ProtectedRoute>
+				<Create />
+			</ProtectedRoute>
+		),
+	},
+	{
 		path: '/signUp',
 		element: (
 			<PublicOnlyRoute>
@@ -57,9 +66,9 @@ const router = createBrowserRouter([
 	{
 		path: '/verify',
 		element: (
-			<PublicOnlyRoute>
+			<ProtectedRoute>
 				<Verif />
-			</PublicOnlyRoute>
+			</ProtectedRoute>
 		),
 	},
 	{

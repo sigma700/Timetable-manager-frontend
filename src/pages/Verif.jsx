@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Verif = () => {
 	const [code, setCode] = useState('');
-	const { verify, isLoading, error, user } = useAuthStore();
+	const { verify, isLoading, error } = useAuthStore();
 
 	const navigate = useNavigate();
 
@@ -13,7 +13,7 @@ const Verif = () => {
 		e.preventDefault();
 		try {
 			await verify(code);
-			navigate('/create');
+			navigate('/home');
 		} catch (error) {
 			// Handle error
 		}

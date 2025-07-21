@@ -8,7 +8,7 @@ const SignUp = () => {
 	const [email, setEmail] = useState('');
 	const [lastName, setLastName] = useState('');
 
-	const { signUp, isLoading, error, user } = useAuthStore();
+	const { signUp, isLoading, error } = useAuthStore();
 
 	const navigate = useNavigate();
 
