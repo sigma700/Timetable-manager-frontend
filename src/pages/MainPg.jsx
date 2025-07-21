@@ -1,9 +1,12 @@
 import React from 'react';
+import { FullMenu } from './components/animatedHamb';
 
 const MainPg = () => {
 	return (
 		<main>
-			<div>main page</div>
+			<div>
+				<FullMenu />
+			</div>
 		</main>
 	);
 };
