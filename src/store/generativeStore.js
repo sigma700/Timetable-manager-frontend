@@ -15,7 +15,7 @@ export const useGenStore = create((set) => ({
 
 		try {
 			const backendUrl = import.meta.env.VITE_BACKEND_URL;
-			const response = await fetch(`${backendUrl}/api/genTable`, {
+			const response = await fetch(`${backendUrl}/api/list-school`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export const useGenStore = create((set) => ({
 	},
 
 	//listing all the subjects that are taught in the school
-	listSubs: async (name, schoolId) => {
+	listSubs: async (names, schoolId) => {
 		set({ isLoading: true, error: null, isCreated: false });
 		try {
 			const fetchUrl = import.meta.env.VITE_BACKEND_URL;
@@ -53,7 +53,7 @@ export const useGenStore = create((set) => ({
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ name, schoolId }),
+				body: JSON.stringify({ names, schoolId }),
 			});
 
 			//reasign the response varible to make sure that the data we are getting is in json format
@@ -74,7 +74,7 @@ export const useGenStore = create((set) => ({
 	},
 
 	//listing all the classes in the school to make sure that the backend is properly suplemented with all the data thats is required
-	listClasses: async (minLevel, maxLevel, labels, schoolId) => {
+	listClasses: async (minLevel, maxLevel, type, labels, schoolId) => {
 		set({ isLoading: true, error: null, isCreated: false });
 		try {
 			const fetcher = import.meta.env.VITE_BACKEND_URL;
@@ -84,7 +84,7 @@ export const useGenStore = create((set) => ({
 					'Content-Type': 'application/json',
 				},
 				credentials: 'include',
-				body: JSON.stringify({ minLevel, maxLevel, labels }),
+				body: JSON.stringify({ minLevel, maxLevel, labels, type }),
 			});
 
 			const data = await response.json();
