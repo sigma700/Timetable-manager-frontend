@@ -8,8 +8,8 @@ const Create = () => {
 		subjectName: '',
 		minLevel: '',
 		maxLevel: '',
-		classLabels: '',
 		classTypes: '',
+		classLabels: '',
 		teachers: [{ name: '', subjects: '', classes: '' }],
 	});
 
@@ -58,10 +58,14 @@ const Create = () => {
 
 			// Process classes
 			await listClasses(
-				formData.minLevel,
-				formData.maxLevel,
-				formData.classLabels,
+				formData.minLevel.toString(),
+				formData.maxLevel.toString(),
+
 				formData.classTypes,
+				formData.classLabels
+					.split(',')
+					.map((label) => label.trim())
+					.filter((label) => label), // This converts string to array,
 				schoolId
 			);
 
@@ -173,7 +177,7 @@ const Create = () => {
 										<Input
 											value={teacher.name}
 											onChange={(e) => handleTeacherChange(index, 'name', e.target.value)}
-											placeholder="Mr. Smith"
+											placeholder="eg :Mr. Smith"
 										/>
 									</div>
 									<div>
