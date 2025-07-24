@@ -4,7 +4,7 @@ import { create } from 'zustand';
 
 export const useGenStore = create((set) => ({
 	value: null,
-	isLoading: true,
+	isLoading: false,
 	error: null,
 	isCreated: false,
 
@@ -37,6 +37,7 @@ export const useGenStore = create((set) => ({
 		} catch (error) {
 			set({
 				error: data.message,
+				isLoading: false,
 			});
 			console.log(error);
 			throw new Error(error);
@@ -70,7 +71,11 @@ export const useGenStore = create((set) => ({
 
 			//return the data
 			return data;
-		} catch (error) {}
+		} catch (error) {
+			set({
+				isLoading: false,
+			});
+		}
 	},
 
 	//listing all the classes in the school to make sure that the backend is properly suplemented with all the data thats is required
@@ -99,6 +104,7 @@ export const useGenStore = create((set) => ({
 			return data;
 		} catch (error) {
 			set({
+				isLoading: false,
 				isCreated: false,
 				error: data.message,
 			});
@@ -139,6 +145,7 @@ export const useGenStore = create((set) => ({
 			set({
 				isCreated: false,
 				error: data.message,
+				isLoading: false,
 			});
 			console.log(error);
 			throw new Error(error);
