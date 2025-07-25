@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 export const FullMenu = () => {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
 		<div className="h-screen">
-			{/* Hamburger Button - Always visible */}
 			<AnimatedHamburgerBtn active={isOpen} setActive={setIsOpen} />
 
-			{/* Menu Content - Only visible when open */}
 			<AnimatePresence>
 				{isOpen && (
 					<>
-						{/* Backdrop */}
 						<motion.div
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 0.7 }}
@@ -79,29 +77,49 @@ export const FullMenu = () => {
 };
 
 const NavigatorCont = () => {
-	const menuItems = ['Home', 'Contact Us', 'Request Demo', 'Settings'];
+	// const menuItems = ['Home', 'Contact Us', 'Request Demo', 'Settings'];
+	const menuItems = [
+		{
+			title: 'Home',
+			path: '/home',
+		},
+		{
+			title: 'Contact Us',
+			path: '/contacts',
+		},
+		{
+			title: 'Request Demo',
+			path: '/demo',
+		},
+		{
+			title: 'Settings',
+			path: '/settings',
+		},
+	];
 
 	return (
 		<main>
 			<ul className="text-[30px] lg:text-[40px] font-extrabold text-gray-400 space-y-6">
 				{menuItems.map((item, index) => (
-					<motion.li
-						key={item}
-						initial={{ x: -50, opacity: 0 }}
-						animate={{
-							x: 0,
-							opacity: 1,
-							transition: { delay: 0.7 + index * 0.1, duration: 0.5 },
-						}}
-						exit={{
-							x: -50,
-							opacity: 0,
-							transition: { duration: 0.2 },
-						}}
-						className="hover:text-white hover:transition-colors hover:duration-[0.3s] duration-[0.3s] hover:cursor-pointer text-center"
-					>
-						{item}
-					</motion.li>
+					<Link to={item.path}>
+						<motion.li
+							key={item}
+							initial={{ x: -50, opacity: 0 }}
+							animate={{
+								x: 0,
+								opacity: 1,
+								transition: { delay: 0.7 + index * 0.1, duration: 0.5 },
+							}}
+							exit={{
+								x: -50,
+								opacity: 0,
+								transition: { duration: 0.2 },
+							}}
+							className="hover:text-white hover:transition-colors hover:duration-[0.3s] duration-[0.3s] hover:cursor-pointer text-center"
+						>
+							{item.title}
+						</motion.li>
+					</Link>
 				))}
 			</ul>
 		</main>
