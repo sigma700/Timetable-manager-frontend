@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FullMenu } from './components/animatedHamb';
 import { useGenStore } from '../store/generativeStore';
+import LoadingSpinner from './components/spinner';
+import Notification from './components/notification';
 
 const Create = () => {
 	const [formData, setFormData] = useState({
@@ -13,7 +15,16 @@ const Create = () => {
 		teachers: [{ name: '', subjects: '', classes: '' }],
 	});
 
-	const { listName, listSubs, listClasses, listTichs, isLoading } = useGenStore();
+	const [localError, setLocalError] = useState(null);
+	const { listName, listSubs, listClasses, listTichs, isLoading, error } = useGenStore();
+
+	useEffect(() => {
+		if (error) {
+			setLocalError(error);
+			const timer = setTimeout(() => setLocalError(null), 8000);
+			return () => clearTimeout(timer);
+		}
+	}, [error]);
 
 	const handleChange = (e) => {
 		const { name, value } = e.target;
@@ -45,16 +56,28 @@ const Create = () => {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
+			setLocalError(null); // Clear previous errors
+
+			// Basic validation
+			if (!formData.schoolName.trim()) {
+				throw new Error('School name is required');
+			}
+			if (!formData.minLevel || !formData.maxLevel) {
+				throw new Error('Class levels are required');
+			}
+
 			// Create school
 			const schoolData = await listName(formData.schoolName);
 			const schoolId = schoolData.data._id;
 
+			// Process subjects
 			const subjectsArray = formData.subjectName
 				.split(',')
 				.map((s) => s.trim())
 				.filter((s) => s);
 			await listSubs(subjectsArray, schoolId);
 
+			// Process classes
 			await listClasses(
 				formData.minLevel.toString(),
 				formData.maxLevel.toString(),
@@ -66,6 +89,7 @@ const Create = () => {
 				schoolId
 			);
 
+			// Process teachers
 			await Promise.all(
 				formData.teachers.map((teacher) => {
 					const subjectNames = teacher.subjects
@@ -83,6 +107,7 @@ const Create = () => {
 			);
 		} catch (error) {
 			console.error('Submission failed:', error);
+			setLocalError(error.message);
 		}
 	};
 
@@ -90,6 +115,18 @@ const Create = () => {
 		<main className="text-white relative h-screen bg-gradient-to-r from-slate-900 to-slate-900 overflow-auto">
 			<FullMenu />
 			<div className="h-full w-full flex flex-col absolute top-1/9 items-center z-0 p-[5px]">
+				{/* Notification for errors */}
+				{localError && (
+					<div className="w-full max-w-2xl mb-4">
+						<Notification
+							message={localError}
+							type="error"
+							duration={8000}
+							onClose={() => setLocalError(null)}
+						/>
+					</div>
+				)}
+
 				<form
 					onSubmit={handleSubmit}
 					className="max-w-2xl mx-auto p-6 bg-slate-800 rounded-lg shadow-lg flex flex-col gap-6"
@@ -102,6 +139,7 @@ const Create = () => {
 							value={formData.schoolName}
 							onChange={handleChange}
 							placeholder="Enter school name"
+							required
 						/>
 					</div>
 
@@ -128,6 +166,7 @@ const Create = () => {
 									value={formData.classTypes}
 									onChange={handleChange}
 									placeholder="Grade or Class"
+									required
 								/>
 							</div>
 							<div>
@@ -138,6 +177,7 @@ const Create = () => {
 									value={formData.minLevel}
 									onChange={handleChange}
 									placeholder="1"
+									required
 								/>
 							</div>
 							<div>
@@ -148,6 +188,7 @@ const Create = () => {
 									value={formData.maxLevel}
 									onChange={handleChange}
 									placeholder="9"
+									required
 								/>
 							</div>
 							<div>
@@ -175,7 +216,8 @@ const Create = () => {
 										<Input
 											value={teacher.name}
 											onChange={(e) => handleTeacherChange(index, 'name', e.target.value)}
-											placeholder="eg :Mr. Smith"
+											placeholder="eg: Mr. Smith"
+											required
 										/>
 									</div>
 									<div>
@@ -218,10 +260,36 @@ const Create = () => {
 
 					<button
 						type="submit"
-						className="mt-4 py-2 px-6 bg-gradient-to-r from-slate-700 to-slate-900 rounded-lg text-white font-bold hover:scale-105 transition-transform hover:cursor-pointer"
+						className="mt-4 py-2 px-6 bg-gradient-to-r from-slate-700 to-slate-900 rounded-lg text-white font-bold hover:scale-105 transition-transform hover:cursor-pointer relative overflow-hidden"
 						disabled={isLoading}
 					>
-						{isLoading ? 'Processing...' : 'Submit'}
+						{isLoading ? (
+							<div className="flex items-center justify-center">
+								<svg
+									className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<circle
+										className="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										strokeWidth="4"
+									></circle>
+									<path
+										className="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
+								</svg>
+								Processing...
+							</div>
+						) : (
+							'Submit'
+						)}
 					</button>
 				</form>
 			</div>

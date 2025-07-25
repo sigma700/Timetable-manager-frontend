@@ -66,9 +66,9 @@ const router = createBrowserRouter([
 	{
 		path: '/verify',
 		element: (
-			<ProtectedRoute>
+			<PublicOnlyRoute>
 				<Verif />
-			</ProtectedRoute>
+			</PublicOnlyRoute>
 		),
 	},
 	{
