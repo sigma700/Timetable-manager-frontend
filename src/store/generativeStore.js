@@ -7,6 +7,7 @@ export const useGenStore = create((set) => ({
 	isLoading: false,
 	error: null,
 	isCreated: false,
+	idOfSchool: null,
 
 	//actions for making all of that happen in real sense
 
@@ -31,6 +32,7 @@ export const useGenStore = create((set) => ({
 				error: null,
 				value: data.data, //this part has to get checked well
 				isCreated: true,
+				idOfSchool: data._id,
 			});
 
 			return data;
@@ -152,9 +154,6 @@ export const useGenStore = create((set) => ({
 			throw new Error(error);
 		}
 	},
-
-	//lets now add the last one for creating the timetable for the user
-	//TODO:CHECK WHAT IS EXPECTED IN THE BACKEND LOGIC
 
 	generateTabel: async (config, schoolId) => {
 		set({ isLoading: true, error: null, isCreated: false });

@@ -66,7 +66,7 @@ const SelectField = ({
 );
 
 const Generation = () => {
-	const { isloading, error, isCreated, generateTabel } = useGenStore();
+	const { isloading, error, isCreated, generateTabel, idOfSchool } = useGenStore();
 	const initialFormData = {
 		name: '',
 		school: '',
