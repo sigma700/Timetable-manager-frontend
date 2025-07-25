@@ -3,6 +3,7 @@ import { FullMenu } from './components/animatedHamb';
 import { useGenStore } from '../store/generativeStore';
 import LoadingSpinner from './components/spinner';
 import Notification from './components/notification';
+import { useNavigate } from 'react-router-dom';
 
 const Create = () => {
 	const [formData, setFormData] = useState({
@@ -17,6 +18,8 @@ const Create = () => {
 
 	const [localError, setLocalError] = useState(null);
 	const { listName, listSubs, listClasses, listTichs, isLoading, error } = useGenStore();
+
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (error) {
@@ -56,7 +59,7 @@ const Create = () => {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		try {
-			setLocalError(null); // Clear previous errors
+			setLocalError(null);
 
 			// Basic validation
 			if (!formData.schoolName.trim()) {
@@ -105,6 +108,7 @@ const Create = () => {
 					return listTichs(teacher.name, subjectNames, classNames, schoolId);
 				})
 			);
+			navigate('/home/gentable');
 		} catch (error) {
 			console.error('Submission failed:', error);
 			setLocalError(error.message);
