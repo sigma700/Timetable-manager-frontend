@@ -49,38 +49,36 @@ const Create = () => {
 			const schoolData = await listName(formData.schoolName);
 			const schoolId = schoolData.data._id;
 
-			// Process subjects
 			const subjectsArray = formData.subjectName
 				.split(',')
 				.map((s) => s.trim())
 				.filter((s) => s);
 			await listSubs(subjectsArray, schoolId);
 
-			// Process classes
 			await listClasses(
 				formData.minLevel.toString(),
 				formData.maxLevel.toString(),
-
 				formData.classTypes,
 				formData.classLabels
 					.split(',')
 					.map((label) => label.trim())
-					.filter((label) => label), // This converts string to array,
+					.filter((label) => label),
 				schoolId
 			);
 
-			// Process teachers
 			await Promise.all(
 				formData.teachers.map((teacher) => {
-					const subjects = teacher.subjects
+					const subjectNames = teacher.subjects
 						.split(',')
 						.map((s) => s.trim())
 						.filter((s) => s);
-					const classes = teacher.classes
+
+					const classNames = teacher.classes
 						.split(',')
 						.map((c) => c.trim())
 						.filter((c) => c);
-					return listTichs(teacher.name, classes, subjects, schoolId);
+
+					return listTichs(teacher.name, subjectNames, classNames, schoolId);
 				})
 			);
 		} catch (error) {
