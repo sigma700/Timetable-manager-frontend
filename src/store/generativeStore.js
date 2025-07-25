@@ -115,7 +115,7 @@ export const useGenStore = create((set) => ({
 
 	//listing all the teachers that are in the school to suplement our backend logic
 
-	listTichs: async (name, subjectsId, schoolId, classesId) => {
+	listTichs: async (name, subjects, classesNames, schoolId) => {
 		set({ isLoading: true, isCreated: false, error: null });
 
 		try {
@@ -125,7 +125,7 @@ export const useGenStore = create((set) => ({
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ name, subjectsId, classesId }),
+				body: JSON.stringify({ name, subjects, classesNames, schoolId }),
 			});
 
 			const data = await response.json();
