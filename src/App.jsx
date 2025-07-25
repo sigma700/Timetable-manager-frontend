@@ -7,6 +7,7 @@ import MainPg from './pages/MainPg';
 import { useAuthStore } from './store/authStore';
 import LoadingSpinner from './pages/components/spinner';
 import Create from './pages/Create';
+import Generation from './pages/Generation';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -47,6 +48,14 @@ const PublicOnlyRoute = ({ children }) => {
 };
 
 const router = createBrowserRouter([
+	{
+		path: '/home/gentable',
+		element: (
+			<ProtectedRoute>
+				<Generation />
+			</ProtectedRoute>
+		),
+	},
 	{
 		path: '/home/create-table',
 		element: (
