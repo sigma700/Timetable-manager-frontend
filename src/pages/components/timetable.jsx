@@ -82,7 +82,6 @@ const TimetableView = ({ timetable }) => {
 
 	const { name, schedule, config } = timetable;
 
-	// Format time helper with validation
 	const formatTime = (timeStr) => {
 		if (!timeStr || typeof timeStr !== 'string') return '';
 		try {
