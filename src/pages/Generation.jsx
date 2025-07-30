@@ -25,16 +25,14 @@ const InputField = ({
 				required={required}
 				min={min}
 				max={max}
-				value={value} // This makes the input "controlled" by React state
-				onChange={onChange} // This function updates the state when the input changes
+				value={value}
+				onChange={onChange}
 				className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
 			/>
 		</div>
 	);
 };
 
-// Reusable Select Component
-// Now accepts 'value' and 'onChange' props to make it controllable by React state
 const SelectField = ({
 	label,
 	name,
@@ -51,8 +49,8 @@ const SelectField = ({
 		<select
 			name={name}
 			required={required}
-			value={value} // This makes the select "controlled" by React state
-			onChange={onChange} // This function updates the state when the select changes
+			value={value}
+			onChange={onChange}
 			className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
 		>
 			<option value="">Select {label}</option>
@@ -73,11 +71,10 @@ const Generation = () => {
 		startTime: '',
 		periodsPerDay: '',
 		periodDuration: '',
-		breaks: [], // Array for dynamic breaks
-		doublePeriods: [], // Array for dynamic double periods
+		breaks: [],
+		doublePeriods: [],
 	};
 
-	// Use one state variable for the entire form data
 	const [formData, setFormData] = useState(initialFormData);
 
 	const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -113,7 +110,6 @@ const Generation = () => {
 		}));
 	};
 
-	// Function to Handle Changes in a Break's Input Fields
 	const handleBreakChange = (id, e) => {
 		const { name, value } = e.target;
 		setFormData((prevFormData) => ({
@@ -124,7 +120,6 @@ const Generation = () => {
 		}));
 	};
 
-	// Function to Remove a Break
 	const removeBreak = (idToRemove) => {
 		setFormData((prevFormData) => ({
 			...prevFormData,
@@ -132,14 +127,13 @@ const Generation = () => {
 		}));
 	};
 
-	// Function to Add a New Double Period
 	const addDoublePeriod = () => {
 		setFormData((prevFormData) => ({
 			...prevFormData,
 			doublePeriods: [
 				...prevFormData.doublePeriods,
 				{
-					id: crypto.randomUUID(), // Unique ID for each double period
+					id: crypto.randomUUID(),
 					day: '',
 					period: '',
 				},
@@ -147,7 +141,6 @@ const Generation = () => {
 		}));
 	};
 
-	// Function to Handle Changes in a Double Period's Input Fields
 	const handleDoublePeriodChange = (id, e) => {
 		const { name, value } = e.target;
 		setFormData((prevFormData) => ({
@@ -166,6 +159,7 @@ const Generation = () => {
 	};
 
 	const handleSubmit = async (e) => {
+		//this is the place where we will make all the api requests and make them work out as required
 		e.preventDefault();
 
 		try {
@@ -176,6 +170,7 @@ const Generation = () => {
 				breaks: formData.breaks
 					.filter((breakItem) => breakItem.name)
 					.map((breakItem) => ({
+						//this is the main area of focus and should be making alot of sense if you do not know what i am talking about
 						name: breakItem.name,
 						afterPeriod: breakItem.afterPeriod ? parseInt(breakItem.afterPeriod) : undefined,
 						duration: breakItem.duration ? parseInt(breakItem.duration) : undefined,
@@ -202,6 +197,7 @@ const Generation = () => {
 		}
 	};
 
+	//TODO:Include pagination in the page so as to improve the overall page performance of the application
 	return (
 		<div className="min-h-screen bg-gray-100 py-8 px-4 font-sans">
 			<div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-md overflow-hidden">
@@ -323,7 +319,6 @@ const Generation = () => {
 						))}
 					</div>
 
-					{/* Double Periods Section - NOW DYNAMIC AND TYPABLE! */}
 					<div className="mb-8 p-4 bg-gray-50 rounded-lg">
 						<div className="flex justify-between items-center mb-4">
 							<h3 className="text-lg font-semibold text-gray-700">Double Periods</h3>
@@ -375,7 +370,6 @@ const Generation = () => {
 						))}
 					</div>
 
-					{/* Save Configuration Button (still static, but would submit formData) */}
 					<div className="mt-6">
 						<button
 							type="submit"

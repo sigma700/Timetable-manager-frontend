@@ -9,8 +9,6 @@ export const useGenStore = create((set) => ({
 	isCreated: false,
 	idOfSchool: null,
 
-	//actions for making all of that happen in real sense
-
 	listName: async (name) => {
 		set({ isLoading: true, value: null, isCreated: false });
 
@@ -46,7 +44,7 @@ export const useGenStore = create((set) => ({
 		}
 	},
 
-	//listing all the subjects that are taught in the school
+	//this is the main area of focus and should not make it all happen
 	listSubs: async (names, schoolId) => {
 		set({ isLoading: true, error: null, isCreated: false });
 		try {
