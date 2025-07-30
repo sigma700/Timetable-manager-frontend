@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useGenStore } from '../store/generativeStore';
+import Timetable from './components/timetable';
 
 const InputField = ({
 	type,
@@ -64,7 +65,7 @@ const SelectField = ({
 );
 
 const Generation = () => {
-	const { isloading, error, isCreated, generateTabel, idOfSchool } = useGenStore();
+	const { isloading, error, isCreated, generateTabel, idOfSchool, relValue } = useGenStore();
 	const initialFormData = {
 		name: '',
 		school: '',
@@ -379,6 +380,15 @@ const Generation = () => {
 						</button>
 					</div>
 				</form>
+			</div>
+			<div>
+				<Timetable
+					timetableResponse={{
+						success: true,
+						message: 'Timetable loaded',
+						data: relValue,
+					}}
+				/>
 			</div>
 		</div>
 	);

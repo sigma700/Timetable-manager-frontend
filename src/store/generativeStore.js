@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 
 export const useGenStore = create((set) => ({
-	value: null,
+	relValue: null,
 	isLoading: false,
 	error: null,
 	isCreated: false,
@@ -43,8 +43,6 @@ export const useGenStore = create((set) => ({
 			throw new Error(error);
 		}
 	},
-
-	//this is the main area of focus and should not make it all happen
 	listSubs: async (names, schoolId) => {
 		set({ isLoading: true, error: null, isCreated: false });
 		try {
@@ -154,7 +152,7 @@ export const useGenStore = create((set) => ({
 	},
 
 	generateTabel: async (config, schoolId) => {
-		set({ isLoading: true, error: null, isCreated: false });
+		set({ isLoading: true, error: null, isCreated: false, relValue: null });
 		try {
 			const reqUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -173,14 +171,14 @@ export const useGenStore = create((set) => ({
 				isLoading: false,
 				isCreated: true,
 				error: null,
-				value: data.data,
+				relValue: data.data,
 			});
 
 			return data;
 		} catch (error) {
 			set({
 				error: data.message,
-				value: null,
+				relValue: null,
 				isCreated: false,
 			});
 			console.log(error);
