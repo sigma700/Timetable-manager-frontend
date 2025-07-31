@@ -8,6 +8,7 @@ import { useAuthStore } from './store/authStore';
 import LoadingSpinner from './pages/components/spinner';
 import Create from './pages/Create';
 import Generation from './pages/Generation';
+import Timetables from './pages/Timetables';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -53,6 +54,14 @@ const router = createBrowserRouter([
 		element: (
 			<ProtectedRoute>
 				<Generation />
+			</ProtectedRoute>
+		),
+	},
+	{
+		path: '/home/timetables',
+		element: (
+			<ProtectedRoute>
+				<Timetables />
 			</ProtectedRoute>
 		),
 	},

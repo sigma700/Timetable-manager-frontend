@@ -9,7 +9,7 @@ const MainPg = () => {
 	const { checkAuth, user, genTable, relValue, isLoading } = useAuthStore();
 
 	return (
-		<main className="text-white min-h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-auto">
+		<main className="text-white min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-auto">
 			<FullMenu />
 			{/* Main content area */}
 			<div className="w-full flex flex-col items-center z-0 p-4 lg:p-8">
@@ -35,7 +35,7 @@ const MainPg = () => {
 				{/* View Timetables button with enhanced styling */}
 				<div className="w-full max-w-md flex justify-center my-8">
 					<Link
-						to="/timetables"
+						to="timetables"
 						className="relative overflow-hidden group p-5 lg:p-6 w-full rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-bold flex items-center justify-center gap-4 hover:shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 transform hover:-translate-y-1"
 					>
 						<span className="relative z-10">View Timetables</span>
