@@ -6,7 +6,7 @@ export const FullMenu = () => {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<div className="h-screen">
+		<div className="h-full">
 			<AnimatedHamburgerBtn active={isOpen} setActive={setIsOpen} />
 
 			<AnimatePresence>

@@ -259,17 +259,20 @@ export const useGenStore = create((set) => ({
 
 	//function for getting the timetable
 
-	getTable: async () => {
-		set({ isLoading: true, isCreated: false, error: null });
+	getTable: async ({ timetableId }) => {
+		set({ isLoading: true, isCreated: false, error: null, relValue: null });
 
 		try {
-			const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/getTable`, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				credentials: 'include',
-			});
+			const response = await fetch(
+				`${import.meta.env.VITE_BACKEND_URL}/api/getTable/${timetableId}`,
+				{
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					credentials: 'include',
+				}
+			);
 
 			const data = await response.json();
 
@@ -279,6 +282,7 @@ export const useGenStore = create((set) => ({
 				isLoading: false,
 				isCreated: true,
 				error: null,
+				relValue: data.data,
 			});
 
 			return data;

@@ -3,33 +3,71 @@ import { FullMenu } from './components/animatedHamb';
 import { useAuthStore } from '../store/authStore';
 import HoverDevCards from './components/gridOPtions';
 import { Link } from 'react-router-dom';
-import { FaPlus } from 'react-icons/fa';
+import { FaTable } from 'react-icons/fa';
 
 const MainPg = () => {
-	const { checkAuth, user } = useAuthStore();
+	const { checkAuth, user, genTable, relValue, isLoading } = useAuthStore();
 
 	return (
-		<main className="text-white relative h-full bg-gradient-to-r from-slate-900 to-slate-900 overflow-auto">
+		<main className="text-white min-h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-auto">
 			<FullMenu />
 			{/* Main content area */}
-			<div className="h-full w-full flex flex-col absolute top-1/9 items-center z-0 p-[5px]">
-				<h1 className="text-gray-200 font-extrabold text-[30px] lg:text-[40px]">
-					Welcome {user} !
-				</h1>
-				<div className="sytled-container lg:my-[30px]">
-					<h2 className="text-[22px] lg:text-[25px]">Select Action</h2>
-					<div className="w-full h-1 bg-white my-1 rounded"></div>
+			<div className="w-full flex flex-col items-center z-0 p-4 lg:p-8">
+				{/* Welcome section with improved styling */}
+				<div className="w-full max-w-4xl text-center mb-8">
+					<h1 className="font-bold text-3xl lg:text-5xl mb-2 bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 to-purple-400">
+						Welcome {user}!
+					</h1>
+					<p className="text-gray-400 text-sm lg:text-base">Manage your schedules efficiently</p>
 				</div>
-				<div className="">
-					<HoverDevCards />
+
+				{/* Action section with subtle glow effect */}
+				<div className="w-full max-w-4xl mb-8">
+					<div className="styled-container mb-6">
+						<h2 className="text-xl lg:text-2xl font-semibold text-gray-300 mb-2">Select Action</h2>
+						<div className="w-full h-0.5 bg-gradient-to-r from-transparent via-indigo-500 to-transparent rounded-full"></div>
+					</div>
+					<div className="w-full">
+						<HoverDevCards />
+					</div>
 				</div>
-				<h3 className=" my-[30px] lg:my-[70px]">Your timetables</h3>
-				<div className="create-table flex flex-col justify-center items-center bg-amber-50 text-black p-[50px] lg:p-[100px] w-full rounded-[20px]">
-					<h4>None Yet</h4>
-					<button className="p-[20px] bg-gradient-to-r from-indigo-700 to-indigo-700 lg:p-[30px] lg:w-[300px] rounded-[20px] text-white font-extrabold flex items-center justify-center gap-[20px] hover:opacity-[0.8] hover:scale-[1.009] hover:text-gray-100 hover:transition-all hover:duration-[0.3s] hover:cursor-pointer">
-						<Link>Create New</Link>
-						<FaPlus />
-					</button>
+
+				{/* View Timetables button with enhanced styling */}
+				<div className="w-full max-w-md flex justify-center my-8">
+					<Link
+						to="/timetables"
+						className="relative overflow-hidden group p-5 lg:p-6 w-full rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-bold flex items-center justify-center gap-4 hover:shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 transform hover:-translate-y-1"
+					>
+						<span className="relative z-10">View Timetables</span>
+						<FaTable className="relative z-10" />
+						<div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+					</Link>
+				</div>
+
+				{/* Timetables section with improved empty state */}
+				<div className="w-full max-w-4xl mt-8">
+					<h3 className="text-xl lg:text-2xl font-semibold text-gray-300 mb-4 text-center">
+						Your Timetables
+					</h3>
+					<div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 lg:p-12 border border-slate-700/50 text-center">
+						<div className="text-gray-400 mb-6">
+							<svg
+								className="w-16 h-16 mx-auto opacity-70"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={1.5}
+									d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+								/>
+							</svg>
+							<p className="mt-4 text-lg">No timetables created yet</p>
+						</div>
+					</div>
 				</div>
 			</div>
 		</main>
