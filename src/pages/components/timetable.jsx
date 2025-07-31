@@ -75,7 +75,6 @@ const ClassSelector = ({ timetables, selectedClass, onChange }) => {
 };
 
 const TimetableView = ({ timetable }) => {
-	// Validate timetable structure
 	if (!timetable || !timetable.schedule || !timetable.config) {
 		return <div className="p-4 text-center text-red-500">Invalid timetable structure</div>;
 	}
@@ -87,10 +86,10 @@ const TimetableView = ({ timetable }) => {
 		try {
 			const [hours, minutes] = timeStr.split(':');
 			const hour = parseInt(hours, 10);
-			if (isNaN(hour)) return timeStr; // Return original if parsing fails
+			if (isNaN(hour)) return timeStr;
 			return `${hour > 12 ? hour - 12 : hour}:${minutes} ${hour >= 12 ? 'PM' : 'AM'}`;
 		} catch {
-			return timeStr; // Fallback to original string
+			return timeStr;
 		}
 	};
 
@@ -109,38 +108,50 @@ const TimetableView = ({ timetable }) => {
 					</tr>
 				</thead>
 				<tbody>
-					{Array.from({ length: config.periodsPerDay }).map((_, periodIdx) => {
-						const periodNumber = periodIdx + 1;
-						const firstPeriod = schedule[0].periods.find((p) => p.periodNumber === periodNumber);
-						const periodTime = firstPeriod
-							? `${formatTime(firstPeriod.startTime)} - ${formatTime(firstPeriod.endTime)}`
-							: `Period ${periodNumber}`;
+					{schedule[0].periods.map((_, periodIdx) => {
+						const period = schedule[0].periods[periodIdx];
+						const periodTime = period
+							? `${formatTime(period.startTime)} - ${formatTime(period.endTime)}`
+							: `Period ${periodIdx + 1}`;
 
 						return (
-							<tr key={`period-${periodNumber}`}>
+							<tr key={`period-${periodIdx}`}>
 								<td className="border p-2 bg-gray-50 text-center">{periodTime}</td>
 
 								{schedule.map((day) => {
-									const daySchedule = schedule.find((d) => d.day === day.day);
-									const period = daySchedule?.periods?.find((p) => p.periodNumber === periodNumber);
-
-									if (!period) {
+									const currentPeriod = day.periods[periodIdx];
+									if (!currentPeriod) {
 										return <td key={`${day.day}-empty`} className="border p-2"></td>;
 									}
 
+									// Break period
+									if (currentPeriod.isBreak) {
+										return (
+											<td
+												key={`${day.day}-break-${periodIdx}`}
+												className="border p-2 bg-amber-50 text-center"
+											>
+												<div className="font-medium text-amber-800">
+													{currentPeriod.name || 'Break'}
+												</div>
+											</td>
+										);
+									}
+
+									// Normal period
 									return (
 										<td
-											key={`${day.day}-${periodNumber}`}
-											className={`border p-2 ${period.warning ? 'bg-red-50' : 'bg-white'}`}
+											key={`${day.day}-${periodIdx}`}
+											className={`border p-2 ${currentPeriod.warning ? 'bg-red-50' : 'bg-white'}`}
 										>
-											{period.subject && (
+											{currentPeriod.subject && (
 												<>
-													<div className="font-medium">{period.subject.name}</div>
+													<div className="font-medium">{currentPeriod.subject.name}</div>
 													<div className="text-sm text-gray-600">
-														{period.teacher?.name || 'No teacher'}
+														{currentPeriod.teacher?.name || 'No teacher'}
 													</div>
-													{period.warning && (
-														<div className="text-xs text-red-500 mt-1">{period.warning}</div>
+													{currentPeriod.warning && (
+														<div className="text-xs text-red-500 mt-1">{currentPeriod.warning}</div>
 													)}
 												</>
 											)}
@@ -162,14 +173,23 @@ const TimetableView = ({ timetable }) => {
 				<div key={day.day} className="border rounded-lg overflow-hidden">
 					<h3 className="bg-gray-100 p-3 font-bold text-lg">{day.day}</h3>
 					<div className="divide-y">
-						{day.periods?.map((period) => (
+						{day.periods?.map((period, idx) => (
 							<div
-								key={`${day.day}-period-${period.periodNumber}`}
-								className={`p-3 ${period.warning ? 'bg-red-50' : 'bg-white'}`}
+								key={`${day.day}-period-${idx}`}
+								className={`p-3 ${
+									period.isBreak ? 'bg-amber-50' : period.warning ? 'bg-red-50' : 'bg-white'
+								}`}
 							>
 								<div className="flex justify-between items-start">
 									<div>
-										<span className="font-medium">Period {period.periodNumber}: </span>
+										<span className="font-medium">
+											{period.isBreak ? (
+												<span className="text-amber-800">Break</span>
+											) : (
+												`Period ${period.periodNumber || idx + 1}`
+											)}
+											:{' '}
+										</span>
 										<span>
 											{formatTime(period.startTime)} - {formatTime(period.endTime)}
 										</span>
@@ -179,9 +199,18 @@ const TimetableView = ({ timetable }) => {
 											{period.subject.name}
 										</span>
 									)}
+									{period.isBreak && (
+										<span className="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded">
+											{period.name || 'Break'}
+										</span>
+									)}
 								</div>
 
-								{period.subject && (
+								{period.isBreak ? (
+									<div className="mt-2 text-sm text-amber-700">
+										Duration: {period.duration} minutes
+									</div>
+								) : period.subject ? (
 									<div className="mt-2">
 										<div className="text-sm">
 											<span className="text-gray-600">Teacher: </span>
@@ -191,7 +220,7 @@ const TimetableView = ({ timetable }) => {
 											<div className="text-xs text-red-500 mt-1">{period.warning}</div>
 										)}
 									</div>
-								)}
+								) : null}
 							</div>
 						))}
 					</div>
