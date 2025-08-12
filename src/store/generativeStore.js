@@ -151,7 +151,7 @@ export const useGenStore = create((set) => ({
 		}
 	},
 
-	generateTabel: async (config, schoolId) => {
+	generateTabel: async (name, config, schoolId) => {
 		set({ isLoading: true, error: null, isCreated: false, relValue: null });
 		try {
 			const reqUrl = import.meta.env.VITE_BACKEND_URL;
@@ -161,7 +161,8 @@ export const useGenStore = create((set) => ({
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ config }),
+				credentials: 'include',
+				body: JSON.stringify({ name, config }),
 			});
 
 			const data = await response.json();
@@ -181,6 +182,46 @@ export const useGenStore = create((set) => ({
 				relValue: null,
 				isCreated: false,
 			});
+			console.log(error);
+			throw new Error(error);
+		}
+	},
+
+	getTable: async ({ timetableId, name }) => {
+		set({ isLoading: true, isCreated: false, error: null, relValue: null });
+
+		try {
+			const response = await fetch(
+				`${import.meta.env.VITE_BACKEND_URL}/api/getTable/${timetableId}`,
+				{
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					credentials: 'include',
+					body: JSON.stringify({ name, timetableId }),
+				}
+			);
+
+			const data = await response.json();
+
+			console.log('data : ', data);
+
+			set({
+				isLoading: false,
+				isCreated: true,
+				error: null,
+				relValue: data.data,
+			});
+
+			return data;
+		} catch (error) {
+			set({
+				error: data.message,
+				isCreated: false,
+				isLoading: false,
+			});
+
 			console.log(error);
 			throw new Error(error);
 		}
@@ -258,42 +299,4 @@ export const useGenStore = create((set) => ({
 	},
 
 	//function for getting the timetable
-
-	getTable: async ({ timetableId }) => {
-		set({ isLoading: true, isCreated: false, error: null, relValue: null });
-
-		try {
-			const response = await fetch(
-				`${import.meta.env.VITE_BACKEND_URL}/api/getTable/${timetableId}`,
-				{
-					method: 'GET',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					credentials: 'include',
-				}
-			);
-
-			const data = await response.json();
-
-			console.log('data : ', data);
-
-			set({
-				isLoading: false,
-				isCreated: true,
-				error: null,
-				relValue: data.data,
-			});
-
-			return data;
-		} catch (error) {
-			set({
-				error: data.message,
-				isCreated: false,
-			});
-
-			console.log(error);
-			throw new Error(error);
-		}
-	},
 }));

@@ -160,8 +160,8 @@ const Generation = () => {
 	};
 
 	const handleSubmit = async (e) => {
-		//this is the place where we will make all the api requests and make them work out as required
 		e.preventDefault();
+		//this is the place where we will make all the api requests and make them work out as required
 
 		try {
 			const config = {
@@ -192,7 +192,7 @@ const Generation = () => {
 
 			console.log('Submitting:', submissionData);
 
-			await generateTabel(config, formData.school);
+			await generateTabel(formData.name, config, formData.school);
 		} catch (error) {
 			console.error('Submission error:', error);
 		}
