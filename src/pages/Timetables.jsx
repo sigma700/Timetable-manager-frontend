@@ -1,18 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useAuthStore } from '../store/authStore';
 import { useGenStore } from '../store/generativeStore';
-import Timetable from './components/timetable';
-import LoadingSpinner from './components/spinner';
 
 const Timetables = () => {
-	const { getTable, isLoading, isCreated, relValue, error } = useGenStore();
-	const [name, setName] = useState('');
-	const [tableId, setTableId] = useState('');
-	//this part requires a check for validation options especially on the part of the setTableId
+	const { isAuthenticated, requiredData } = useAuthStore();
+	const { getTable, gottenTable } = useGenStore();
 
+	useEffect(() => {
+		if (isAuthenticated && requiredData) {
+			getTable(requiredData);
+		}
+	}, [isAuthenticated, requiredData]);
 	return (
 		<main className="text-white min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-auto">
 			<div>
-				
+				<p>{gottenTable}</p>
 			</div>
 		</main>
 	);

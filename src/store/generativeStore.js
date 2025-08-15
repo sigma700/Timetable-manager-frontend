@@ -8,6 +8,7 @@ export const useGenStore = create((set) => ({
 	error: null,
 	isCreated: false,
 	idOfSchool: null,
+	gottenTable: null,
 
 	listName: async (name) => {
 		set({ isLoading: true, value: null, isCreated: false });
@@ -187,8 +188,8 @@ export const useGenStore = create((set) => ({
 		}
 	},
 
-	getTable: async ({ timetableId, name }) => {
-		set({ isLoading: true, isCreated: false, error: null, relValue: null });
+	getTable: async (timetableId) => {
+		set({ isLoading: true, isCreated: false, error: null, gottenTable: null });
 
 		try {
 			const response = await fetch(
@@ -199,7 +200,6 @@ export const useGenStore = create((set) => ({
 						'Content-Type': 'application/json',
 					},
 					credentials: 'include',
-					body: JSON.stringify({ name, timetableId }),
 				}
 			);
 
@@ -211,13 +211,13 @@ export const useGenStore = create((set) => ({
 				isLoading: false,
 				isCreated: true,
 				error: null,
-				relValue: data.data,
+				gottenTable: data.data,
 			});
 
 			return data;
 		} catch (error) {
 			set({
-				error: data.message,
+				error: 'There is an error somewhere with data parsing !',
 				isCreated: false,
 				isLoading: false,
 			});

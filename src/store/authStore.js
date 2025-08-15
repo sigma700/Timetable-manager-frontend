@@ -98,6 +98,7 @@ export const useAuthStore = create((set, get) => ({
 			isAuthenticated: false,
 			error: null,
 			user: null,
+			//this is the timetable id
 			requiredData: null,
 		});
 		try {
