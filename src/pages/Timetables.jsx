@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGenStore } from '../store/generativeStore';
 import { useAuthStore } from '../store/authStore';
+import { FullMenu } from './components/animatedHamb';
 
 const Timetables = () => {
 	const { gottenTable, isLoading, error, getTable } = useGenStore();
@@ -400,15 +401,20 @@ const Timetables = () => {
 	};
 
 	return (
-		<div className="p-4 max-w-full">
-			<h1 className="text-2xl font-bold text-gray-800 mb-6">{user}'s Timetables</h1>
-
-			{renderClassTabs()}
-
-			<div className="bg-white rounded-lg shadow-sm p-4">
-				{renderDesktopView()}
-				{renderMobileView()}
-				{renderDoublePeriodsSummary()}
+		<div className="relative min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-auto">
+			{' '}
+			{/* Changed to relative positioning */}
+			<FullMenu />
+			<div className="p-4 max-w-full pt-20">
+				{' '}
+				{/* Added pt-20 to account for menu button */}
+				<h1 className="text-2xl font-bold text-white mb-6">{user}'s Timetables</h1>
+				{renderClassTabs()}
+				<div className="bg-white rounded-lg shadow-sm p-4">
+					{renderDesktopView()}
+					{renderMobileView()}
+					{renderDoublePeriodsSummary()}
+				</div>
 			</div>
 		</div>
 	);
