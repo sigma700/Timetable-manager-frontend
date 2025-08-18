@@ -3,16 +3,14 @@ import { useGenStore } from '../store/generativeStore';
 import { useAuthStore } from '../store/authStore';
 
 const Timetables = () => {
-	// Get all needed values from store
 	const { gottenTable, isLoading, error, getTable } = useGenStore();
 	const [selectedClass, setSelectedClass] = useState(null);
 	const { checkAuth, requiredData, user } = useAuthStore();
 
-	// Fetch data when component mounts
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				await getTable(requiredData); // REPLACE WITH YOUR ACTUAL TIMETABLE ID
+				await getTable(requiredData);
 			} catch (err) {
 				console.error('Failed to fetch timetable:', err);
 			}
@@ -23,16 +21,88 @@ const Timetables = () => {
 		}
 	}, [gottenTable, isLoading, getTable]);
 
-	// Set initial selected class when data loads
 	useEffect(() => {
 		if (gottenTable?.timetables?.length > 0 && !selectedClass) {
 			setSelectedClass(gottenTable.timetables[0].name);
 		}
 	}, [gottenTable, selectedClass]);
 
-	// Loading state
 	if (isLoading) {
-		return <div className="p-4 text-center text-gray-500">Loading timetable data...</div>;
+		return (
+			<div className="p-8 max-w-md mx-auto space-y-6 animate-pulse">
+				{/* Animated header with typing indicator */}
+				<div className="text-center space-y-2">
+					<h3 className="text-xl font-medium text-gray-700 flex justify-center items-center">
+						Getting your timetable
+						<span className="ml-2 flex space-x-1">
+							{[...Array(3)].map((_, i) => (
+								<span
+									key={i}
+									className="h-1.5 w-1.5 bg-blue-500 rounded-full inline-block animate-bounce"
+									style={{ animationDelay: `${i * 0.1}s` }}
+								/>
+							))}
+						</span>
+					</h3>
+					<p className="text-sm text-gray-500">Gathering all your sessions...</p>
+				</div>
+
+				{/* Animated book opening effect */}
+				<div className="flex justify-center">
+					<div className="relative w-24 h-32">
+						<div className="absolute inset-0 bg-blue-100 rounded-lg shadow-md transform origin-left animate-[flip_1.5s_ease-in-out_infinite]"></div>
+						<div className="absolute inset-0 bg-blue-50 rounded-lg shadow-md transform origin-right animate-[flip_1.5s_ease-in-out_infinite_reverse]"></div>
+						<div className="absolute inset-0 flex items-center justify-center">
+							<svg
+								className="w-10 h-10 text-blue-400 animate-pulse"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth="2"
+									d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+								></path>
+							</svg>
+						</div>
+					</div>
+				</div>
+
+				{/* Progress indicator with steps */}
+				<div className="space-y-3">
+					<div className="flex justify-between text-xs text-gray-500">
+						<span>Collecting data</span>
+						<span>Almost there</span>
+					</div>
+					<div className="w-full bg-gray-200 rounded-full h-2.5">
+						<div
+							className="bg-gradient-to-r from-blue-400 to-purple-500 h-2.5 rounded-full animate-[progress_2s_ease-in-out_infinite]"
+							style={{ width: '75%' }}
+						></div>
+					</div>
+				</div>
+
+				{/* Mini calendar preview animation */}
+				<div className="grid grid-cols-7 gap-1 text-center">
+					{['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+						<div key={i} className="text-xs font-medium text-gray-400">
+							{day}
+						</div>
+					))}
+					{[...Array(35)].map((_, i) => (
+						<div
+							key={i}
+							className={`h-6 rounded-sm ${
+								i % 8 === 0 ? 'bg-blue-200' : 'bg-gray-100'
+							} animate-pulse`}
+							style={{ animationDelay: `${(i % 7) * 0.05}s` }}
+						/>
+					))}
+				</div>
+			</div>
+		);
 	}
 
 	// Error state
@@ -91,7 +161,6 @@ const Timetables = () => {
 		return duration > (selectedTimetable.config?.periodDuration || 40);
 	};
 
-	// Render functions
 	const renderClassTabs = () => (
 		<div className="mb-6 border-b border-gray-200">
 			<nav className="-mb-px flex space-x-8 overflow-x-auto">
