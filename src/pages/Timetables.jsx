@@ -6,7 +6,7 @@ const Timetables = () => {
 	// Get all needed values from store
 	const { gottenTable, isLoading, error, getTable } = useGenStore();
 	const [selectedClass, setSelectedClass] = useState(null);
-	const { checkAuth, requiredData } = useAuthStore();
+	const { checkAuth, requiredData, user } = useAuthStore();
 
 	// Fetch data when component mounts
 	useEffect(() => {
@@ -332,7 +332,7 @@ const Timetables = () => {
 
 	return (
 		<div className="p-4 max-w-full">
-			<h1 className="text-2xl font-bold text-gray-800 mb-6">School Timetables</h1>
+			<h1 className="text-2xl font-bold text-gray-800 mb-6">{user}'s Timetables</h1>
 
 			{renderClassTabs()}
 
