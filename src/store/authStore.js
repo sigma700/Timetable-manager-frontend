@@ -56,6 +56,41 @@ export const useAuthStore = create((set, get) => ({
 		}
 	},
 
+	logIn: async (email, password, firstName) => {
+		set({ isLoading: true, error: null, isAuthenticated: false });
+
+		try {
+			const link = await import.meta.env.VITE_BACKEND_URL;
+			const response = await fetch(`${link}/api/login/686939ac65244f797d3334b7`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ email, password, firstName }),
+				credentials: 'include',
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.message || 'LOGIN FAILED !');
+			}
+
+			set({
+				isLoading: false,
+				isAuthenticated: true,
+			});
+
+			return data;
+		} catch (error) {
+			console.log(error);
+
+			set({
+				isLoading: false,
+				error: error.message,
+			});
+		}
+	},
 	//action for email verification
 	verify: async (code) => {
 		set({ isLoading: true, isAuthenticated: false, error: null });

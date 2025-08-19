@@ -9,6 +9,8 @@ import LoadingSpinner from './pages/components/spinner';
 import Create from './pages/Create';
 import Generation from './pages/Generation';
 import Timetables from './pages/Timetables';
+import Login from './pages/Login';
+import Terms from './pages/Terms';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -71,6 +73,22 @@ const router = createBrowserRouter([
 			<ProtectedRoute>
 				<Create />
 			</ProtectedRoute>
+		),
+	},
+	{
+		path: '/logIn',
+		element: (
+			<PublicOnlyRoute>
+				<Login />
+			</PublicOnlyRoute>
+		),
+	},
+	{
+		path: '/terms',
+		element: (
+			<PublicOnlyRoute>
+				<Terms />
+			</PublicOnlyRoute>
 		),
 	},
 	{
