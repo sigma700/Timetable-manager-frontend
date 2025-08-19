@@ -13,6 +13,7 @@ import Login from './pages/Login';
 import Terms from './pages/Terms';
 import UserManual from './pages/Manual';
 import Demo from './pages/Demo';
+import Invite from './pages/Invite';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -82,6 +83,14 @@ const router = createBrowserRouter([
 		element: (
 			<ProtectedRoute>
 				<Demo />
+			</ProtectedRoute>
+		),
+	},
+	{
+		path: '/home/invite',
+		element: (
+			<ProtectedRoute>
+				<Invite />
 			</ProtectedRoute>
 		),
 	},
