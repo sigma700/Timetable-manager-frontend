@@ -12,6 +12,7 @@ import Timetables from './pages/Timetables';
 import Login from './pages/Login';
 import Terms from './pages/Terms';
 import UserManual from './pages/Manual';
+import Demo from './pages/Demo';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -73,6 +74,14 @@ const router = createBrowserRouter([
 		element: (
 			<ProtectedRoute>
 				<UserManual />
+			</ProtectedRoute>
+		),
+	},
+	{
+		path: '/home/demo',
+		element: (
+			<ProtectedRoute>
+				<Demo />
 			</ProtectedRoute>
 		),
 	},
