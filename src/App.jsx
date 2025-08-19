@@ -11,6 +11,7 @@ import Generation from './pages/Generation';
 import Timetables from './pages/Timetables';
 import Login from './pages/Login';
 import Terms from './pages/Terms';
+import UserManual from './pages/Manual';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -64,6 +65,14 @@ const router = createBrowserRouter([
 		element: (
 			<ProtectedRoute>
 				<Timetables />
+			</ProtectedRoute>
+		),
+	},
+	{
+		path: '/home/manual',
+		element: (
+			<ProtectedRoute>
+				<UserManual />
 			</ProtectedRoute>
 		),
 	},
