@@ -89,7 +89,7 @@ const NavigatorCont = () => {
 		},
 		{
 			title: 'Request Demo',
-			path: '/demo',
+			path: '/home/demo',
 		},
 		{
 			title: 'Settings',
