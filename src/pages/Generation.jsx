@@ -216,6 +216,7 @@ const Generation = () => {
 							value={formData.name}
 							onChange={handleChange}
 						/>
+						{/* just send the id of the school to the user of the application */}
 						<InputField
 							label="School ID"
 							name="school"
