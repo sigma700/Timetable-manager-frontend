@@ -92,8 +92,8 @@ const Invite = () => {
 						Invite Friends & Colleagues
 					</h1>
 					<p className="text-xl text-slate-300 max-w-3xl mx-auto">
-						Share the power of Timetable Manager with your network and earn exclusive rewards for
-						every friend who joins!
+						Share the power of Protiba with your network and earn exclusive rewards for every friend
+						who joins!
 					</p>
 				</motion.div>
 
