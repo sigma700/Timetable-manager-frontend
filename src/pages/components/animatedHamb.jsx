@@ -85,7 +85,7 @@ const NavigatorCont = () => {
 		},
 		{
 			title: 'Contact Us',
-			path: '/contacts',
+			path: '/home/contacts',
 		},
 		{
 			title: 'Request Demo',

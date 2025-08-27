@@ -14,6 +14,7 @@ import Terms from './pages/Terms';
 import UserManual from './pages/Manual';
 import Demo from './pages/Demo';
 import Invite from './pages/Invite';
+import Contacts from './pages/Contacts';
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -99,6 +100,14 @@ const router = createBrowserRouter([
 		element: (
 			<ProtectedRoute>
 				<Create />
+			</ProtectedRoute>
+		),
+	},
+	{
+		path: '/home/contacts',
+		element: (
+			<ProtectedRoute>
+				<Contacts />
 			</ProtectedRoute>
 		),
 	},
