@@ -10,14 +10,16 @@ import {
 } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store/authStore';
+import { useSubStore } from '../store/subsidiary';
 
 const Demo = () => {
 	const { user } = useAuthStore();
-	const [selectedDate, setSelectedDate] = useState('');
-	const [selectedTime, setSelectedTime] = useState('');
-	const [name, setName] = useState('');
+	const { bookSess, isLoading, error } = useSubStore();
+	const [date, setSelectedDate] = useState('');
+	const [time, setSelectedTime] = useState('');
+	const [fullName, setName] = useState('');
 	const [email, setEmail] = useState('');
-	const [institution, setInstitution] = useState('');
+	const [schName, setInstitution] = useState('');
 	const [isSubmitted, setIsSubmitted] = useState(false);
 
 	const timeSlots = [
@@ -31,9 +33,10 @@ const Demo = () => {
 		'05:00 PM',
 	];
 
-	const handleSubmit = (e) => {
+	const handleSubmit = async (e) => {
 		e.preventDefault();
 		// Here you would typically send the data to your backend
+		await bookSess(fullName, email, schName, date, time);
 		setIsSubmitted(true);
 	};
 
@@ -166,7 +169,7 @@ const Demo = () => {
 										<input
 											type="text"
 											required
-											value={name}
+											value={fullName}
 											onChange={(e) => setName(e.target.value)}
 											className="w-full bg-slate-700/50 border border-slate-600/30 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
 											placeholder="Enter your full name"
@@ -190,7 +193,7 @@ const Demo = () => {
 										<input
 											type="text"
 											required
-											value={institution}
+											value={schName}
 											onChange={(e) => setInstitution(e.target.value)}
 											className="w-full bg-slate-700/50 border border-slate-600/30 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
 											placeholder="Your school or organization"
@@ -205,7 +208,7 @@ const Demo = () => {
 												<input
 													type="date"
 													required
-													value={selectedDate}
+													value={date}
 													onChange={(e) => setSelectedDate(e.target.value)}
 													className="w-full bg-slate-700/50 border border-slate-600/30 rounded-xl pl-12 pr-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
 												/>
@@ -218,7 +221,7 @@ const Demo = () => {
 												<FaClock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
 												<select
 													required
-													value={selectedTime}
+													value={time}
 													onChange={(e) => setSelectedTime(e.target.value)}
 													className="w-full bg-slate-700/50 border border-slate-600/30 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all appearance-none"
 												>
