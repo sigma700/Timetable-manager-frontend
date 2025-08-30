@@ -16,6 +16,7 @@ import Demo from './pages/Demo';
 import Invite from './pages/Invite';
 import Contacts from './pages/Contacts';
 import Footer from './pages/components/footer';
+import Story from './pages/Story';
 // import Footer from './components/Footer'; // Import the Footer component
 
 // Layout component that includes the footer
@@ -125,6 +126,14 @@ const router = createBrowserRouter([
 		element: (
 			<RouteWrapper isProtected={true}>
 				<Invite />
+			</RouteWrapper>
+		),
+	},
+	{
+		path: '/home/story',
+		element: (
+			<RouteWrapper isProtected={true}>
+				<Story />
 			</RouteWrapper>
 		),
 	},
