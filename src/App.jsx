@@ -132,7 +132,7 @@ const router = createBrowserRouter([
 	{
 		path: '/home/story',
 		element: (
-			<RouteWrapper isProtected={true}>
+			<RouteWrapper isProtected={false}>
 				<Story />
 			</RouteWrapper>
 		),
