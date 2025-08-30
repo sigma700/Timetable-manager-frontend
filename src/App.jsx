@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-router-dom';
 import SignUp from './pages/SignUp';
 import Home from './pages/Home';
 import Verif from './pages/Verif';
@@ -15,6 +15,18 @@ import UserManual from './pages/Manual';
 import Demo from './pages/Demo';
 import Invite from './pages/Invite';
 import Contacts from './pages/Contacts';
+import Footer from './pages/components/footer';
+// import Footer from './components/Footer'; // Import the Footer component
+
+// Layout component that includes the footer
+const Layout = ({ children }) => {
+	return (
+		<div className="flex flex-col min-h-screen">
+			<div className="flex-grow">{children}</div>
+			<Footer />
+		</div>
+	);
+};
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
@@ -54,109 +66,130 @@ const PublicOnlyRoute = ({ children }) => {
 	return children;
 };
 
+// Create a wrapper component for each route
+const RouteWrapper = ({ children, isProtected = false, isPublicOnly = false }) => {
+	if (isProtected) {
+		return (
+			<ProtectedRoute>
+				<Layout>{children}</Layout>
+			</ProtectedRoute>
+		);
+	}
+
+	if (isPublicOnly) {
+		return (
+			<PublicOnlyRoute>
+				<Layout>{children}</Layout>
+			</PublicOnlyRoute>
+		);
+	}
+
+	return <Layout>{children}</Layout>;
+};
+
 const router = createBrowserRouter([
 	{
 		path: '/home/gentable',
 		element: (
-			<ProtectedRoute>
+			<RouteWrapper isProtected={true}>
 				<Generation />
-			</ProtectedRoute>
+			</RouteWrapper>
 		),
 	},
 	{
 		path: '/home/timetables',
 		element: (
-			<ProtectedRoute>
+			<RouteWrapper isProtected={true}>
 				<Timetables />
-			</ProtectedRoute>
+			</RouteWrapper>
 		),
 	},
 	{
 		path: '/home/manual',
 		element: (
-			<ProtectedRoute>
+			<RouteWrapper isProtected={true}>
 				<UserManual />
-			</ProtectedRoute>
+			</RouteWrapper>
 		),
 	},
 	{
 		path: '/home/demo',
 		element: (
-			<ProtectedRoute>
+			<RouteWrapper isProtected={true}>
 				<Demo />
-			</ProtectedRoute>
+			</RouteWrapper>
 		),
 	},
 	{
 		path: '/home/invite',
 		element: (
-			<ProtectedRoute>
+			<RouteWrapper isProtected={true}>
 				<Invite />
-			</ProtectedRoute>
+			</RouteWrapper>
 		),
 	},
 	{
 		path: '/home/create-table',
 		element: (
-			<ProtectedRoute>
+			<RouteWrapper isProtected={true}>
 				<Create />
-			</ProtectedRoute>
+			</RouteWrapper>
 		),
 	},
 	{
 		path: '/home/contacts',
 		element: (
-			<ProtectedRoute>
+			<RouteWrapper isProtected={true}>
 				<Contacts />
-			</ProtectedRoute>
+			</RouteWrapper>
 		),
 	},
 	{
 		path: '/logIn',
 		element: (
-			<PublicOnlyRoute>
+			<RouteWrapper isPublicOnly={true}>
 				<Login />
-			</PublicOnlyRoute>
+			</RouteWrapper>
 		),
 	},
 	{
 		path: '/terms',
 		element: (
-			<PublicOnlyRoute>
+			<RouteWrapper isPublicOnly={true}>
 				<Terms />
-			</PublicOnlyRoute>
+			</RouteWrapper>
 		),
 	},
 	{
 		path: '/signUp',
 		element: (
-			<PublicOnlyRoute>
+			<RouteWrapper isPublicOnly={true}>
 				<SignUp />
-			</PublicOnlyRoute>
+			</RouteWrapper>
 		),
 	},
 	{
 		path: '/verify',
 		element: (
-			<PublicOnlyRoute>
+			<RouteWrapper isPublicOnly={true}>
 				<Verif />
-			</PublicOnlyRoute>
+			</RouteWrapper>
 		),
 	},
 	{
 		path: '/',
 		element: (
-			<PublicOnlyRoute>
+			<RouteWrapper isPublicOnly={true}>
 				<Home />
-			</PublicOnlyRoute>
+			</RouteWrapper>
 		),
 	},
 	{
 		path: '/home',
 		element: (
-			<ProtectedRoute>
+			<RouteWrapper isProtected={true}>
 				<MainPg />
-			</ProtectedRoute>
+			</RouteWrapper>
 		),
 	},
 ]);

@@ -220,7 +220,7 @@ const Generation = () => {
 						<InputField
 							label="School ID"
 							name="school"
-							placeholder="Enter school ID"
+							placeholder="Id sent to your email adress !"
 							value={formData.school}
 							onChange={handleChange}
 						/>

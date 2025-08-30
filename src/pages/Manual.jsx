@@ -268,26 +268,6 @@ const UserManual = () => {
 					))}
 				</div>
 			</div>
-
-			{/* Footer */}
-			<footer className="bg-gradient-to-r from-slate-900 to-slate-800 border-t border-slate-700/50 mt-16">
-				<div className="container mx-auto px-4 py-8 text-center">
-					<p className="text-slate-400 text-sm">
-						© {new Date().getFullYear()} Timetable Manager. All rights reserved.
-					</p>
-					<div className="flex justify-center space-x-6 mt-4">
-						<Link to="/terms" className="text-slate-400 hover:text-white text-sm">
-							Terms
-						</Link>
-						<Link to="/privacy" className="text-slate-400 hover:text-white text-sm">
-							Privacy
-						</Link>
-						<Link to="/contact" className="text-slate-400 hover:text-white text-sm">
-							Contact
-						</Link>
-					</div>
-				</div>
-			</footer>
 		</main>
 	);
 };
