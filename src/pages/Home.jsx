@@ -99,7 +99,7 @@ const Home = () => {
 					</motion.div>
 
 					<motion.h1
-						className="text-4xl md:text-5xl font-bold text-white mb-4 text-center bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent"
+						className="text-4xl md:text-5xl font-bold text-white mb-4 text-center bg-gradient-to-r from-white to-slate-200 bg-clip-text"
 						variants={itemVariants}
 					>
 						Welcome to <span className="text-amber-400">Protiba</span>
