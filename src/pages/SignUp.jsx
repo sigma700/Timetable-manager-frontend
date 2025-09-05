@@ -22,7 +22,7 @@ const SignUp = () => {
 		}
 		try {
 			await signUp(email, password, firstName, lastName);
-			navigate('/verify');
+			navigate('/home');
 		} catch (error) {}
 	};
 

@@ -42,6 +42,7 @@ export const useAuthStore = create((set, get) => ({
 
 			set({
 				isLoading: false,
+				isAuthenticated: true,
 			});
 
 			return fetchedData;

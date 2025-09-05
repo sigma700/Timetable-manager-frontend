@@ -177,14 +177,14 @@ const router = createBrowserRouter([
 			</RouteWrapper>
 		),
 	},
-	{
-		path: '/verify',
-		element: (
-			<RouteWrapper isPublicOnly={true}>
-				<Verif />
-			</RouteWrapper>
-		),
-	},
+	// {
+	// 	path: '/verify',
+	// 	element: (
+	// 		<RouteWrapper isPublicOnly={true}>
+	// 			<Verif />
+	// 		</RouteWrapper>
+	// 	),
+	// },
 	{
 		path: '/',
 		element: (
