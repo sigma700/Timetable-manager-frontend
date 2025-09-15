@@ -84,7 +84,7 @@ export const useGenStore = create((set) => ({
 		set({ isLoading: true, error: null, isCreated: false });
 		try {
 			const fetcher = import.meta.env.VITE_BACKEND_URL;
-			const response = await fetch(`${fetcher}/api/list-classData/${schoolId}`, {
+			const response = await fetch(`${fetcher}/api/list-classData`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -121,11 +121,12 @@ export const useGenStore = create((set) => ({
 
 		try {
 			const usedUrl = import.meta.env.VITE_BACKEND_URL;
-			const response = await fetch(`${usedUrl}/api/list-teachers/${schoolId}`, {
+			const response = await fetch(`${usedUrl}/api/list-teachers`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
+				credentials: 'include',
 				body: JSON.stringify({ name, subjects, classesNames }),
 			});
 
