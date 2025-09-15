@@ -48,11 +48,12 @@ export const useGenStore = create((set) => ({
 		set({ isLoading: true, error: null, isCreated: false });
 		try {
 			const fetchUrl = import.meta.env.VITE_BACKEND_URL;
-			const response = await fetch(`${fetchUrl}/api/list-subjects/${schoolId}`, {
+			const response = await fetch(`${fetchUrl}/api/list-subjects`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
+				credentials: 'include',
 				body: JSON.stringify({ names, schoolId }),
 			});
 
@@ -125,7 +126,7 @@ export const useGenStore = create((set) => ({
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ name, subjects, classesNames, schoolId }),
+				body: JSON.stringify({ name, subjects, classesNames }),
 			});
 
 			const data = await response.json();
@@ -152,17 +153,17 @@ export const useGenStore = create((set) => ({
 		}
 	},
 
-	generateTabel: async (name, config, schoolId) => {
+	generateTabel: async (name, config) => {
 		set({ isLoading: true, error: null, isCreated: false, relValue: null });
 		try {
 			const reqUrl = import.meta.env.VITE_BACKEND_URL;
 
-			const response = await fetch(`${reqUrl}/api/gen-table/${schoolId}`, {
+			const response = await fetch(`${reqUrl}/api/gen-table`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				credentials: 'include',
+				credentials: 'include', //sends cookies for authentiaction !
 				body: JSON.stringify({ name, config }),
 			});
 

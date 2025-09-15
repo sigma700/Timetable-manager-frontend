@@ -17,7 +17,7 @@ const Invite = () => {
 	const [emails, setEmails] = useState(['']);
 	const [copied, setCopied] = useState(false);
 	const [isSubmitted, setIsSubmitted] = useState(false);
-	const referralCode = 'TIMETABLE-FRIEND25';
+	const referralCode = 'https://protiba/onrender.com';
 
 	const addEmailField = () => {
 		setEmails([...emails, '']);

@@ -216,14 +216,14 @@ const Generation = () => {
 							value={formData.name}
 							onChange={handleChange}
 						/>
-						{/* just send the id of the school to the user of the application */}
+						{/* just send the id of the school to the user of the application
 						<InputField
 							label="School ID"
 							name="school"
 							placeholder="Id sent to your email adress !"
 							value={formData.school}
 							onChange={handleChange}
-						/>
+						/> */}
 						<InputField
 							label="Start Time"
 							type="time"

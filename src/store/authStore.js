@@ -25,7 +25,7 @@ export const useAuthStore = create((set, get) => ({
 		set({ isLoading: true, error: null, isAuthenticated: false });
 		try {
 			const url = import.meta.env.VITE_BACKEND_URL;
-			const response = await fetch(`${url}/api/create-account/686939ac65244f797d3334b7`, {
+			const response = await fetch(`${url}/api/create-account`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
