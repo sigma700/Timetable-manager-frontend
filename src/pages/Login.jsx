@@ -25,7 +25,7 @@ const Login = () => {
 				{/* Illustration Side */}
 				<div className="lg:w-1/2 mb-6 lg:mb-0 lg:pr-8 flex justify-center">
 					<img
-						src="src/assets/undraw_login_re_4vu2.svg"
+						src="/assets/undraw_login_re_4vu2.svg"
 						alt="Login illustration"
 						className="w-64 lg:w-80"
 					/>

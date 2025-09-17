@@ -92,7 +92,7 @@ const Home = () => {
 						}}
 					>
 						<img
-							src="src/assets/undraw_hello_ccwj.svg"
+							src="/assets/undraw_hello_ccwj.svg"
 							alt="Welcome illustration"
 							className="w-48 h-48 mx-auto"
 						/>
