@@ -37,7 +37,7 @@ const SignUp = () => {
 				<div className="lg:w-1/2 mb-8 lg:mb-0 lg:pr-8 flex justify-center">
 					<div className="text-center">
 						<img
-							src="src/assets/undraw_security_0ubl.svg"
+							src="/assets/undraw_security_0ubl.svg"
 							alt="Security illustration"
 							className="w-56 lg:w-72 mx-auto mb-6"
 						/>
