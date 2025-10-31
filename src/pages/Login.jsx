@@ -43,12 +43,6 @@ const Login = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* {error && (
-              <div className="bg-red-900/30 border border-red-700/50 rounded-lg p-3">
-                <small className="text-red-300 font-medium">{error}</small>
-              </div>
-            )} */}
-
             <div className="space-y-2">
               <label className="text-white font-light text-sm" htmlFor="email">
                 Email Address
