@@ -1,12 +1,11 @@
-# React + Vite
+#PROTIBA FULL SUMMARY
+Think of protiba as your smart timetable manager that mainly saves you the hustle of manually creating full school learning schedules . 
+**PROTIBA** Creates full timetables for all classes within just 2minutes , the only manual work is filling out the simple forms 
+##These is the main lists that are required to be filled out
+<img width="712" height="825" alt="image" src="https://github.com/user-attachments/assets/b58fe152-bfd2-4230-8d4b-1073e3825c0c" />
+###LANGUAGES USED:
+1.ReactJs - Frontend
+2.TypeScript
+3.Docker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+*N/B: Its not yet open for collaboration* but it will soon be ....
