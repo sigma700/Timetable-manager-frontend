@@ -1,6 +1,7 @@
 import React from "react";
 import {Link} from "react-router-dom";
 import {motion} from "framer-motion";
+import {Helmet} from "react-helmet";
 
 const Home = () => {
   const userName = "Educator"; // Changed to a more relevant default name
@@ -43,6 +44,13 @@ const Home = () => {
 
   return (
     <main className="bg-gradient-to-br from-slate-900 via-slate-800 to-neutral-900 min-h-screen flex justify-center items-center w-full px-4 overflow-hidden">
+      <Helmet>
+        <title>Home page</title>
+        <meta
+          name="description"
+          content="Welcome to your one stop platform for managing school schedules with ease"
+        />
+      </Helmet>
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         {/* Animated background elements */}
         {Array.from({length: 5}).map((_, i) => (
