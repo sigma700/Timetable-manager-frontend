@@ -210,7 +210,7 @@ const App = () => {
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, []);
 
   return (
     <main className="">

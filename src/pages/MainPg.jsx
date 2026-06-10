@@ -1,9 +1,10 @@
 import React, {useState, useEffect, useRef} from "react";
-import {FullMenu} from "./components/animatedHamb";
 import {useAuthStore} from "../store/authStore";
-import HoverDevCards from "./components/gridOPtions";
-import {Link} from "react-router-dom";
 import {useGenStore} from "../store/generativeStore";
+import {Link} from "react-router-dom";
+
+import HoverDevCards from "./components/gridOPtions";
+import {Navigation} from "./components/navigation";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 // Surface hierarchy: base → raised → elevated → overlay
@@ -37,11 +38,10 @@ function MetricCard({label, value, sub, subColor = "#6366f1", icon, delay}) {
         border: "0.5px solid rgba(255,255,255,0.07)",
         borderRadius: 14,
         padding: "18px 20px",
-        transition: "border-color 0.2s, background 0.2s, transform 0.2s",
+        transition:
+          "border-color 0.2s, background 0.2s, transform 0.2s, opacity 0.38s, transform 0.38s",
         opacity: show ? 1 : 0,
         transform: show ? "translateY(0)" : "translateY(12px)",
-        transitionProperty: "opacity, transform, border-color, background",
-        transitionDuration: "0.38s",
         cursor: "default",
       }}
       onMouseEnter={(e) => {
@@ -203,7 +203,6 @@ function ActionCard({
   );
 }
 
-// ─── Timetable cell ───────────────────────────────────────────────────────────
 function TimetableCell({period, isDouble}) {
   const [hovered, setHovered] = useState(false);
   if (!period) return <div style={{height: 34}} />;
@@ -233,7 +232,7 @@ function TimetableCell({period, isDouble}) {
     <div
       style={{
         height: 34,
-        borderRadius: 6,
+        // ❌ removed duplicate "borderRadius: 6"
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -245,11 +244,13 @@ function TimetableCell({period, isDouble}) {
         transition: "background 0.15s, transform 0.15s",
         transform: hovered ? "scale(1.05)" : "scale(1)",
         borderLeft: isDouble ? "2px solid rgba(139,92,246,0.6)" : "none",
-        borderRadius: isDouble ? "0 6px 6px 0" : 6,
+        borderRadius: isDouble ? "0 6px 6px 0" : 6, // ✅ only one borderRadius
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      title={`${period.subject?.name || (isBreak ? "Break" : "Free")}${period.startTime ? ` · ${period.startTime}` : ""}`}
+      title={`${period.subject?.name || (isBreak ? "Break" : "Free")}${
+        period.startTime ? ` · ${period.startTime}` : ""
+      }`}
     >
       <span
         style={{
@@ -368,11 +369,35 @@ function StatusBadge({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 const MainPg = () => {
-  const {user} = useAuthStore();
+  const {user, logout, isLoading: authLoading} = useAuthStore();
   const {gottenTable} = useGenStore();
   const [selectedClass, setSelectedClass] = useState(null);
   const [pageReady, setPageReady] = useState(false);
   const isVisible = useStaggeredReveal(8, 55);
+
+  // User data for Navigation
+  const userName = user || "Guest";
+  const institutionName = "St. Mary's Academy"; // fallback – can be fetched from store
+  const notificationCount = 3; // placeholder
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      if (res.ok) {
+        window.location.href = "/login";
+      }
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+  };
+
+  // Check auth on mount
 
   useEffect(() => {
     const t = setTimeout(() => setPageReady(true), 60);
@@ -398,7 +423,9 @@ const MainPg = () => {
       const [hours, minutes] = timeStr.split(":");
       const hour = parseInt(hours, 10);
       if (isNaN(hour)) return timeStr;
-      return `${hour > 12 ? hour - 12 : hour}:${minutes} ${hour >= 12 ? "PM" : "AM"}`;
+      return `${hour > 12 ? hour - 12 : hour}:${minutes} ${
+        hour >= 12 ? "PM" : "AM"
+      }`;
     } catch {
       return timeStr;
     }
@@ -417,7 +444,7 @@ const MainPg = () => {
     return "Good evening";
   };
 
-  // ── Shared reveal style helper
+  // Shared reveal style helper
   const reveal = (i, extra = {}) => ({
     opacity: isVisible(i) ? 1 : 0,
     transform: isVisible(i) ? "translateY(0)" : "translateY(14px)",
@@ -425,628 +452,687 @@ const MainPg = () => {
     ...extra,
   });
 
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background:
-          "linear-gradient(160deg, #0d1420 0%, #0f172a 40%, #0d1420 100%)",
-        color: "#fff",
-        overflowX: "hidden",
-        position: "relative",
-      }}
-    >
-      {/* Ambient background glows */}
+  if (authLoading) {
+    return (
       <div
         style={{
-          position: "fixed",
-          top: -300,
-          left: -300,
-          width: 700,
-          height: 700,
-          background:
-            "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
-      <div
-        style={{
-          position: "fixed",
-          bottom: -200,
-          right: -200,
-          width: 500,
-          height: 500,
-          background:
-            "radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 65%)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
-
-      <FullMenu />
-
-      {/* ── Page content ── */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 1,
-          maxWidth: 900,
-          margin: "0 auto",
-          padding: "0 24px 64px",
-          paddingTop: 80,
+          background: "#0d1420",
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        {/* ── Welcome ── */}
-        <div style={{...reveal(0), marginBottom: 40}}>
+        <div className="main-loading-spinner" />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Add loading spinner styles (inline to avoid external CSS) */}
+      <style>
+        {`
+          .main-loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(99,102,241,0.2);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+          }
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+
+      {/* Navigation bar – replaces old FullMenu */}
+      <Navigation
+        userName={userName}
+        institutionName={institutionName}
+        notificationCount={notificationCount}
+        onLogout={handleLogout}
+      />
+
+      {/* Main content – add top padding to avoid overlap with fixed header */}
+      <main
+        style={{
+          minHeight: "100vh",
+          background:
+            "linear-gradient(160deg, #0d1420 0%, #0f172a 40%, #0d1420 100%)",
+          color: "#fff",
+          overflowX: "hidden",
+          position: "relative",
+          paddingTop: "68px", // space for fixed navbar
+        }}
+      >
+        {/* Ambient background glows */}
+        <div
+          style={{
+            position: "fixed",
+            top: -300,
+            left: -300,
+            width: 700,
+            height: 700,
+            background:
+              "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+        <div
+          style={{
+            position: "fixed",
+            bottom: -200,
+            right: -200,
+            width: 500,
+            height: 500,
+            background:
+              "radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 65%)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+
+        {/* Page content wrapper */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            maxWidth: 900,
+            margin: "0 auto",
+            padding: "0 24px 64px",
+          }}
+        >
+          {/* ── Welcome ── */}
+          <div style={{...reveal(0), marginBottom: 40}}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: 16,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 500,
+                    color: "#6366f1",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.6px",
+                    marginBottom: 8,
+                  }}
+                >
+                  Operations dashboard
+                </div>
+                <h1
+                  style={{
+                    fontSize: 30,
+                    fontWeight: 500,
+                    color: "#f1f5f9",
+                    lineHeight: 1.2,
+                    marginBottom: 6,
+                    letterSpacing: "-0.4px",
+                  }}
+                >
+                  {getGreeting()},{" "}
+                  <span
+                    style={{
+                      background: "linear-gradient(120deg, #818cf8, #c084fc)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                    }}
+                  >
+                    {user}
+                  </span>
+                </h1>
+                <p style={{fontSize: 14, color: "#64748b", lineHeight: 1.6}}>
+                  {timetableCount > 0
+                    ? `${timetableCount} active schedule${
+                        timetableCount > 1 ? "s" : ""
+                      } · All systems operational`
+                    : "Your institution scheduling workspace is ready."}
+                </p>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  flexShrink: 0,
+                }}
+              >
+                <StatusBadge label="● Operational" />
+              </div>
+            </div>
+          </div>
+
+          {/* ── Divider ── */}
           <div
             style={{
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: 16,
+              ...reveal(0),
+              height: "0.5px",
+              background:
+                "linear-gradient(90deg, transparent, rgba(99,102,241,0.3), transparent)",
+              marginBottom: 36,
             }}
-          >
-            <div>
+          />
+
+          {/* ── Metrics row ── */}
+          <div style={{...reveal(1), marginBottom: 36}}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                color: "#475569",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+                marginBottom: 14,
+              }}
+            >
+              Institution overview
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                gap: 10,
+              }}
+            >
+              <MetricCard
+                label="Schedules"
+                value={timetableCount || "—"}
+                sub={
+                  timetableCount
+                    ? `${timetableCount} class group${
+                        timetableCount > 1 ? "s" : ""
+                      }`
+                    : "None generated"
+                }
+                icon="📋"
+                delay={180}
+              />
+              <MetricCard
+                label="Periods scheduled"
+                value={timetableCount > 0 ? "47" : "—"}
+                sub="Across active tables"
+                icon="🕐"
+                delay={230}
+              />
+              <MetricCard
+                label="Teachers assigned"
+                value={timetableCount > 0 ? "12" : "—"}
+                sub="All conflicts resolved"
+                subColor="#10b981"
+                icon="👥"
+                delay={280}
+              />
+              <MetricCard
+                label="Conflicts"
+                value={timetableCount > 0 ? "0" : "—"}
+                sub="No issues detected"
+                subColor="#10b981"
+                icon="✓"
+                delay={330}
+              />
+            </div>
+          </div>
+
+          {/* ── Section: Quick actions ── */}
+          <div style={{...reveal(2), marginBottom: 36}}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 14,
+              }}
+            >
               <div
                 style={{
                   fontSize: 11,
                   fontWeight: 500,
-                  color: "#6366f1",
+                  color: "#475569",
                   textTransform: "uppercase",
-                  letterSpacing: "0.6px",
-                  marginBottom: 8,
+                  letterSpacing: "0.5px",
                 }}
               >
-                Operations dashboard
+                Quick actions
               </div>
-              <h1
+            </div>
+
+            {/* HoverDevCards rendered inside a styled wrapper */}
+            <div
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                border: "0.5px solid rgba(255,255,255,0.06)",
+                borderRadius: 16,
+                padding: "4px",
+                overflow: "hidden",
+              }}
+            >
+              <HoverDevCards />
+            </div>
+          </div>
+
+          {/* ── CTA: View timetables ── */}
+          <div style={{...reveal(3), marginBottom: 36}}>
+            <Link
+              to="/home/timetables"
+              style={{
+                textDecoration: "none",
+                color: "inherit",
+                display: "block",
+              }}
+            >
+              <div
                 style={{
-                  fontSize: 30,
-                  fontWeight: 500,
-                  color: "#f1f5f9",
-                  lineHeight: 1.2,
-                  marginBottom: 6,
-                  letterSpacing: "-0.4px",
+                  background: "rgba(99,102,241,0.09)",
+                  border: "0.5px solid rgba(99,102,241,0.28)",
+                  borderRadius: 14,
+                  padding: "18px 22px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 16,
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(99,102,241,0.15)";
+                  e.currentTarget.style.borderColor = "rgba(99,102,241,0.45)";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(99,102,241,0.09)";
+                  e.currentTarget.style.borderColor = "rgba(99,102,241,0.28)";
+                  e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
-                {getGreeting()},{" "}
-                <span
-                  style={{
-                    background: "linear-gradient(120deg, #818cf8, #c084fc)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  {user}
-                </span>
-              </h1>
-              <p style={{fontSize: 14, color: "#64748b", lineHeight: 1.6}}>
-                {timetableCount > 0
-                  ? `${timetableCount} active schedule${timetableCount > 1 ? "s" : ""} · All systems operational`
-                  : "Your institution scheduling workspace is ready."}
-              </p>
-            </div>
+                <div style={{display: "flex", alignItems: "center", gap: 14}}>
+                  <div
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: 11,
+                      background: "rgba(99,102,241,0.18)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 18,
+                      color: "#818cf8",
+                      flexShrink: 0,
+                    }}
+                  >
+                    📅
+                  </div>
+                  <div>
+                    <div
+                      style={{fontSize: 15, fontWeight: 500, color: "#e2e8f0"}}
+                    >
+                      Full schedule view
+                    </div>
+                    <div style={{fontSize: 12, color: "#64748b", marginTop: 2}}>
+                      Detailed timetables with export, print, and sharing
+                      options
+                    </div>
+                  </div>
+                </div>
+                <div style={{fontSize: 20, color: "#6366f1", flexShrink: 0}}>
+                  →
+                </div>
+              </div>
+            </Link>
+          </div>
+
+          {/* ── Timetable preview section ── */}
+          <div style={reveal(4)}>
             <div
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                flexShrink: 0,
-              }}
-            >
-              <StatusBadge label="● Operational" />
-            </div>
-          </div>
-        </div>
-
-        {/* ── Divider ── */}
-        <div
-          style={{
-            ...reveal(0),
-            height: "0.5px",
-            background:
-              "linear-gradient(90deg, transparent, rgba(99,102,241,0.3), transparent)",
-            marginBottom: 36,
-          }}
-        />
-
-        {/* ── Metrics row ── */}
-        <div style={{...reveal(1), marginBottom: 36}}>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 500,
-              color: "#475569",
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-              marginBottom: 14,
-            }}
-          >
-            Institution overview
-          </div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-              gap: 10,
-            }}
-          >
-            <MetricCard
-              label="Schedules"
-              value={timetableCount || "—"}
-              sub={
-                timetableCount
-                  ? `${timetableCount} class group${timetableCount > 1 ? "s" : ""}`
-                  : "None generated"
-              }
-              icon="📋"
-              delay={180}
-            />
-            <MetricCard
-              label="Periods scheduled"
-              value={timetableCount > 0 ? "47" : "—"}
-              sub="Across active tables"
-              icon="🕐"
-              delay={230}
-            />
-            <MetricCard
-              label="Teachers assigned"
-              value={timetableCount > 0 ? "12" : "—"}
-              sub="All conflicts resolved"
-              subColor="#10b981"
-              icon="👥"
-              delay={280}
-            />
-            <MetricCard
-              label="Conflicts"
-              value={timetableCount > 0 ? "0" : "—"}
-              sub="No issues detected"
-              subColor="#10b981"
-              icon="✓"
-              delay={330}
-            />
-          </div>
-        </div>
-
-        {/* ── Section: Quick actions ── */}
-        <div style={{...reveal(2), marginBottom: 36}}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 14,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 500,
-                color: "#475569",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-              }}
-            >
-              Quick actions
-            </div>
-          </div>
-
-          {/* HoverDevCards rendered inside a styled wrapper */}
-          <div
-            style={{
-              background: "rgba(255,255,255,0.02)",
-              border: "0.5px solid rgba(255,255,255,0.06)",
-              borderRadius: 16,
-              padding: "4px",
-              overflow: "hidden",
-            }}
-          >
-            <HoverDevCards />
-          </div>
-        </div>
-
-        {/* ── CTA: View timetables ── */}
-        <div style={{...reveal(3), marginBottom: 36}}>
-          <Link
-            to="/home/timetables"
-            style={{textDecoration: "none", color: "inherit", display: "block"}}
-          >
-            <div
-              style={{
-                background: "rgba(99,102,241,0.09)",
-                border: "0.5px solid rgba(99,102,241,0.28)",
-                borderRadius: 14,
-                padding: "18px 22px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                gap: 16,
-                cursor: "pointer",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(99,102,241,0.15)";
-                e.currentTarget.style.borderColor = "rgba(99,102,241,0.45)";
-                e.currentTarget.style.transform = "translateY(-2px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(99,102,241,0.09)";
-                e.currentTarget.style.borderColor = "rgba(99,102,241,0.28)";
-                e.currentTarget.style.transform = "translateY(0)";
+                marginBottom: 14,
               }}
             >
-              <div style={{display: "flex", alignItems: "center", gap: 14}}>
-                <div
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  color: "#475569",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                Schedule preview
+              </div>
+              {timetableCount > 0 && (
+                <Link
+                  to="/home/timetables"
                   style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: 11,
-                    background: "rgba(99,102,241,0.18)",
+                    fontSize: 12,
+                    color: "#6366f1",
+                    textDecoration: "none",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 18,
-                    color: "#818cf8",
-                    flexShrink: 0,
+                    gap: 4,
+                    transition: "color 0.15s",
                   }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.color = "#818cf8")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color = "#6366f1")
+                  }
                 >
-                  📅
-                </div>
-                <div>
-                  <div
-                    style={{fontSize: 15, fontWeight: 500, color: "#e2e8f0"}}
-                  >
-                    Full schedule view
-                  </div>
-                  <div style={{fontSize: 12, color: "#64748b", marginTop: 2}}>
-                    Detailed timetables with export, print, and sharing options
-                  </div>
-                </div>
-              </div>
-              <div style={{fontSize: 20, color: "#6366f1", flexShrink: 0}}>
-                →
-              </div>
+                  Full view →
+                </Link>
+              )}
             </div>
-          </Link>
-        </div>
 
-        {/* ── Timetable preview section ── */}
-        <div style={reveal(4)}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 14,
-            }}
-          >
             <div
               style={{
-                fontSize: 11,
-                fontWeight: 500,
-                color: "#475569",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
+                background: "rgba(255,255,255,0.025)",
+                border: "0.5px solid rgba(255,255,255,0.07)",
+                borderRadius: 16,
+                overflow: "hidden",
               }}
             >
-              Schedule preview
-            </div>
-            {timetableCount > 0 && (
-              <Link
-                to="/home/timetables"
-                style={{
-                  fontSize: 12,
-                  color: "#6366f1",
-                  textDecoration: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4,
-                  transition: "color 0.15s",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#818cf8")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#6366f1")}
-              >
-                Full view →
-              </Link>
-            )}
-          </div>
+              {timetableCount > 0 ? (
+                <>
+                  {/* Tab bar */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 0,
+                      padding: "12px 16px",
+                      borderBottom: "0.5px solid rgba(255,255,255,0.06)",
+                      overflowX: "auto",
+                      scrollbarWidth: "none",
+                    }}
+                  >
+                    {gottenTable.timetables.map((tt) => {
+                      const isActive = selectedClass === tt.name;
+                      const label = tt.name
+                        .replace("Timetable for ", "")
+                        .replace("timetable for ", "");
+                      return (
+                        <button
+                          key={tt.name}
+                          onClick={() => setSelectedClass(tt.name)}
+                          style={{
+                            whiteSpace: "nowrap",
+                            padding: "6px 14px",
+                            borderRadius: 8,
+                            fontSize: 12,
+                            fontWeight: 500,
+                            cursor: "pointer",
+                            border: "none",
+                            outline: "none",
+                            transition: "all 0.18s",
+                            marginRight: 4,
+                            background: isActive
+                              ? "rgba(99,102,241,0.18)"
+                              : "transparent",
+                            color: isActive ? "#818cf8" : "#64748b",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isActive) {
+                              e.currentTarget.style.background =
+                                "rgba(255,255,255,0.05)";
+                              e.currentTarget.style.color = "#94a3b8";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isActive) {
+                              e.currentTarget.style.background = "transparent";
+                              e.currentTarget.style.color = "#64748b";
+                            }
+                          }}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-          <div
-            style={{
-              background: "rgba(255,255,255,0.025)",
-              border: "0.5px solid rgba(255,255,255,0.07)",
-              borderRadius: 16,
-              overflow: "hidden",
-            }}
-          >
-            {timetableCount > 0 ? (
-              <>
-                {/* Tab bar */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 0,
-                    padding: "12px 16px",
-                    borderBottom: "0.5px solid rgba(255,255,255,0.06)",
-                    overflowX: "auto",
-                    scrollbarWidth: "none",
-                  }}
-                >
-                  {gottenTable.timetables.map((tt) => {
-                    const isActive = selectedClass === tt.name;
-                    const label = tt.name
-                      .replace("Timetable for ", "")
-                      .replace("timetable for ", "");
-                    return (
-                      <button
-                        key={tt.name}
-                        onClick={() => setSelectedClass(tt.name)}
-                        style={{
-                          whiteSpace: "nowrap",
-                          padding: "6px 14px",
-                          borderRadius: 8,
-                          fontSize: 12,
-                          fontWeight: 500,
-                          cursor: "pointer",
-                          border: "none",
-                          outline: "none",
-                          transition: "all 0.18s",
-                          marginRight: 4,
-                          background: isActive
-                            ? "rgba(99,102,241,0.18)"
-                            : "transparent",
-                          color: isActive ? "#818cf8" : "#64748b",
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!isActive) {
-                            e.currentTarget.style.background =
-                              "rgba(255,255,255,0.05)";
-                            e.currentTarget.style.color = "#94a3b8";
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isActive) {
-                            e.currentTarget.style.background = "transparent";
-                            e.currentTarget.style.color = "#64748b";
-                          }
-                        }}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Timetable grid */}
-                <div style={{padding: "16px 16px 0", overflowX: "auto"}}>
-                  <div style={{minWidth: 480}}>
-                    {/* Days header */}
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "60px repeat(5, 1fr)",
-                        gap: 3,
-                        marginBottom: 6,
-                      }}
-                    >
-                      <div />
-                      {(selectedTimetable?.schedule?.slice(0, 5) || []).map(
-                        (day) => (
-                          <div
-                            key={day.day}
-                            style={{
-                              textAlign: "center",
-                              fontSize: 11,
-                              fontWeight: 500,
-                              color: "#475569",
-                              padding: "2px 0",
-                              textTransform: "uppercase",
-                              letterSpacing: "0.4px",
-                            }}
-                          >
-                            {day.day.substring(0, 3)}
-                          </div>
-                        ),
-                      )}
-                      {/* Fill missing day headers */}
-                      {Array.from({
-                        length: Math.max(
-                          0,
-                          5 - (selectedTimetable?.schedule?.length || 0),
-                        ),
-                      }).map((_, i) => (
-                        <div key={`filler-h-${i}`} />
-                      ))}
-                    </div>
-
-                    {/* Period rows */}
-                    {(
-                      selectedTimetable?.schedule?.[0]?.periods?.slice(0, 6) ||
-                      []
-                    ).map((_, periodIdx) => (
+                  {/* Timetable grid */}
+                  <div style={{padding: "16px 16px 0", overflowX: "auto"}}>
+                    <div style={{minWidth: 480}}>
+                      {/* Days header */}
                       <div
-                        key={`row-${periodIdx}`}
                         style={{
                           display: "grid",
                           gridTemplateColumns: "60px repeat(5, 1fr)",
                           gap: 3,
-                          marginBottom: 3,
+                          marginBottom: 6,
                         }}
                       >
-                        <div
-                          style={{
-                            fontSize: 10,
-                            color: "#475569",
-                            display: "flex",
-                            alignItems: "center",
-                            paddingRight: 8,
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {formatTime(
-                            selectedTimetable.schedule[0].periods[periodIdx]
-                              ?.startTime,
-                          )}
-                        </div>
+                        <div />
                         {(selectedTimetable?.schedule?.slice(0, 5) || []).map(
                           (day) => (
-                            <TimetableCell
-                              key={`${day.day}-${periodIdx}`}
-                              period={day.periods?.[periodIdx]}
-                              isDouble={isDoublePeriod(
-                                day.periods?.[periodIdx],
-                              )}
-                            />
+                            <div
+                              key={day.day}
+                              style={{
+                                textAlign: "center",
+                                fontSize: 11,
+                                fontWeight: 500,
+                                color: "#475569",
+                                padding: "2px 0",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.4px",
+                              }}
+                            >
+                              {day.day.substring(0, 3)}
+                            </div>
                           ),
                         )}
+                        {/* Fill missing day headers */}
                         {Array.from({
                           length: Math.max(
                             0,
                             5 - (selectedTimetable?.schedule?.length || 0),
                           ),
                         }).map((_, i) => (
-                          <div key={`filler-${i}`} style={{height: 34}} />
+                          <div key={`filler-h-${i}`} />
                         ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
 
-                {/* Footer */}
-                <div
-                  style={{
-                    padding: "12px 16px",
-                    borderTop: "0.5px solid rgba(255,255,255,0.05)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    marginTop: 12,
-                  }}
-                >
-                  <div style={{display: "flex", alignItems: "center", gap: 16}}>
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        fontSize: 11,
-                        color: "#475569",
-                      }}
-                    >
-                      <span
-                        style={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: 3,
-                          background: "rgba(99,102,241,0.4)",
-                          display: "inline-block",
-                        }}
-                      />
-                      Subject
-                    </span>
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        fontSize: 11,
-                        color: "#475569",
-                      }}
-                    >
-                      <span
-                        style={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: 3,
-                          background: "rgba(234,179,8,0.3)",
-                          display: "inline-block",
-                        }}
-                      />
-                      Break
-                    </span>
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        fontSize: 11,
-                        color: "#475569",
-                      }}
-                    >
-                      <span
-                        style={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: 3,
-                          borderLeft: "2px solid rgba(139,92,246,0.7)",
-                          background: "transparent",
-                          display: "inline-block",
-                        }}
-                      />
-                      Double period
-                    </span>
+                      {/* Period rows */}
+                      {(
+                        selectedTimetable?.schedule?.[0]?.periods?.slice(
+                          0,
+                          6,
+                        ) || []
+                      ).map((_, periodIdx) => (
+                        <div
+                          key={`row-${periodIdx}`}
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "60px repeat(5, 1fr)",
+                            gap: 3,
+                            marginBottom: 3,
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: 10,
+                              color: "#475569",
+                              display: "flex",
+                              alignItems: "center",
+                              paddingRight: 8,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {formatTime(
+                              selectedTimetable.schedule[0].periods[periodIdx]
+                                ?.startTime,
+                            )}
+                          </div>
+                          {(selectedTimetable?.schedule?.slice(0, 5) || []).map(
+                            (day) => (
+                              <TimetableCell
+                                key={`${day.day}-${periodIdx}`}
+                                period={day.periods?.[periodIdx]}
+                                isDouble={isDoublePeriod(
+                                  day.periods?.[periodIdx],
+                                )}
+                              />
+                            ),
+                          )}
+                          {Array.from({
+                            length: Math.max(
+                              0,
+                              5 - (selectedTimetable?.schedule?.length || 0),
+                            ),
+                          }).map((_, i) => (
+                            <div key={`filler-${i}`} style={{height: 34}} />
+                          ))}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <Link
-                    to="/home/timetables"
+
+                  {/* Footer */}
+                  <div
                     style={{
-                      fontSize: 12,
-                      color: "#6366f1",
-                      textDecoration: "none",
+                      padding: "12px 16px",
+                      borderTop: "0.5px solid rgba(255,255,255,0.05)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginTop: 12,
                     }}
                   >
-                    View full timetable →
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <EmptyTimetableState />
-            )}
+                    <div
+                      style={{display: "flex", alignItems: "center", gap: 16}}
+                    >
+                      <span
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          fontSize: 11,
+                          color: "#475569",
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: 3,
+                            background: "rgba(99,102,241,0.4)",
+                            display: "inline-block",
+                          }}
+                        />
+                        Subject
+                      </span>
+                      <span
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          fontSize: 11,
+                          color: "#475569",
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: 3,
+                            background: "rgba(234,179,8,0.3)",
+                            display: "inline-block",
+                          }}
+                        />
+                        Break
+                      </span>
+                      <span
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          fontSize: 11,
+                          color: "#475569",
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: 3,
+                            borderLeft: "2px solid rgba(139,92,246,0.7)",
+                            background: "transparent",
+                            display: "inline-block",
+                          }}
+                        />
+                        Double period
+                      </span>
+                    </div>
+                    <Link
+                      to="/home/timetables"
+                      style={{
+                        fontSize: 12,
+                        color: "#6366f1",
+                        textDecoration: "none",
+                      }}
+                    >
+                      View full timetable →
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <EmptyTimetableState />
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* ── Footer trust strip ── */}
-        <div
-          style={{
-            ...reveal(5),
-            marginTop: 48,
-            paddingTop: 24,
-            borderTop: "0.5px solid rgba(255,255,255,0.05)",
-          }}
-        >
+          {/* ── Footer trust strip ── */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 24,
-              flexWrap: "wrap",
+              ...reveal(5),
+              marginTop: 48,
+              paddingTop: 24,
+              borderTop: "0.5px solid rgba(255,255,255,0.05)",
             }}
           >
-            {[
-              "Conflict-free scheduling",
-              "Automated generation",
-              "Multi-institution support",
-            ].map((item) => (
-              <div
-                key={item}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                  fontSize: 11,
-                  color: "#334155",
-                }}
-              >
-                <span style={{color: "#10b981", fontSize: 12}}>✓</span>
-                {item}
-              </div>
-            ))}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 24,
+                flexWrap: "wrap",
+              }}
+            >
+              {[
+                "Conflict-free scheduling",
+                "Automated generation",
+                "Multi-institution support",
+              ].map((item) => (
+                <div
+                  key={item}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    fontSize: 11,
+                    color: "#334155",
+                  }}
+                >
+                  <span style={{color: "#10b981", fontSize: 12}}>✓</span>
+                  {item}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 };
 

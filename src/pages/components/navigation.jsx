@@ -25,7 +25,6 @@ const Icons = {
       <circle cx="24" cy="23" r="3.5" fill="rgba(255,255,255,0.3)" />
     </svg>
   ),
-
   Dashboard: () => (
     <svg
       width="18"
@@ -43,7 +42,6 @@ const Icons = {
       <rect x="10" y="10" width="6" height="6" rx="2" />
     </svg>
   ),
-
   Timetable: () => (
     <svg
       width="18"
@@ -60,7 +58,6 @@ const Icons = {
       <path d="M5 11h2M5 13h2M9 11h2M9 13h2" strokeWidth="1.2" />
     </svg>
   ),
-
   Generate: () => (
     <svg
       width="18"
@@ -76,7 +73,6 @@ const Icons = {
       <circle cx="9" cy="9" r="2.5" />
     </svg>
   ),
-
   Institution: () => (
     <svg
       width="18"
@@ -93,7 +89,6 @@ const Icons = {
       <path d="M9 3v3" strokeWidth="1.2" />
     </svg>
   ),
-
   Analytics: () => (
     <svg
       width="18"
@@ -109,7 +104,6 @@ const Icons = {
       <path d="M2 16h14" />
     </svg>
   ),
-
   Settings: () => (
     <svg
       width="18"
@@ -125,7 +119,6 @@ const Icons = {
       <path d="M14.5 9a5.5 5.5 0 00-.45-2.2l1.8-1.8-1.4-1.4-1.8 1.8A5.5 5.5 0 009 3.5V1.5H7v2a5.5 5.5 0 00-2.2.45l-1.8-1.8-1.4 1.4 1.8 1.8A5.5 5.5 0 003.5 9H1.5v2h2a5.5 5.5 0 00.45 2.2l-1.8 1.8 1.4 1.4 1.8-1.8A5.5 5.5 0 007 14.5v2h2v-2a5.5 5.5 0 002.2-.45l1.8 1.8 1.4-1.4-1.8-1.8A5.5 5.5 0 0014.5 9h2V9z" />
     </svg>
   ),
-
   Search: () => (
     <svg
       width="16"
@@ -141,7 +134,6 @@ const Icons = {
       <path d="M11 11l3.5 3.5" />
     </svg>
   ),
-
   ChevronDown: () => (
     <svg
       width="12"
@@ -156,7 +148,6 @@ const Icons = {
       <path d="M2 4.5l4 4 4-4" />
     </svg>
   ),
-
   Bell: () => (
     <svg
       width="18"
@@ -173,7 +164,6 @@ const Icons = {
       <path d="M6 13.5v.5a3 3 0 006 0v-.5" />
     </svg>
   ),
-
   User: () => (
     <svg
       width="18"
@@ -189,7 +179,6 @@ const Icons = {
       <path d="M2.5 15.5c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5" />
     </svg>
   ),
-
   Menu: () => (
     <svg
       width="20"
@@ -203,7 +192,6 @@ const Icons = {
       <path d="M3 6h14M3 10h14M3 14h10" />
     </svg>
   ),
-
   X: () => (
     <svg
       width="20"
@@ -217,7 +205,6 @@ const Icons = {
       <path d="M5 5l10 10M15 5L5 15" />
     </svg>
   ),
-
   Classes: () => (
     <svg
       width="16"
@@ -233,7 +220,6 @@ const Icons = {
       <path d="M6 7h4M6 10h4" strokeWidth="1.2" />
     </svg>
   ),
-
   Subjects: () => (
     <svg
       width="16"
@@ -249,7 +235,6 @@ const Icons = {
       <path d="M3 6h10M6 3v10" strokeWidth="1.2" />
     </svg>
   ),
-
   Departments: () => (
     <svg
       width="16"
@@ -267,7 +252,6 @@ const Icons = {
       <rect x="9" y="9" width="5" height="5" rx="1" />
     </svg>
   ),
-
   Teachers: () => (
     <svg
       width="16"
@@ -283,7 +267,6 @@ const Icons = {
       <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" />
     </svg>
   ),
-
   History: () => (
     <svg
       width="16"
@@ -299,7 +282,6 @@ const Icons = {
       <path d="M8 4.5v4l2.5 1.5" />
     </svg>
   ),
-
   Export: () => (
     <svg
       width="16"
@@ -315,7 +297,6 @@ const Icons = {
       <path d="M3 12v1a2 2 0 002 2h6a2 2 0 002-2v-1" />
     </svg>
   ),
-
   Account: () => (
     <svg
       width="16"
@@ -331,7 +312,6 @@ const Icons = {
       <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" />
     </svg>
   ),
-
   Preferences: () => (
     <svg
       width="16"
@@ -347,7 +327,6 @@ const Icons = {
       <path d="M8 2v2M8 12v2M2 8h2M12 8h2M4.2 4.2l1.4 1.4M10.4 10.4l1.4 1.4M4.2 11.8l1.4-1.4M10.4 5.6l1.4-1.4" />
     </svg>
   ),
-
   Notifications: () => (
     <svg
       width="16"
@@ -363,7 +342,6 @@ const Icons = {
       <path d="M7 13.5a1.5 1.5 0 002 0" />
     </svg>
   ),
-
   Security: () => (
     <svg
       width="16"
@@ -379,7 +357,6 @@ const Icons = {
       <path d="M5 7V5a3 3 0 016 0v2" />
     </svg>
   ),
-
   Logout: () => (
     <svg
       width="16"
@@ -395,7 +372,6 @@ const Icons = {
       <path d="M6 8h6M10 5l3 3-3 3" />
     </svg>
   ),
-
   ArrowRight: () => (
     <svg
       width="14"
@@ -419,7 +395,7 @@ const navStructure = [
   {
     id: "dashboard",
     label: "Dashboard",
-    path: "/dashboard",
+    path: "/home",
     icon: Icons.Dashboard,
     children: null,
   },
@@ -438,7 +414,7 @@ const navStructure = [
   {
     id: "generate",
     label: "Generate",
-    path: "/generate",
+    path: "/home/create-table",
     icon: Icons.Generate,
     children: null,
     highlight: true,
@@ -505,6 +481,7 @@ const getInitials = (name) => {
     .toUpperCase()
     .slice(0, 2);
 };
+
 // ═══════════════════════════════════════════════════════════════════════════════
 //  MOBILE NAV ITEM — Expandable with children
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -653,19 +630,16 @@ export const Navigation = ({
   return (
     <>
       <style>{navStyles}</style>
-
-      {/* ═══════ TOP NAVIGATION BAR ═══════ */}
+      {/* TOP NAVIGATION BAR */}
       <header
         className={`nav-header ${scrolled ? "nav-header--scrolled" : ""}`}
       >
         <div className="nav-header__inner">
-          {/* Logo */}
           <Link to="/dashboard" className="nav-logo">
             <Icons.Logo />
             <span className="nav-logo__text">Protiba</span>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="nav-desktop" ref={dropdownRef}>
             {navStructure.map((item) => (
               <div key={item.id} className="nav-item-wrapper">
@@ -742,9 +716,7 @@ export const Navigation = ({
             ))}
           </nav>
 
-          {/* Right Actions */}
           <div className="nav-actions">
-            {/* Search */}
             <div className="nav-search-wrapper" ref={searchRef}>
               <button
                 className="nav-action-btn"
@@ -793,7 +765,6 @@ export const Navigation = ({
               </AnimatePresence>
             </div>
 
-            {/* Notifications */}
             <button
               className="nav-action-btn nav-action-btn--badge"
               aria-label="Notifications"
@@ -804,7 +775,6 @@ export const Navigation = ({
               )}
             </button>
 
-            {/* User Menu */}
             <div className="nav-user-wrapper" ref={userMenuRef}>
               <button
                 className="nav-user-trigger"
@@ -884,7 +854,6 @@ export const Navigation = ({
               </AnimatePresence>
             </div>
 
-            {/* Mobile Toggle */}
             <button
               className="nav-mobile-toggle"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -921,7 +890,7 @@ export const Navigation = ({
         </div>
       </header>
 
-      {/* ═══════ MOBILE NAVIGATION PANEL ═══════ */}
+      {/* MOBILE NAVIGATION PANEL */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -1009,289 +978,553 @@ export const Navigation = ({
     </>
   );
 };
-// ═══════════════════════════════════════════════════════════════════════════════
-//  SIDEBAR NAVIGATION — For dashboard pages that need a persistent sidebar
-// ═══════════════════════════════════════════════════════════════════════════════
-export const SidebarNavigation = ({
-  userName = "Admin User",
-  institutionName = "St. Mary's Academy",
-  onLogout = () => {},
-  collapsed = false,
-  onToggleCollapse = () => {},
-}) => {
-  const location = useLocation();
-  const currentPath = location.pathname;
 
-  return (
-    <>
-      <style>{sidebarStyles}</style>
-      <aside className={`sidebar ${collapsed ? "sidebar--collapsed" : ""}`}>
-        <div className="sidebar__header">
-          <Link to="/dashboard" className="sidebar__logo">
-            <Icons.Logo />
-            {!collapsed && <span className="sidebar__logo-text">Protiba</span>}
-          </Link>
-          <button
-            className="sidebar__collapse"
-            onClick={onToggleCollapse}
-            aria-label={collapsed ? "Expand" : "Collapse"}
-          >
-            <motion.span
-              animate={{rotate: collapsed ? 180 : 0}}
-              transition={{duration: 0.2}}
-            >
-              <Icons.ChevronDown />
-            </motion.span>
-          </button>
-        </div>
-
-        <nav className="sidebar__nav">
-          {navStructure.map((item) => (
-            <div key={item.id} className="sidebar__group">
-              <Link
-                to={item.path}
-                className={`sidebar__link ${isRouteActive(currentPath, item.path, item.children) ? "sidebar__link--active" : ""}`}
-                title={collapsed ? item.label : undefined}
-              >
-                <item.icon />
-                {!collapsed && (
-                  <>
-                    <span>{item.label}</span>
-                    {item.children && <Icons.ChevronDown />}
-                  </>
-                )}
-              </Link>
-              {!collapsed &&
-                item.children &&
-                isRouteActive(currentPath, item.path, item.children) && (
-                  <div className="sidebar__children">
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.path}
-                        to={child.path}
-                        className={`sidebar__sublink ${currentPath === child.path ? "sidebar__sublink--active" : ""}`}
-                      >
-                        <child.icon />
-                        <span>{child.label}</span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-            </div>
-          ))}
-        </nav>
-
-        <div className="sidebar__footer">
-          {!collapsed && (
-            <div className="sidebar__user">
-              <div className="nav-user-avatar">{getInitials(userName)}</div>
-              <div className="sidebar__user-info">
-                <span className="sidebar__user-name">{userName}</span>
-                <span className="sidebar__user-institution">
-                  {institutionName}
-                </span>
-              </div>
-            </div>
-          )}
-          <button
-            className="sidebar__logout"
-            onClick={onLogout}
-            title="Sign out"
-          >
-            <Icons.Logout />
-            {!collapsed && <span>Sign out</span>}
-          </button>
-        </div>
-      </aside>
-    </>
-  );
-};
 // ═══════════════════════════════════════════════════════════════════════════════
-//  STYLES — Sidebar Navigation (sidebarStyles)
+//  STYLES — Main Navigation (navStyles)
 // ═══════════════════════════════════════════════════════════════════════════════
-const sidebarStyles = `
-  .sidebar {
+const navStyles = `
+  :root {
+    --nav-bg: rgba(3,3,5,0.8);
+    --nav-bg-solid: #0a0a0f;
+    --nav-border: rgba(255,255,255,0.07);
+    --nav-border-2: rgba(255,255,255,0.12);
+    --nav-text: #f0f0f5;
+    --nav-text-2: #9ca3af;
+    --nav-text-3: #6b7280;
+    --nav-accent: #7c3aed;
+    --nav-accent-light: #a78bfa;
+    --nav-accent-glow: rgba(124,58,237,0.12);
+    --nav-red: #f43f5e;
+    --nav-radius: 10px;
+    --nav-transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .nav-header {
     position: fixed;
-    left: 0;
     top: 0;
-    bottom: 0;
-    width: 260px;
-    background: var(--nav-bg-solid);
-    border-right: 1px solid var(--nav-border);
-    display: flex;
-    flex-direction: column;
-    z-index: 90;
-    transition: width 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s, box-shadow 0.3s;
   }
-  .sidebar--collapsed {
-    width: 72px;
+  .nav-header--scrolled {
+    background: rgba(3,3,5,0.85);
+    backdrop-filter: blur(20px) saturate(1.5);
+    border-bottom-color: var(--nav-border);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
   }
-
-  .sidebar__header {
+  .nav-header__inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 68px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--nav-border);
-    height: 64px;
+    gap: 24px;
   }
-  .sidebar__logo {
+  .nav-logo {
     display: flex;
     align-items: center;
     gap: 10px;
     text-decoration: none;
-  }
-  .sidebar__logo-text {
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 800;
     color: var(--nav-text);
     letter-spacing: -0.03em;
-    transition: opacity 200ms;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
   }
-  .sidebar--collapsed .sidebar__logo-text {
-    opacity: 0;
-    width: 0;
-    overflow: hidden;
+  .nav-logo:hover { opacity: 0.85; }
+  .nav-logo__text {
+    background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  .sidebar__collapse {
+  .nav-desktop {
     display: flex;
     align-items: center;
+    gap: 4px;
+    flex: 1;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--nav-border);
-    color: var(--nav-text-3);
+  }
+  .nav-item-wrapper { position: relative; }
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--nav-text-2);
+    text-decoration: none;
+    background: transparent;
+    border: none;
     cursor: pointer;
     transition: all var(--nav-transition);
   }
-  .sidebar__collapse:hover {
-    background: rgba(255,255,255,0.08);
+  .nav-link:hover {
+    background: rgba(255,255,255,0.04);
+    color: var(--nav-text);
+  }
+  .nav-link--active {
+    background: rgba(124,58,237,0.1);
+    color: var(--nav-text);
+  }
+  .nav-link--highlight {
+    background: rgba(124,58,237,0.08);
+    border: 0.5px solid rgba(124,58,237,0.3);
+  }
+  .nav-link__badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: #fbbf24;
+    background: rgba(251,191,36,0.12);
+    border: 0.5px solid rgba(251,191,36,0.3);
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+  .nav-link__chevron {
+    display: inline-flex;
+    transition: transform 0.2s;
+  }
+  .nav-dropdown-container { position: relative; }
+  .nav-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 200px;
+    background: var(--nav-bg-solid);
+    border: 0.5px solid var(--nav-border);
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+    z-index: 101;
+  }
+  .nav-dropdown__header {
+    padding: 10px 16px;
+    border-bottom: 0.5px solid var(--nav-border);
+  }
+  .nav-dropdown__label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--nav-text-3);
+  }
+  .nav-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
     color: var(--nav-text-2);
+    text-decoration: none;
+    transition: all var(--nav-transition);
+    position: relative;
   }
-  .sidebar--collapsed .sidebar__collapse {
-    transform: rotate(180deg);
+  .nav-dropdown__item:hover {
+    background: rgba(255,255,255,0.04);
+    color: var(--nav-text);
   }
-
-  .sidebar__nav {
+  .nav-dropdown__item--active {
+    background: rgba(124,58,237,0.08);
+    color: var(--nav-accent-light);
+  }
+  .nav-dropdown__indicator {
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--nav-accent);
+    border-radius: 2px;
+  }
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: var(--nav-text-2);
+    cursor: pointer;
+    padding: 8px 10px;
+    border-radius: 10px;
+    transition: all var(--nav-transition);
+    position: relative;
+  }
+  .nav-action-btn:hover {
+    background: rgba(255,255,255,0.04);
+    color: var(--nav-text);
+  }
+  .nav-search-shortcut {
+    font-size: 11px;
+    color: var(--nav-text-3);
+    background: rgba(255,255,255,0.05);
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 0.5px solid var(--nav-border);
+  }
+  .nav-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #ef4444;
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 10px;
+    line-height: 1;
+  }
+  .nav-search-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 15vh;
+  }
+  .nav-search-modal {
+    width: 90%;
+    max-width: 560px;
+    background: #0f0f14;
+    border: 0.5px solid var(--nav-border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 32px 64px rgba(0,0,0,0.5);
+  }
+  .nav-search-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 0.5px solid var(--nav-border);
+    background: rgba(255,255,255,0.02);
+  }
+  .nav-search-input {
     flex: 1;
-    padding: 12px 12px;
-    overflow-y: auto;
+    background: transparent;
+    border: none;
+    font-size: 15px;
+    color: var(--nav-text);
+    outline: none;
   }
-  .sidebar__group {
-    margin-bottom: 4px;
+  .nav-search-esc {
+    font-size: 11px;
+    color: var(--nav-text-3);
+    background: rgba(255,255,255,0.05);
+    padding: 3px 8px;
+    border-radius: 8px;
   }
-  .sidebar__link {
+  .nav-search-hints {
+    padding: 10px 20px;
+    font-size: 12px;
+    color: var(--nav-text-3);
+    border-top: 0.5px solid var(--nav-border);
+  }
+  .nav-user-wrapper { position: relative; }
+  .nav-user-trigger {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 12px;
-    border-radius: var(--nav-radius);
+    background: transparent;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all var(--nav-transition);
+  }
+  .nav-user-trigger:hover {
+    background: rgba(255,255,255,0.04);
+  }
+  .nav-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #6366f1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+  }
+  .nav-user-avatar--large {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
+  .nav-user-info {
+    text-align: left;
+  }
+  .nav-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--nav-text);
+    display: block;
+    line-height: 1.3;
+  }
+  .nav-user-institution {
+    font-size: 10px;
+    color: var(--nav-text-3);
+  }
+  .nav-user-chevron {
+    display: inline-flex;
+    transition: transform 0.2s;
+  }
+  .nav-user-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 280px;
+    background: var(--nav-bg-solid);
+    border: 0.5px solid var(--nav-border);
+    border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+    z-index: 101;
+  }
+  .nav-user-dropdown__header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-bottom: 0.5px solid var(--nav-border);
+  }
+  .nav-user-dropdown__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--nav-text);
+  }
+  .nav-user-dropdown__institution {
+    font-size: 11px;
+    color: var(--nav-text-3);
+  }
+  .nav-user-dropdown__divider {
+    height: 0.5px;
+    background: var(--nav-border);
+    margin: 4px 0;
+  }
+  .nav-user-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--nav-text-2);
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--nav-transition);
+  }
+  .nav-user-dropdown__item:hover {
+    background: rgba(255,255,255,0.04);
+    color: var(--nav-text);
+  }
+  .nav-user-dropdown__item--danger {
+    color: #f87171;
+  }
+  .nav-user-dropdown__item--danger:hover {
+    background: rgba(248,113,113,0.08);
+    color: #f87171;
+  }
+  .nav-mobile-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    margin-left: 4px;
+  }
+  .nav-mobile-bar {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--nav-text);
+    margin: 4px 0;
+    border-radius: 2px;
+  }
+  .nav-mobile-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 150;
+  }
+  .nav-mobile-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    background: var(--nav-bg-solid);
+    border-right: 0.5px solid var(--nav-border);
+    z-index: 151;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .nav-mobile-panel__header {
+    padding: 20px;
+    border-bottom: 0.5px solid var(--nav-border);
+  }
+  .nav-mobile-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+    border-bottom: 0.5px solid var(--nav-border);
+  }
+  .nav-mobile-user__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--nav-text);
+  }
+  .nav-mobile-user__institution {
+    font-size: 11px;
+    color: var(--nav-text-3);
+  }
+  .nav-mobile-nav {
+    flex: 1;
+    padding: 12px;
+  }
+  .nav-mobile-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
     font-size: 14px;
     font-weight: 500;
     color: var(--nav-text-2);
     text-decoration: none;
     transition: all var(--nav-transition);
   }
-  .sidebar__link:hover {
-    background: rgba(255,255,255,0.04);
-    color: var(--nav-text);
-  }
-  .sidebar__link--active {
+  .nav-mobile-link--active {
     background: rgba(124,58,237,0.1);
     color: var(--nav-text);
   }
-  .sidebar__link svg:last-child {
+  .nav-mobile-link--highlight {
+    background: rgba(124,58,237,0.08);
+  }
+  .nav-mobile-link__badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: #fbbf24;
+    background: rgba(251,191,36,0.12);
+    padding: 2px 8px;
+    border-radius: 20px;
     margin-left: auto;
-    opacity: 0.5;
-    width: 14px;
-    height: 14px;
   }
-  .sidebar--collapsed .sidebar__link {
-    justify-content: center;
-    padding: 12px;
-  }
-  .sidebar--collapsed .sidebar__link svg:last-child {
-    display: none;
-  }
-
-  .sidebar__children {
-    padding-left: 8px;
-    margin-top: 2px;
-  }
-  .sidebar__sublink {
+  .nav-mobile-group { margin-bottom: 4px; }
+  .nav-mobile-group__trigger {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 12px 8px 36px;
-    border-radius: var(--nav-radius);
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--nav-text-2);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--nav-transition);
+  }
+  .nav-mobile-group__trigger--active {
+    background: rgba(124,58,237,0.1);
+    color: var(--nav-text);
+  }
+  .nav-mobile-group__chevron {
+    margin-left: auto;
+    display: inline-flex;
+    transition: transform 0.2s;
+  }
+  .nav-mobile-group__children {
+    padding-left: 32px;
+    overflow: hidden;
+  }
+  .nav-mobile-sublink {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
     color: var(--nav-text-3);
     text-decoration: none;
     transition: all var(--nav-transition);
   }
-  .sidebar__sublink:hover {
-    color: var(--nav-text-2);
-    background: rgba(255,255,255,0.02);
-  }
-  .sidebar__sublink--active {
+  .nav-mobile-sublink--active {
+    background: rgba(124,58,237,0.08);
     color: var(--nav-accent-light);
-    background: rgba(124,58,237,0.06);
   }
-
-  .sidebar__footer {
-    padding: 16px 16px;
-    border-top: 1px solid var(--nav-border);
+  .nav-mobile-section {
+    padding: 12px;
+    border-top: 0.5px solid var(--nav-border);
+    margin-top: 12px;
   }
-  .sidebar__user {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    border-radius: var(--nav-radius);
-  }
-  .sidebar__user-info {
-    display: flex;
-    flex-direction: column;
-  }
-  .sidebar__user-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--nav-text);
-    line-height: 1.2;
-  }
-  .sidebar__user-institution {
+  .nav-mobile-section__label {
     font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     color: var(--nav-text-3);
-    line-height: 1.2;
+    padding: 8px 12px;
+    display: block;
   }
-  .sidebar__logout {
+  .nav-mobile-footer {
+    padding: 16px;
+    border-top: 0.5px solid var(--nav-border);
+  }
+  .nav-mobile-logout {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     width: 100%;
-    padding: 8px 12px;
-    border-radius: var(--nav-radius);
-    font-size: 13px;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
     font-weight: 500;
-    color: var(--nav-text-3);
-    background: none;
+    color: #f87171;
+    background: transparent;
     border: none;
     cursor: pointer;
     transition: all var(--nav-transition);
-    font-family: 'Inter', sans-serif;
   }
-  .sidebar__logout:hover {
-    background: rgba(239,68,68,0.08);
-    color: var(--nav-red);
+  .nav-mobile-logout:hover {
+    background: rgba(248,113,113,0.08);
   }
-  .sidebar--collapsed .sidebar__logout {
-    justify-content: center;
-  }
-  .sidebar--collapsed .sidebar__logout span {
-    display: none;
+  @media (max-width: 860px) {
+    .nav-desktop { display: none; }
+    .nav-mobile-toggle { display: block; }
+    .nav-user-info { display: none; }
+    .nav-search-shortcut { display: none; }
+    .nav-user-trigger { padding: 6px; }
   }
 `;
+
+export default Navigation; // optional default export

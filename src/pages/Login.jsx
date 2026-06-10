@@ -1,6 +1,6 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useAuthStore} from "../store/authStore";
-import {useNavigate, Link} from "react-router-dom";
+import {useNavigate, Link, replace} from "react-router-dom";
 
 // ─── Icons (same set as SignUp) ───────────────────────────────────────────────
 const Icons = {
@@ -164,14 +164,19 @@ const Login = () => {
   const [focused, setFocused] = useState(null);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const {logIn, isLoading, error} = useAuthStore();
+  const {logIn, isLoading, error, isAuthenticated} = useAuthStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/home", {replace: true});
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await logIn(email, password);
-      navigate("/home");
     } catch {}
   };
 

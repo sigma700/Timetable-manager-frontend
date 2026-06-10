@@ -1,6 +1,8 @@
 import React, {useState, useEffect, useRef} from "react";
 import {useGenStore} from "../store/generativeStore";
 import Timetable from "./components/timetable";
+import {useAuthStore} from "../store/authStore";
+import Navigation from "./components/navigation";
 
 // ─── Micro Icons ────────────────────────────────────────────────────────────
 const Icon = {
@@ -482,6 +484,29 @@ const useFormCompletion = (formData) => {
 const Generation = () => {
   const {isloading, error, isCreated, generateTabel, idOfSchool, relValue} =
     useGenStore();
+  const {user, logout} = useAuthStore();
+
+  // Navigation props
+  const userName = user || "User";
+  const institutionName = "St. Mary's Academy";
+  const notificationCount = 3;
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      if (res.ok) {
+        window.location.href = "/login";
+      }
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+  };
 
   const initialFormData = {
     name: "",
@@ -604,7 +629,16 @@ const Generation = () => {
   return (
     <>
       <style>{css}</style>
-      <div className="gen-root">
+
+      {/* Navigation bar */}
+      <Navigation
+        userName={userName}
+        institutionName={institutionName}
+        notificationCount={notificationCount}
+        onLogout={handleLogout}
+      />
+
+      <div className="gen-root" style={{paddingTop: "68px"}}>
         {/* ── Page Header ── */}
         <header className="gen-header">
           <div className="gen-header__inner">
@@ -904,7 +938,7 @@ const Generation = () => {
   );
 };
 
-// ─── Schedule Timeline Preview ─────────────────────────────────────────────
+// ─── Schedule Timeline Preview (with improved spacing & time visibility) ───
 const ScheduleTimeline = ({
   startTime,
   periodsPerDay,
@@ -961,8 +995,8 @@ const ScheduleTimeline = ({
           className={`timeline__slot timeline__slot--${slot.type}`}
           style={{
             "--w": slot.duration
-              ? `${Math.max(slot.duration / 2, 32)}px`
-              : "48px",
+              ? `${Math.max(slot.duration / 1.5, 48)}px` // wider boxes
+              : "60px",
           }}
           title={`${slot.label}${slot.start ? " · " + slot.start : ""}${slot.duration ? " · " + slot.duration + "min" : ""}`}
         >
@@ -974,7 +1008,7 @@ const ScheduleTimeline = ({
   );
 };
 
-// ─── Styles ────────────────────────────────────────────────────────────────
+// ─── Styles (updated for timeline spacing & time visibility) ───────────────
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -1383,34 +1417,34 @@ const css = `
   .empty-state__title { font-size: 14px; font-weight: 500; color: var(--text-2); }
   .empty-state__desc { font-size: 13px; color: var(--text-3); max-width: 320px; line-height: 1.5; }
 
-  /* ── Schedule Preview ── */
+  /* ── Schedule Preview (improved) ── */
   .schedule-preview {
     margin-top: 16px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 14px 16px;
+    padding: 16px 20px;
     animation: slideIn 200ms both;
   }
   .schedule-preview__label {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 11px;
+    gap: 8px;
+    font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.07em;
     color: var(--accent-light);
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
   .timeline {
     display: flex;
     align-items: stretch;
-    gap: 3px;
+    gap: 6px;               /* more spacing between boxes */
     overflow-x: auto;
-    padding-bottom: 4px;
+    padding-bottom: 6px;
   }
-  .timeline::-webkit-scrollbar { height: 4px; }
+  .timeline::-webkit-scrollbar { height: 5px; }
   .timeline::-webkit-scrollbar-track { background: transparent; }
   .timeline::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
   .timeline__slot {
@@ -1418,20 +1452,33 @@ const css = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-width: var(--w, 48px);
-    width: var(--w, 48px);
-    padding: 8px 6px;
-    border-radius: 6px;
+    min-width: var(--w, 56px);
+    width: var(--w, 56px);
+    padding: 10px 6px;
+    border-radius: 8px;
     flex-shrink: 0;
-    gap: 2px;
+    gap: 4px;
   }
-  .timeline__slot--period { background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.25); }
-  .timeline__slot--break { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); }
+  .timeline__slot--period { background: rgba(124,58,237,0.14); border: 1px solid rgba(124,58,237,0.3); }
+  .timeline__slot--break { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); }
   .timeline__slot--more { background: var(--surface-2); border: 1px dashed var(--border); }
-  .timeline__label { font-size: 11px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
+  .timeline__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    white-space: nowrap;
+  }
   .timeline__slot--period .timeline__label { color: var(--accent-light); }
   .timeline__slot--break .timeline__label { color: var(--amber); }
-  .timeline__time { font-size: 9px; color: var(--text-3); white-space: nowrap; }
+  .timeline__time {
+    font-size: 10px;
+    color: var(--text-2);
+    white-space: nowrap;
+    font-weight: 500;
+    background: rgba(0,0,0,0.2);
+    padding: 2px 5px;
+    border-radius: 12px;
+  }
 
   /* ── Submit ── */
   .gen-submit {

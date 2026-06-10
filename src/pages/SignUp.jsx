@@ -208,7 +208,7 @@ const SignUp = () => {
   const [focused, setFocused] = useState(null);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
 
-  const {signUp, isLoading, error} = useAuthStore();
+  const {signUp, isLoading, error, isAuthenticated} = useAuthStore();
   const navigate = useNavigate();
   const strength = getStrength(password);
 
@@ -220,17 +220,30 @@ const SignUp = () => {
     return () => clearInterval(t);
   }, []);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/home", {replace: true});
+    }
+  });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!agreeToTerms) return;
     try {
       await signUp(email, password, firstName, lastName);
-      navigate("/home");
     } catch {}
   };
 
-  const f = (name) =>
-    `su-field ${focused === name ? "su-field--focused" : ""} ${eval(name) ? "su-field--filled" : ""}`;
+  // Safe field state checker (no eval)
+  const getFieldState = (name) => {
+    const value = {firstName, lastName, email, password}[name];
+    return value && value.length > 0;
+  };
+
+  const fieldClass = (name) =>
+    `su-field ${focused === name ? "su-field--focused" : ""} ${
+      getFieldState(name) ? "su-field--filled" : ""
+    }`;
 
   return (
     <>
@@ -264,7 +277,7 @@ const SignUp = () => {
               </p>
             </div>
 
-            {/* Testimonial */}
+            {/* Testimonial carousel - FIXED */}
             <div className="su-testimonial">
               <div
                 className="su-testimonial__track"
@@ -284,7 +297,9 @@ const SignUp = () => {
                 {testimonials.map((_, i) => (
                   <button
                     key={i}
-                    className={`su-testimonial__dot ${i === testimonialIdx ? "su-testimonial__dot--active" : ""}`}
+                    className={`su-testimonial__dot ${
+                      i === testimonialIdx ? "su-testimonial__dot--active" : ""
+                    }`}
                     onClick={() => setTestimonialIdx(i)}
                   />
                 ))}
@@ -325,7 +340,7 @@ const SignUp = () => {
             <form onSubmit={handleSubmit} className="su-form">
               {/* Name row */}
               <div className="su-form__row">
-                <div className={f("firstName")}>
+                <div className={fieldClass("firstName")}>
                   <label className="su-field__label">
                     <Icons.User /> First Name{" "}
                     <span className="su-field__req">*</span>
@@ -341,7 +356,7 @@ const SignUp = () => {
                     className="su-field__input"
                   />
                 </div>
-                <div className={f("lastName")}>
+                <div className={fieldClass("lastName")}>
                   <label className="su-field__label">
                     Last Name <span className="su-field__req">*</span>
                   </label>
@@ -359,7 +374,7 @@ const SignUp = () => {
               </div>
 
               {/* Email */}
-              <div className={f("email")}>
+              <div className={fieldClass("email")}>
                 <label className="su-field__label">
                   <Icons.Mail /> Email Address{" "}
                   <span className="su-field__req">*</span>
@@ -377,7 +392,7 @@ const SignUp = () => {
               </div>
 
               {/* Password */}
-              <div className={f("password")}>
+              <div className={fieldClass("password")}>
                 <label className="su-field__label">
                   <Icons.Lock /> Password{" "}
                   <span className="su-field__req">*</span>
@@ -442,32 +457,36 @@ const SignUp = () => {
                 </div>
               </div>
 
-              {/* Terms */}
-              <label className="su-terms">
+              {/* Terms and conditions - FIXED: fully clickable checkbox */}
+              <label
+                className="su-terms"
+                onClick={() => setAgreeToTerms((prev) => !prev)}
+              >
                 <div
-                  className={`su-checkbox ${agreeToTerms ? "su-checkbox--checked" : ""}`}
-                  onClick={() => setAgreeToTerms((s) => !s)}
+                  className={`su-checkbox ${
+                    agreeToTerms ? "su-checkbox--checked" : ""
+                  }`}
                 >
                   {agreeToTerms && <Icons.Check />}
                 </div>
-                <input
-                  type="checkbox"
-                  checked={agreeToTerms}
-                  onChange={(e) => setAgreeToTerms(e.target.checked)}
-                  style={{display: "none"}}
-                />
                 <span>
                   I agree to the{" "}
-                  <Link to="/terms" className="su-link">
+                  <Link
+                    to="/terms"
+                    className="su-link"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     terms and conditions
                   </Link>
                 </span>
               </label>
 
-              {/* Submit */}
+              {/* Submit button - enabled only when terms are accepted */}
               <button
                 type="submit"
-                className={`su-btn-submit ${isLoading ? "su-btn-submit--loading" : ""}`}
+                className={`su-btn-submit ${
+                  isLoading ? "su-btn-submit--loading" : ""
+                }`}
                 disabled={isLoading || !agreeToTerms}
               >
                 {isLoading ? (
@@ -493,7 +512,7 @@ const SignUp = () => {
   );
 };
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// ─── Styles (FIXED: carousel and checkbox) ───────────────────────────────────
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -623,7 +642,7 @@ const css = `
     max-width: 340px;
   }
 
-  /* ── Testimonial ── */
+  /* ── Testimonial Carousel - FIXED ── */
   .su-testimonial {
     background: var(--surface-2);
     border: 1px solid var(--border);
@@ -634,9 +653,18 @@ const css = `
     height: 120px;
   }
   .su-testimonial__track {
-    transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
   }
-  .su-testimonial__item { height: 120px; padding-bottom: 32px; }
+  .su-testimonial__item {
+    flex: 0 0 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
   .su-testimonial__text {
     font-size: 13px;
     color: var(--text-2);
@@ -644,7 +672,12 @@ const css = `
     font-style: italic;
     margin-bottom: 10px;
   }
-  .su-testimonial__author { display: flex; align-items: center; gap: 8px; }
+  .su-testimonial__author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+  }
   .su-testimonial__name { font-size: 12px; font-weight: 600; color: var(--text); }
   .su-testimonial__role { font-size: 11px; color: var(--text-3); }
   .su-testimonial__dots { position: absolute; bottom: 14px; left: 24px; display: flex; gap: 5px; }
@@ -807,7 +840,7 @@ const css = `
     border-color: rgba(16,185,129,0.2);
   }
 
-  /* ── Custom Checkbox ── */
+  /* ── Custom Checkbox - FIXED ── */
   .su-terms {
     display: flex;
     align-items: flex-start;
@@ -829,13 +862,16 @@ const css = `
     flex-shrink: 0;
     margin-top: 1px;
     transition: all var(--t);
-    cursor: pointer;
     color: #fff;
   }
   .su-checkbox--checked {
     background: var(--accent);
     border-color: var(--accent);
     box-shadow: 0 0 10px var(--accent-glow);
+  }
+  .su-terms .su-link {
+    position: relative;
+    z-index: 2;
   }
 
   /* ── Submit Button ── */

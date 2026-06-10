@@ -1,9 +1,11 @@
 import React, {useState, useEffect, useRef} from "react";
-import {FullMenu} from "./components/animatedHamb";
+import {useAuthStore} from "../store/authStore";
 import {useGenStore} from "../store/generativeStore";
-import Notification from "./components/notification";
 import {useNavigate} from "react-router-dom";
 import {motion, AnimatePresence} from "framer-motion";
+
+import Notification from "./components/notification";
+import {Navigation} from "./components/navigation";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const t = {
@@ -514,7 +516,9 @@ function SubmitButton({isLoading}) {
           : hovered
             ? "rgba(99,102,241,0.95)"
             : "rgba(99,102,241,0.85)",
-        border: `0.5px solid ${isLoading ? "rgba(99,102,241,0.2)" : "rgba(99,102,241,0.6)"}`,
+        border: `0.5px solid ${
+          isLoading ? "rgba(99,102,241,0.2)" : "rgba(99,102,241,0.6)"
+        }`,
         borderRadius: 10,
         fontSize: 14,
         fontWeight: 500,
@@ -559,6 +563,7 @@ function SubmitButton({isLoading}) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 const Create = () => {
+  const {user, isLoading: authLoading, logout} = useAuthStore();
   const [formData, setFormData] = useState({
     schoolName: "",
     subjectName: "",
@@ -579,6 +584,28 @@ const Create = () => {
   const {listName, listSubs, listClasses, listTichs, isLoading, error} =
     useGenStore();
   const navigate = useNavigate();
+
+  // User data for Navigation
+  const userName = user || "Guest";
+  const institutionName = "St. Mary's Academy";
+  const notificationCount = 3;
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      if (res.ok) {
+        window.location.href = "/login";
+      }
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+  };
 
   // Track which section is active for ring highlight
   const [activeSection, setActiveSection] = useState(1);
@@ -769,349 +796,384 @@ const Create = () => {
     }
   };
 
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background:
-          "linear-gradient(160deg, #0d1420 0%, #0f172a 50%, #0d1420 100%)",
-        color: "#fff",
-        overflowX: "hidden",
-        position: "relative",
-      }}
-    >
-      {/* Spin keyframe */}
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-
-      {/* Ambient glows */}
+  if (authLoading) {
+    return (
       <div
         style={{
-          position: "fixed",
-          top: -200,
-          left: -200,
-          width: 600,
-          height: 600,
-          background:
-            "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
-      <div
-        style={{
-          position: "fixed",
-          bottom: -100,
-          right: -100,
-          width: 400,
-          height: 400,
-          background:
-            "radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 65%)",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
-
-      <FullMenu />
-
-      <div
-        style={{
-          position: "relative",
-          zIndex: 1,
-          maxWidth: 680,
-          margin: "0 auto",
-          padding: "80px 24px 64px",
+          background: "#0d1420",
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        {/* ── Page header ── */}
-        <motion.div
-          initial={{opacity: 0, y: 10}}
-          animate={{opacity: 1, y: 0}}
-          transition={{duration: 0.4}}
-          style={{marginBottom: 32}}
+        <div className="create-loading-spinner" />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <style>
+        {`
+          @keyframes spin { to { transform: rotate(360deg); } }
+          .create-loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(99,102,241,0.2);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+          }
+        `}
+      </style>
+
+      <Navigation
+        userName={userName}
+        institutionName={institutionName}
+        notificationCount={notificationCount}
+        onLogout={handleLogout}
+      />
+
+      <main
+        style={{
+          minHeight: "100vh",
+          background:
+            "linear-gradient(160deg, #0d1420 0%, #0f172a 50%, #0d1420 100%)",
+          color: "#fff",
+          overflowX: "hidden",
+          position: "relative",
+          paddingTop: "68px", // space for fixed navbar
+        }}
+      >
+        {/* Ambient glows */}
+        <div
+          style={{
+            position: "fixed",
+            top: -200,
+            left: -200,
+            width: 600,
+            height: 600,
+            background:
+              "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+        <div
+          style={{
+            position: "fixed",
+            bottom: -100,
+            right: -100,
+            width: 400,
+            height: 400,
+            background:
+              "radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 65%)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            maxWidth: 680,
+            margin: "0 auto",
+            padding: "0 24px 64px",
+          }}
         >
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 500,
-              color: "#6366f1",
-              textTransform: "uppercase",
-              letterSpacing: "0.6px",
-              marginBottom: 8,
-            }}
-          >
-            New schedule
-          </div>
-          <h1
-            style={{
-              fontSize: 24,
-              fontWeight: 500,
-              color: "#f1f5f9",
-              letterSpacing: "-0.3px",
-              marginBottom: 6,
-            }}
-          >
-            Configure timetable
-          </h1>
-          <p style={{fontSize: 13, color: t.muted, lineHeight: 1.7}}>
-            Define your institution's structure and Protiba will generate an
-            optimized, conflict-free schedule automatically.
-          </p>
-        </motion.div>
-
-        {/* ── Step indicator ── */}
-        <motion.div
-          initial={{opacity: 0}}
-          animate={{opacity: 1}}
-          transition={{delay: 0.15}}
-        >
-          <StepIndicator current={currentStep} />
-        </motion.div>
-
-        {/* ── Error notification ── */}
-        <AnimatePresence>
-          {localError && (
-            <motion.div
-              initial={{opacity: 0, y: -8}}
-              animate={{opacity: 1, y: 0}}
-              exit={{opacity: 0, y: -8}}
-              style={{marginBottom: 20}}
-            >
-              <Notification
-                message={localError}
-                type="error"
-                duration={8000}
-                onClose={() => setLocalError(null)}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* ── Form ── */}
-        <form
-          onSubmit={handleSubmit}
-          style={{display: "flex", flexDirection: "column", gap: 12}}
-        >
-          {/* Section 1: Institution */}
-          <SectionCard
-            step={1}
-            title="Institution"
-            subtitle="Your school's identity"
-            active={currentStep === 1}
-          >
-            <Input
-              label="School name"
-              name="schoolName"
-              value={formData.schoolName}
-              onChange={handleChange}
-              placeholder="e.g. Nyeri High School"
-              required
-            />
-          </SectionCard>
-
-          {/* Section 2: Subjects */}
-          <SectionCard
-            step={2}
-            title="Subjects"
-            subtitle="Curriculum offered at your institution"
-            active={currentStep === 2}
-          >
-            <Input
-              label="Subjects taught"
-              name="subjectName"
-              value={formData.subjectName}
-              onChange={handleChange}
-              placeholder="Mathematics, English, Biology, Chemistry"
-              hint="Separate subjects with commas"
-            />
-          </SectionCard>
-
-          {/* Section 3: Classes */}
-          <SectionCard
-            step={3}
-            title="Classes"
-            subtitle="Define the class structure and groupings"
-            active={currentStep === 3}
+          {/* ── Page header ── */}
+          <motion.div
+            initial={{opacity: 0, y: 10}}
+            animate={{opacity: 1, y: 0}}
+            transition={{duration: 0.4}}
+            style={{marginBottom: 32}}
           >
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
-                gap: 12,
+                fontSize: 11,
+                fontWeight: 500,
+                color: "#6366f1",
+                textTransform: "uppercase",
+                letterSpacing: "0.6px",
+                marginBottom: 8,
               }}
             >
-              <Select
-                label="Class type"
-                value={formData.classTypes}
-                placeholder="Select type"
-                options={classTypeOptions}
-                isOpen={dropdownsOpen.classType}
-                onToggle={() => toggleDropdown("classType")}
-                onSelect={handleClassTypeSelect}
-                emptyMsg=""
-              />
-              <Input
-                label="Min level"
-                name="minLevel"
-                type="number"
-                value={formData.minLevel}
-                onChange={handleChange}
-                placeholder="1"
-                required
-              />
-              <Input
-                label="Max level"
-                name="maxLevel"
-                type="number"
-                value={formData.maxLevel}
-                onChange={handleChange}
-                placeholder="6"
-                required
-              />
-              <div style={{gridColumn: "span 1"}}>
-                <Input
-                  label="Section labels"
-                  name="classLabels"
-                  value={formData.classLabels}
-                  onChange={handleChange}
-                  placeholder="A, B, C"
-                  hint="Optional — converted to uppercase"
-                />
-              </div>
+              New schedule
             </div>
+            <h1
+              style={{
+                fontSize: 24,
+                fontWeight: 500,
+                color: "#f1f5f9",
+                letterSpacing: "-0.3px",
+                marginBottom: 6,
+              }}
+            >
+              Configure timetable
+            </h1>
+            <p style={{fontSize: 13, color: t.muted, lineHeight: 1.7}}>
+              Define your institution's structure and Protiba will generate an
+              optimized, conflict-free schedule automatically.
+            </p>
+          </motion.div>
 
-            {/* Preview generated classes */}
-            {classOptions.length > 0 && (
-              <div style={{marginTop: 16}}>
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: t.muted,
-                    marginBottom: 8,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.4px",
-                  }}
-                >
-                  Generated classes · {classOptions.length} total
-                </div>
-                <div style={{display: "flex", flexWrap: "wrap", gap: 6}}>
-                  {classOptions.slice(0, 12).map((cls, i) => (
-                    <span
-                      key={i}
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 500,
-                        background: "rgba(99,102,241,0.1)",
-                        border: "0.5px solid rgba(99,102,241,0.25)",
-                        color: "#a5b4fc",
-                        padding: "3px 10px",
-                        borderRadius: 20,
-                      }}
-                    >
-                      {cls}
-                    </span>
-                  ))}
-                  {classOptions.length > 12 && (
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: t.muted,
-                        padding: "3px 10px",
-                      }}
-                    >
-                      +{classOptions.length - 12} more
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-          </SectionCard>
-
-          {/* Section 4: Teachers */}
-          <SectionCard
-            step={4}
-            title="Teachers"
-            subtitle="Assign subjects and classes to each teacher"
-            active={currentStep === 4}
-          >
-            <div style={{display: "flex", flexDirection: "column", gap: 10}}>
-              <AnimatePresence>
-                {formData.teachers.map((teacher, index) => (
-                  <TeacherRow
-                    key={index}
-                    teacher={teacher}
-                    index={index}
-                    dropdownsOpen={dropdownsOpen}
-                    toggleDropdown={toggleDropdown}
-                    handleTeacherChange={handleTeacherChange}
-                    handleSubjectSelect={handleSubjectSelect}
-                    handleClassSelect={handleClassSelect}
-                    subjectOptions={subjectOptions}
-                    classOptions={classOptions}
-                    onRemove={() => removeTeacher(index)}
-                    canRemove={formData.teachers.length > 1}
-                  />
-                ))}
-              </AnimatePresence>
-
-              <button
-                type="button"
-                onClick={addTeacher}
-                style={{
-                  background: "transparent",
-                  border: `0.5px dashed ${t.border}`,
-                  borderRadius: 10,
-                  padding: "11px",
-                  fontSize: 12,
-                  fontWeight: 500,
-                  color: t.muted,
-                  cursor: "pointer",
-                  transition: "all 0.18s",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 6,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(99,102,241,0.4)";
-                  e.currentTarget.style.color = t.accentMid;
-                  e.currentTarget.style.background = "rgba(99,102,241,0.05)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = t.border;
-                  e.currentTarget.style.color = t.muted;
-                  e.currentTarget.style.background = "transparent";
-                }}
-              >
-                <span style={{fontSize: 16, lineHeight: 1}}>+</span>
-                Add teacher
-              </button>
-            </div>
-          </SectionCard>
-
-          {/* Submit */}
+          {/* ── Step indicator ── */}
           <motion.div
             initial={{opacity: 0}}
             animate={{opacity: 1}}
-            transition={{delay: 0.3}}
-            style={{marginTop: 8}}
+            transition={{delay: 0.15}}
           >
-            <SubmitButton isLoading={isLoading} />
-            <p
-              style={{
-                fontSize: 11,
-                color: t.dimmed,
-                textAlign: "center",
-                marginTop: 12,
-                lineHeight: 1.6,
-              }}
-            >
-              Protiba will automatically resolve conflicts and generate an
-              optimized schedule.
-            </p>
+            <StepIndicator current={currentStep} />
           </motion.div>
-        </form>
-      </div>
-    </main>
+
+          {/* ── Error notification ── */}
+          <AnimatePresence>
+            {localError && (
+              <motion.div
+                initial={{opacity: 0, y: -8}}
+                animate={{opacity: 1, y: 0}}
+                exit={{opacity: 0, y: -8}}
+                style={{marginBottom: 20}}
+              >
+                <Notification
+                  message={localError}
+                  type="error"
+                  duration={8000}
+                  onClose={() => setLocalError(null)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* ── Form ── */}
+          <form
+            onSubmit={handleSubmit}
+            style={{display: "flex", flexDirection: "column", gap: 12}}
+          >
+            {/* Section 1: Institution */}
+            <SectionCard
+              step={1}
+              title="Institution"
+              subtitle="Your school's identity"
+              active={currentStep === 1}
+            >
+              <Input
+                label="School name"
+                name="schoolName"
+                value={formData.schoolName}
+                onChange={handleChange}
+                placeholder="e.g. Nyeri High School"
+                required
+              />
+            </SectionCard>
+
+            {/* Section 2: Subjects */}
+            <SectionCard
+              step={2}
+              title="Subjects"
+              subtitle="Curriculum offered at your institution"
+              active={currentStep === 2}
+            >
+              <Input
+                label="Subjects taught"
+                name="subjectName"
+                value={formData.subjectName}
+                onChange={handleChange}
+                placeholder="Mathematics, English, Biology, Chemistry"
+                hint="Separate subjects with commas"
+              />
+            </SectionCard>
+
+            {/* Section 3: Classes */}
+            <SectionCard
+              step={3}
+              title="Classes"
+              subtitle="Define the class structure and groupings"
+              active={currentStep === 3}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
+                  gap: 12,
+                }}
+              >
+                <Select
+                  label="Class type"
+                  value={formData.classTypes}
+                  placeholder="Select type"
+                  options={classTypeOptions}
+                  isOpen={dropdownsOpen.classType}
+                  onToggle={() => toggleDropdown("classType")}
+                  onSelect={handleClassTypeSelect}
+                  emptyMsg=""
+                />
+                <Input
+                  label="Min level"
+                  name="minLevel"
+                  type="number"
+                  value={formData.minLevel}
+                  onChange={handleChange}
+                  placeholder="1"
+                  required
+                />
+                <Input
+                  label="Max level"
+                  name="maxLevel"
+                  type="number"
+                  value={formData.maxLevel}
+                  onChange={handleChange}
+                  placeholder="6"
+                  required
+                />
+                <div style={{gridColumn: "span 1"}}>
+                  <Input
+                    label="Section labels"
+                    name="classLabels"
+                    value={formData.classLabels}
+                    onChange={handleChange}
+                    placeholder="A, B, C"
+                    hint="Optional — converted to uppercase"
+                  />
+                </div>
+              </div>
+
+              {/* Preview generated classes */}
+              {classOptions.length > 0 && (
+                <div style={{marginTop: 16}}>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: t.muted,
+                      marginBottom: 8,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.4px",
+                    }}
+                  >
+                    Generated classes · {classOptions.length} total
+                  </div>
+                  <div style={{display: "flex", flexWrap: "wrap", gap: 6}}>
+                    {classOptions.slice(0, 12).map((cls, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 500,
+                          background: "rgba(99,102,241,0.1)",
+                          border: "0.5px solid rgba(99,102,241,0.25)",
+                          color: "#a5b4fc",
+                          padding: "3px 10px",
+                          borderRadius: 20,
+                        }}
+                      >
+                        {cls}
+                      </span>
+                    ))}
+                    {classOptions.length > 12 && (
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: t.muted,
+                          padding: "3px 10px",
+                        }}
+                      >
+                        +{classOptions.length - 12} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </SectionCard>
+
+            {/* Section 4: Teachers */}
+            <SectionCard
+              step={4}
+              title="Teachers"
+              subtitle="Assign subjects and classes to each teacher"
+              active={currentStep === 4}
+            >
+              <div style={{display: "flex", flexDirection: "column", gap: 10}}>
+                <AnimatePresence>
+                  {formData.teachers.map((teacher, index) => (
+                    <TeacherRow
+                      key={index}
+                      teacher={teacher}
+                      index={index}
+                      dropdownsOpen={dropdownsOpen}
+                      toggleDropdown={toggleDropdown}
+                      handleTeacherChange={handleTeacherChange}
+                      handleSubjectSelect={handleSubjectSelect}
+                      handleClassSelect={handleClassSelect}
+                      subjectOptions={subjectOptions}
+                      classOptions={classOptions}
+                      onRemove={() => removeTeacher(index)}
+                      canRemove={formData.teachers.length > 1}
+                    />
+                  ))}
+                </AnimatePresence>
+
+                <button
+                  type="button"
+                  onClick={addTeacher}
+                  style={{
+                    background: "transparent",
+                    border: `0.5px dashed ${t.border}`,
+                    borderRadius: 10,
+                    padding: "11px",
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: t.muted,
+                    cursor: "pointer",
+                    transition: "all 0.18s",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 6,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "rgba(99,102,241,0.4)";
+                    e.currentTarget.style.color = t.accentMid;
+                    e.currentTarget.style.background = "rgba(99,102,241,0.05)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = t.border;
+                    e.currentTarget.style.color = t.muted;
+                    e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  <span style={{fontSize: 16, lineHeight: 1}}>+</span>
+                  Add teacher
+                </button>
+              </div>
+            </SectionCard>
+
+            {/* Submit */}
+            <motion.div
+              initial={{opacity: 0}}
+              animate={{opacity: 1}}
+              transition={{delay: 0.3}}
+              style={{marginTop: 8}}
+            >
+              <SubmitButton isLoading={isLoading} />
+              <p
+                style={{
+                  fontSize: 11,
+                  color: t.dimmed,
+                  textAlign: "center",
+                  marginTop: 12,
+                  lineHeight: 1.6,
+                }}
+              >
+                Protiba will automatically resolve conflicts and generate an
+                optimized schedule.
+              </p>
+            </motion.div>
+          </form>
+        </div>
+      </main>
+    </>
   );
 };
 

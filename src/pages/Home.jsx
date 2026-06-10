@@ -1,6 +1,8 @@
 import React, {useEffect, useRef, useState, useCallback} from "react";
 import {Link} from "react-router-dom";
 import {Helmet} from "react-helmet";
+import {useAuthStore} from "../store/authStore";
+import {Navigation} from "./components/navigation";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const Icons = {
@@ -206,7 +208,7 @@ const Icons = {
   ),
 };
 
-// ─── Data ────────────────────────────────────────────────────────────────────
+// ─── Data (stats, features, testimonials, trustLogos) unchanged ─────────────
 const stats = [
   {value: "94%", label: "Conflict reduction"},
   {value: "3x", label: "Faster generation"},
@@ -291,7 +293,7 @@ const trustLogos = [
   "Moi University",
 ];
 
-// ─── Timetable Preview ───────────────────────────────────────────────────────
+// ─── Timetable Preview (unchanged) ──────────────────────────────────────────
 const TimetablePreview = () => {
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri"];
   const periods = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00"];
@@ -450,11 +452,35 @@ const AnimatedCounter = ({value, label, delay}) => {
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 const Home = () => {
+  const {user, isLoading: authLoading, logout} = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const [mousePos, setMousePos] = useState({x: 0, y: 0});
   const heroRef = useRef(null);
+
+  // Get user data for Navigation component
+  const userName = user?.fullName || "Margaret Wanjiku";
+  const institutionName = user?.institution || "St. Mary's Academy";
+  const notificationCount = user?.unreadNotifications ?? 3;
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      if (res.ok) {
+        // Optionally reset store state (you may need a logout action in store)
+        window.location.href = "/login";
+      }
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -478,6 +504,23 @@ const Home = () => {
     });
   }, []);
 
+  // Show loading while auth is initializing (optional)
+  if (authLoading) {
+    return (
+      <div
+        style={{
+          background: "#030305",
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div className="hp-loading-spinner" />
+      </div>
+    );
+  }
+
   return (
     <>
       <style>{css}</style>
@@ -489,7 +532,16 @@ const Home = () => {
         />
       </Helmet>
 
-      <div className="hp-root">
+      {/* ── Integrated Navigation (replaces original hp-nav) ── */}
+      <Navigation
+        userName={userName}
+        institutionName={institutionName}
+        notificationCount={notificationCount}
+        onLogout={handleLogout}
+      />
+
+      {/* Main content – add top padding to account for fixed header (approx 68px) */}
+      <div className="hp-root" style={{paddingTop: "68px"}}>
         {/* ── Ambient background ── */}
         <div className="hp-ambient" aria-hidden="true">
           <div
@@ -508,90 +560,7 @@ const Home = () => {
           <div className="hp-ambient__grain" />
         </div>
 
-        {/* ── Nav ── */}
-        <nav className={`hp-nav ${scrolled ? "hp-nav--scrolled" : ""}`}>
-          <div className="hp-nav__inner">
-            <Link to="/" className="hp-nav__logo">
-              <Icons.Logo />
-              <span>Protiba</span>
-            </Link>
-
-            <div className="hp-nav__links">
-              <a href="#features" className="hp-nav__link">
-                Features
-              </a>
-              <a href="#how-it-works" className="hp-nav__link">
-                How it works
-              </a>
-              <a href="#testimonials" className="hp-nav__link">
-                Testimonials
-              </a>
-              <a href="#pricing" className="hp-nav__link">
-                Pricing
-              </a>
-            </div>
-
-            <div className="hp-nav__actions">
-              <Link to="/login" className="hp-nav__signin">
-                Sign in
-              </Link>
-              <Link to="/signup" className="hp-nav__cta">
-                Get started <Icons.ArrowUpRight />
-              </Link>
-            </div>
-
-            <button
-              className="hp-nav__burger"
-              onClick={() => setMobileMenuOpen((o) => !o)}
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <Icons.X /> : <Icons.Menu />}
-            </button>
-          </div>
-
-          {mobileMenuOpen && (
-            <div className="hp-nav__mobile">
-              <a
-                href="#features"
-                className="hp-nav__mobile-link"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Features
-              </a>
-              <a
-                href="#how-it-works"
-                className="hp-nav__mobile-link"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                How it works
-              </a>
-              <a
-                href="#testimonials"
-                className="hp-nav__mobile-link"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Testimonials
-              </a>
-              <a
-                href="#pricing"
-                className="hp-nav__mobile-link"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Pricing
-              </a>
-              <div className="hp-nav__mobile-actions">
-                <Link to="/login" className="hp-nav__mobile-link">
-                  Sign in
-                </Link>
-                <Link to="/signup" className="hp-nav__cta hp-nav__cta--full">
-                  Get started free
-                </Link>
-              </div>
-            </div>
-          )}
-        </nav>
-
-        {/* ── Hero ── */}
+        {/* ── Hero (unchanged except removed original nav) ── */}
         <section
           className="hp-hero"
           ref={heroRef}
@@ -923,6 +892,8 @@ const Home = () => {
     </>
   );
 };
+
+// ─── CSS (unchanged from original, but note: `.hp-root` now has padding-top inline)
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;450;500;600;700;800;900&display=swap');
   
