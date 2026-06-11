@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useRef} from "react";
 import {useAuthStore} from "../store/authStore";
 import {useSubStore} from "../store/subsidiary";
+import Navigation from "./components/navigation";
 
 // ─── Design tokens ──────────────────────────────────────────────────────────
 const tokens = {
@@ -20,53 +21,14 @@ const tokens = {
   successSubtle: "rgba(34,197,94,0.10)",
 };
 
-// ─── Inline styles ──────────────────────────────────────────────────────────
+// ─── Inline styles (updated to work with fixed navbar) ──────────────────────
 const s = {
   root: {
     minHeight: "100vh",
     background: tokens.surface0,
     color: tokens.text1,
     fontFamily: "'Inter', 'SF Pro Text', system-ui, sans-serif",
-    padding: "0",
-  },
-  nav: {
-    position: "sticky",
-    top: 0,
-    zIndex: 50,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "0 48px",
-    height: 60,
-    background: "rgba(10,11,13,0.85)",
-    backdropFilter: "blur(16px)",
-    borderBottom: `1px solid ${tokens.border}`,
-  },
-  navBrand: {
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    fontSize: 15,
-    fontWeight: 600,
-    color: tokens.text1,
-    letterSpacing: "-0.01em",
-  },
-  navDot: {
-    width: 8,
-    height: 8,
-    borderRadius: "50%",
-    background: tokens.accent,
-    boxShadow: `0 0 8px ${tokens.accent}`,
-  },
-  navBadge: {
-    fontSize: 11,
-    fontWeight: 500,
-    color: tokens.text2,
-    background: tokens.surface3,
-    border: `1px solid ${tokens.border}`,
-    borderRadius: 6,
-    padding: "3px 8px",
-    letterSpacing: "0.02em",
+    paddingTop: "68px", // space for fixed navbar
   },
   hero: {
     maxWidth: 1120,
@@ -403,8 +365,7 @@ const s = {
   },
 };
 
-// ─── Micro-components ────────────────────────────────────────────────────────
-
+// ─── Micro-components (icons) ───────────────────────────────────────────────
 const PhoneIcon = () => (
   <svg
     width="18"
@@ -483,24 +444,6 @@ const CheckIcon = ({size = 11, color = tokens.success}) => (
   </svg>
 );
 
-const CalendarIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={tokens.text3}
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-    <line x1="16" y1="2" x2="16" y2="6" />
-    <line x1="8" y1="2" x2="8" y2="6" />
-    <line x1="3" y1="10" x2="21" y2="10" />
-  </svg>
-);
-
 const ChevronDown = () => (
   <svg
     width="14"
@@ -556,7 +499,7 @@ function TextInput({value, onChange, placeholder, type = "text", required}) {
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 const Demo = () => {
-  const {user} = useAuthStore();
+  const {user, isLoading: authLoading, logout, checkAuth} = useAuthStore();
   const {bookSess, isLoading, error} = useSubStore();
 
   const [date, setSelectedDate] = useState("");
@@ -568,6 +511,28 @@ const Demo = () => {
   const [btnHover, setBtnHover] = useState(false);
   const [hoveredContact, setHoveredContact] = useState(null);
   const [mounted, setMounted] = useState(false);
+
+  // Navigation props
+  const userName = user || "Guest";
+  const institutionName = "St. Mary's Academy";
+  const notificationCount = 3;
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      if (res.ok) {
+        window.location.href = "/login";
+      }
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+  };
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
@@ -622,347 +587,382 @@ const Demo = () => {
 
   const firstName = user ? user.split(" ")[0] : "there";
 
-  return (
-    <div style={s.root}>
-      {/* ── Nav ── */}
-      <nav style={s.nav}>
-        <div style={s.navBrand}>
-          <div style={s.navDot} />
-          Protiba
-        </div>
-        <div style={s.navBadge}>Schedule a Demo</div>
-      </nav>
-
-      {/* ── Hero ── */}
-      <div style={s.hero}>
-        <div style={fadeIn(0)}>
-          <div style={s.eyebrow}>
-            <VideoIcon />
-            30-minute live session
-          </div>
-        </div>
-
-        <div style={fadeIn(80)}>
-          <h1 style={s.heroTitle}>
-            {firstName}, see your timetable generate itself.
-          </h1>
-        </div>
-
-        <div style={fadeIn(140)}>
-          <p style={s.heroSub}>
-            Book a session and watch Protiba process your institution's
-            constraints — subjects, rooms, teachers, periods — and produce a
-            conflict-free schedule in under a minute.
-          </p>
-        </div>
-
-        <div style={{...s.statsRow, ...fadeIn(200)}}>
-          {[
-            {n: "500+", l: "Demos conducted"},
-            {n: "98%", l: "Satisfaction rate"},
-            {n: "<24 h", l: "Confirmation time"},
-            {n: "60 sec", l: "Avg. generation time"},
-          ].map((st, i) => (
-            <div key={i} style={s.stat}>
-              <span style={s.statNum}>{st.n}</span>
-              <span style={s.statLabel}>{st.l}</span>
-            </div>
-          ))}
-        </div>
+  if (authLoading) {
+    return (
+      <div
+        style={{
+          background: tokens.surface0,
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div className="demo-loading-spinner" />
       </div>
+    );
+  }
 
-      <div style={s.divider} />
+  return (
+    <>
+      <style>
+        {`
+          @keyframes spin { to { transform: rotate(360deg); } }
+          .demo-loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(79,110,247,0.2);
+            border-top-color: #4F6EF7;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+          }
+        `}
+      </style>
 
-      {/* ── Main content ── */}
-      <div style={{...s.main, ...fadeIn(260)}}>
-        {/* Left column */}
-        <div style={{display: "flex", flexDirection: "column", gap: 16}}>
-          {/* Contact */}
-          <div style={s.panel}>
-            <p style={s.panelTitle}>Contact us directly</p>
+      {/* Navigation component – replaces old nav bar */}
+      <Navigation
+        userName={userName}
+        institutionName={institutionName}
+        notificationCount={notificationCount}
+        onLogout={handleLogout}
+      />
 
-            {[
-              {
-                id: "phone",
-                icon: <PhoneIcon />,
-                color: "rgba(59,130,246,0.15)",
-                iconColor: "#3B82F6",
-                label: "Call us",
-                value: "(+254) 792 624 342",
-                href: "tel:+254792624342",
-              },
-              {
-                id: "email",
-                icon: <MailIcon />,
-                color: "rgba(139,92,246,0.15)",
-                iconColor: "#8B5CF6",
-                label: "Email us",
-                value: "allankirimi65@gmail.com",
-                href: "mailto:allankirimi65@gmail.com",
-              },
-            ].map((c) => (
-              <a
-                key={c.id}
-                href={c.href}
-                style={{
-                  ...s.contactCard,
-                  borderColor:
-                    hoveredContact === c.id
-                      ? tokens.borderHover
-                      : tokens.border,
-                  background:
-                    hoveredContact === c.id ? tokens.surface3 : tokens.surface2,
-                }}
-                onMouseEnter={() => setHoveredContact(c.id)}
-                onMouseLeave={() => setHoveredContact(null)}
-              >
-                <div style={{...s.iconBox(c.color), color: c.iconColor}}>
-                  {c.icon}
-                </div>
-                <div>
-                  <div style={s.contactTitle}>{c.label}</div>
-                  <div style={s.contactValue}>{c.value}</div>
-                </div>
-              </a>
-            ))}
+      <div style={s.root}>
+        {/* ── Hero ── */}
+        <div style={s.hero}>
+          <div style={fadeIn(0)}>
+            <div style={s.eyebrow}>
+              <VideoIcon />
+              30-minute live session
+            </div>
           </div>
 
-          {/* Benefits */}
-          <div style={s.panel}>
-            <p style={s.panelTitle}>What happens in the demo</p>
-            {benefits.map((b, i) => (
-              <div
-                key={i}
-                style={{
-                  ...s.benefitRow,
-                  borderBottom:
-                    i < benefits.length - 1
-                      ? `1px solid ${tokens.border}`
-                      : "none",
-                  paddingTop: i === 0 ? 0 : 12,
-                }}
-              >
-                <div style={s.checkBox}>
-                  <CheckIcon />
-                </div>
-                <div style={s.benefitText}>
-                  <span style={s.benefitStrong}>{b.title} — </span>
-                  {b.desc}
-                </div>
+          <div style={fadeIn(80)}>
+            <h1 style={s.heroTitle}>
+              {firstName}, see your timetable generate itself.
+            </h1>
+          </div>
+
+          <div style={fadeIn(140)}>
+            <p style={s.heroSub}>
+              Book a session and watch Protiba process your institution's
+              constraints — subjects, rooms, teachers, periods — and produce a
+              conflict-free schedule in under a minute.
+            </p>
+          </div>
+
+          <div style={{...s.statsRow, ...fadeIn(200)}}>
+            {[
+              {n: "500+", l: "Demos conducted"},
+              {n: "98%", l: "Satisfaction rate"},
+              {n: "<24 h", l: "Confirmation time"},
+              {n: "60 sec", l: "Avg. generation time"},
+            ].map((st, i) => (
+              <div key={i} style={s.stat}>
+                <span style={s.statNum}>{st.n}</span>
+                <span style={s.statLabel}>{st.l}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Right column — form */}
-        <div style={s.formCard}>
-          {isSubmitted ? (
-            <div style={s.successState}>
-              <div style={s.successIcon}>
-                <CheckIcon size={26} color={tokens.success} />
-              </div>
-              <h2 style={s.successTitle}>Demo confirmed</h2>
-              <p style={s.successBody}>
-                A Google Meet link and calendar invite are on their way to{" "}
-                <strong style={{color: tokens.text1}}>{email}</strong>. We'll
-                see you there.
-              </p>
+        <div style={s.divider} />
 
-              {/* Confirmation card */}
-              <div style={s.confirmCard}>
-                <div style={s.confirmLabel}>Your booking</div>
-                {[
-                  ["Name", fullName],
-                  ["Institution", schName],
-                  ["Date", date],
-                  ["Time", time],
-                ].map(([k, v], i) => (
-                  <div
-                    key={i}
-                    style={{
-                      ...s.confirmRow,
-                      borderBottom:
-                        i < 3 ? `1px solid ${tokens.border}` : "none",
-                      marginBottom: i < 3 ? 8 : 0,
-                      paddingBottom: i < 3 ? 8 : 0,
-                    }}
-                  >
-                    <span style={s.confirmKey}>{k}</span>
-                    <span style={s.confirmVal}>{v}</span>
-                  </div>
-                ))}
-              </div>
+        {/* ── Main content ── */}
+        <div style={{...s.main, ...fadeIn(260)}}>
+          {/* Left column */}
+          <div style={{display: "flex", flexDirection: "column", gap: 16}}>
+            {/* Contact */}
+            <div style={s.panel}>
+              <p style={s.panelTitle}>Contact us directly</p>
 
-              <button
-                onClick={() => {
-                  setIsSubmitted(false);
-                  setName("");
-                  setEmail("");
-                  setInstitution("");
-                  setSelectedDate("");
-                  setSelectedTime("");
-                }}
-                style={s.resetBtn}
-              >
-                Book another session
-              </button>
-            </div>
-          ) : (
-            <>
-              <h2 style={s.formTitle}>Book your session</h2>
-              <p style={s.formSub}>
-                30 minutes. No deck, no sales pitch — just a live product
-                walkthrough built around your institution.
-              </p>
-
-              {error && (
-                <div
+              {[
+                {
+                  id: "phone",
+                  icon: <PhoneIcon />,
+                  color: "rgba(59,130,246,0.15)",
+                  iconColor: "#3B82F6",
+                  label: "Call us",
+                  value: "(+254) 792 624 342",
+                  href: "tel:+254792624342",
+                },
+                {
+                  id: "email",
+                  icon: <MailIcon />,
+                  color: "rgba(139,92,246,0.15)",
+                  iconColor: "#8B5CF6",
+                  label: "Email us",
+                  value: "allankirimi65@gmail.com",
+                  href: "mailto:allankirimi65@gmail.com",
+                },
+              ].map((c) => (
+                <a
+                  key={c.id}
+                  href={c.href}
                   style={{
-                    fontSize: 13,
-                    color: "#F87171",
-                    background: "rgba(248,113,113,0.08)",
-                    border: "1px solid rgba(248,113,113,0.2)",
-                    borderRadius: 8,
-                    padding: "10px 14px",
-                    marginBottom: 20,
+                    ...s.contactCard,
+                    borderColor:
+                      hoveredContact === c.id
+                        ? tokens.borderHover
+                        : tokens.border,
+                    background:
+                      hoveredContact === c.id
+                        ? tokens.surface3
+                        : tokens.surface2,
+                  }}
+                  onMouseEnter={() => setHoveredContact(c.id)}
+                  onMouseLeave={() => setHoveredContact(null)}
+                >
+                  <div style={{...s.iconBox(c.color), color: c.iconColor}}>
+                    {c.icon}
+                  </div>
+                  <div>
+                    <div style={s.contactTitle}>{c.label}</div>
+                    <div style={s.contactValue}>{c.value}</div>
+                  </div>
+                </a>
+              ))}
+            </div>
+
+            {/* Benefits */}
+            <div style={s.panel}>
+              <p style={s.panelTitle}>What happens in the demo</p>
+              {benefits.map((b, i) => (
+                <div
+                  key={i}
+                  style={{
+                    ...s.benefitRow,
+                    borderBottom:
+                      i < benefits.length - 1
+                        ? `1px solid ${tokens.border}`
+                        : "none",
+                    paddingTop: i === 0 ? 0 : 12,
                   }}
                 >
-                  {error}
+                  <div style={s.checkBox}>
+                    <CheckIcon />
+                  </div>
+                  <div style={s.benefitText}>
+                    <span style={s.benefitStrong}>{b.title} — </span>
+                    {b.desc}
+                  </div>
                 </div>
-              )}
+              ))}
+            </div>
+          </div>
 
-              <form onSubmit={handleSubmit}>
-                <Field label="Full name">
-                  <TextInput
-                    required
-                    value={fullName}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your full name"
-                  />
-                </Field>
+          {/* Right column — form */}
+          <div style={s.formCard}>
+            {isSubmitted ? (
+              <div style={s.successState}>
+                <div style={s.successIcon}>
+                  <CheckIcon size={26} color={tokens.success} />
+                </div>
+                <h2 style={s.successTitle}>Demo confirmed</h2>
+                <p style={s.successBody}>
+                  A Google Meet link and calendar invite are on their way to{" "}
+                  <strong style={{color: tokens.text1}}>{email}</strong>. We'll
+                  see you there.
+                </p>
 
-                <Field label="Work email">
-                  <TextInput
-                    required
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@institution.edu"
-                  />
-                </Field>
-
-                <Field label="Institution name">
-                  <TextInput
-                    required
-                    value={schName}
-                    onChange={(e) => setInstitution(e.target.value)}
-                    placeholder="School, college, or university"
-                  />
-                </Field>
-
-                <div style={s.gridTwo}>
-                  <Field label="Date">
-                    <div style={{position: "relative"}}>
-                      <TextInput
-                        required
-                        type="date"
-                        value={date}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                      />
+                {/* Confirmation card */}
+                <div style={s.confirmCard}>
+                  <div style={s.confirmLabel}>Your booking</div>
+                  {[
+                    ["Name", fullName],
+                    ["Institution", schName],
+                    ["Date", date],
+                    ["Time", time],
+                  ].map(([k, v], i) => (
+                    <div
+                      key={i}
+                      style={{
+                        ...s.confirmRow,
+                        borderBottom:
+                          i < 3 ? `1px solid ${tokens.border}` : "none",
+                        marginBottom: i < 3 ? 8 : 0,
+                        paddingBottom: i < 3 ? 8 : 0,
+                      }}
+                    >
+                      <span style={s.confirmKey}>{k}</span>
+                      <span style={s.confirmVal}>{v}</span>
                     </div>
-                  </Field>
-
-                  <Field label="Time">
-                    <div style={s.selectWrap}>
-                      <select
-                        required
-                        value={time}
-                        onChange={(e) => setSelectedTime(e.target.value)}
-                        style={s.select}
-                      >
-                        <option value="">Pick a slot</option>
-                        {timeSlots.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
-                          </option>
-                        ))}
-                      </select>
-                      <span style={s.chevron}>
-                        <ChevronDown />
-                      </span>
-                    </div>
-                  </Field>
+                  ))}
                 </div>
 
                 <button
-                  type="submit"
-                  disabled={isLoading}
-                  style={{
-                    ...s.submitBtn,
-                    background: btnHover ? "#3D5CE8" : tokens.accent,
-                    transform: btnHover ? "translateY(-1px)" : "translateY(0)",
-                    boxShadow: btnHover
-                      ? "0 8px 24px rgba(79,110,247,0.35)"
-                      : "none",
-                    opacity: isLoading ? 0.7 : 1,
+                  onClick={() => {
+                    setIsSubmitted(false);
+                    setName("");
+                    setEmail("");
+                    setInstitution("");
+                    setSelectedDate("");
+                    setSelectedTime("");
                   }}
-                  onMouseEnter={() => setBtnHover(true)}
-                  onMouseLeave={() => setBtnHover(false)}
+                  style={s.resetBtn}
                 >
-                  {isLoading ? "Scheduling…" : "Confirm session"}
-                  {!isLoading && <ArrowRight />}
+                  Book another session
                 </button>
-              </form>
-
-              <div style={s.formNote}>
-                <span
-                  style={{color: tokens.text3, flexShrink: 0, marginTop: 1}}
-                >
-                  <VideoIcon />
-                </span>
-                <span style={s.noteText}>
-                  Google Meet link sent immediately after booking. No software
-                  to install. Invite up to 3 colleagues to the same session.
-                </span>
               </div>
+            ) : (
+              <>
+                <h2 style={s.formTitle}>Book your session</h2>
+                <p style={s.formSub}>
+                  30 minutes. No deck, no sales pitch — just a live product
+                  walkthrough built around your institution.
+                </p>
 
-              <p
-                style={{
-                  fontSize: 11,
-                  color: tokens.text3,
-                  marginTop: 14,
-                  textAlign: "center",
-                  lineHeight: 1.6,
-                }}
-              >
-                By booking, you agree to our privacy policy. We will not share
-                your data with third parties.
-              </p>
-            </>
-          )}
+                {error && (
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: "#F87171",
+                      background: "rgba(248,113,113,0.08)",
+                      border: "1px solid rgba(248,113,113,0.2)",
+                      borderRadius: 8,
+                      padding: "10px 14px",
+                      marginBottom: 20,
+                    }}
+                  >
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit}>
+                  <Field label="Full name">
+                    <TextInput
+                      required
+                      value={fullName}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your full name"
+                    />
+                  </Field>
+
+                  <Field label="Work email">
+                    <TextInput
+                      required
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@institution.edu"
+                    />
+                  </Field>
+
+                  <Field label="Institution name">
+                    <TextInput
+                      required
+                      value={schName}
+                      onChange={(e) => setInstitution(e.target.value)}
+                      placeholder="School, college, or university"
+                    />
+                  </Field>
+
+                  <div style={s.gridTwo}>
+                    <Field label="Date">
+                      <div style={{position: "relative"}}>
+                        <TextInput
+                          required
+                          type="date"
+                          value={date}
+                          onChange={(e) => setSelectedDate(e.target.value)}
+                        />
+                      </div>
+                    </Field>
+
+                    <Field label="Time">
+                      <div style={s.selectWrap}>
+                        <select
+                          required
+                          value={time}
+                          onChange={(e) => setSelectedTime(e.target.value)}
+                          style={s.select}
+                        >
+                          <option value="">Pick a slot</option>
+                          {timeSlots.map((t) => (
+                            <option key={t} value={t}>
+                              {t}
+                            </option>
+                          ))}
+                        </select>
+                        <span style={s.chevron}>
+                          <ChevronDown />
+                        </span>
+                      </div>
+                    </Field>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    style={{
+                      ...s.submitBtn,
+                      background: btnHover ? "#3D5CE8" : tokens.accent,
+                      transform: btnHover
+                        ? "translateY(-1px)"
+                        : "translateY(0)",
+                      boxShadow: btnHover
+                        ? "0 8px 24px rgba(79,110,247,0.35)"
+                        : "none",
+                      opacity: isLoading ? 0.7 : 1,
+                    }}
+                    onMouseEnter={() => setBtnHover(true)}
+                    onMouseLeave={() => setBtnHover(false)}
+                  >
+                    {isLoading ? "Scheduling…" : "Confirm session"}
+                    {!isLoading && <ArrowRight />}
+                  </button>
+                </form>
+
+                <div style={s.formNote}>
+                  <span
+                    style={{color: tokens.text3, flexShrink: 0, marginTop: 1}}
+                  >
+                    <VideoIcon />
+                  </span>
+                  <span style={s.noteText}>
+                    Google Meet link sent immediately after booking. No software
+                    to install. Invite up to 3 colleagues to the same session.
+                  </span>
+                </div>
+
+                <p
+                  style={{
+                    fontSize: 11,
+                    color: tokens.text3,
+                    marginTop: 14,
+                    textAlign: "center",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  By booking, you agree to our privacy policy. We will not share
+                  your data with third parties.
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* ── Footer rule ── */}
+        <div style={{...s.divider, marginBottom: 0}} />
+        <div
+          style={{
+            maxWidth: 1120,
+            margin: "0 auto",
+            padding: "24px 48px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span style={{fontSize: 12, color: tokens.text3}}>
+            © 2025 Protiba. Academic scheduling infrastructure.
+          </span>
+          <span style={{fontSize: 12, color: tokens.text3}}>
+            Kenya · protiba.com
+          </span>
         </div>
       </div>
-
-      {/* ── Footer rule ── */}
-      <div style={{...s.divider, marginBottom: 0}} />
-      <div
-        style={{
-          maxWidth: 1120,
-          margin: "0 auto",
-          padding: "24px 48px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <span style={{fontSize: 12, color: tokens.text3}}>
-          © 2025 Protiba. Academic scheduling infrastructure.
-        </span>
-        <span style={{fontSize: 12, color: tokens.text3}}>
-          Kenya · protiba.com
-        </span>
-      </div>
-    </div>
+    </>
   );
 };
 

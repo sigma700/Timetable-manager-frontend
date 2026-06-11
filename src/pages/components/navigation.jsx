@@ -405,7 +405,11 @@ const navStructure = [
     path: "/timetables",
     icon: Icons.Timetable,
     children: [
-      {label: "All Timetables", path: "/timetables", icon: Icons.Timetable},
+      {
+        label: "All Timetables",
+        path: "/home/timetables",
+        icon: Icons.Timetable,
+      },
       {label: "Generated", path: "/timetables/generated", icon: Icons.History},
       {label: "Exports", path: "/timetables/exports", icon: Icons.Export},
       {label: "History", path: "/timetables/history", icon: Icons.History},

@@ -303,7 +303,7 @@ function Select({
   );
 }
 
-// ─── Section card ─────────────────────────────────────────────────────────────
+// ─── Section card (FIXED: overflow visible) ───────────────────────────────────
 function SectionCard({step, title, subtitle, children, active}) {
   return (
     <motion.div
@@ -314,7 +314,7 @@ function SectionCard({step, title, subtitle, children, active}) {
         background: t.surface,
         border: `0.5px solid ${active ? "rgba(99,102,241,0.25)" : t.border}`,
         borderRadius: 14,
-        overflow: "hidden",
+        overflow: "visible", // ✅ allow dropdowns to expand outside
         transition: "border-color 0.3s",
       }}
     >
@@ -401,6 +401,7 @@ function TeacherRow({
         border: `0.5px solid ${t.border}`,
         borderRadius: 10,
         padding: "16px",
+        overflow: "visible", // ensure dropdown not clipped inside row
       }}
     >
       <div
@@ -606,9 +607,6 @@ const Create = () => {
       console.error("Logout error", err);
     }
   };
-
-  // Track which section is active for ring highlight
-  const [activeSection, setActiveSection] = useState(1);
 
   useEffect(() => {
     if (error) {
@@ -843,10 +841,9 @@ const Create = () => {
           color: "#fff",
           overflowX: "hidden",
           position: "relative",
-          paddingTop: "68px", // space for fixed navbar
+          paddingTop: "68px",
         }}
       >
-        {/* Ambient glows */}
         <div
           style={{
             position: "fixed",
@@ -883,7 +880,6 @@ const Create = () => {
             padding: "0 24px 64px",
           }}
         >
-          {/* ── Page header ── */}
           <motion.div
             initial={{opacity: 0, y: 10}}
             animate={{opacity: 1, y: 0}}
@@ -919,7 +915,6 @@ const Create = () => {
             </p>
           </motion.div>
 
-          {/* ── Step indicator ── */}
           <motion.div
             initial={{opacity: 0}}
             animate={{opacity: 1}}
@@ -928,7 +923,6 @@ const Create = () => {
             <StepIndicator current={currentStep} />
           </motion.div>
 
-          {/* ── Error notification ── */}
           <AnimatePresence>
             {localError && (
               <motion.div
@@ -947,7 +941,6 @@ const Create = () => {
             )}
           </AnimatePresence>
 
-          {/* ── Form ── */}
           <form
             onSubmit={handleSubmit}
             style={{display: "flex", flexDirection: "column", gap: 12}}
@@ -1040,7 +1033,6 @@ const Create = () => {
                 </div>
               </div>
 
-              {/* Preview generated classes */}
               {classOptions.length > 0 && (
                 <div style={{marginTop: 16}}>
                   <div
@@ -1149,7 +1141,6 @@ const Create = () => {
               </div>
             </SectionCard>
 
-            {/* Submit */}
             <motion.div
               initial={{opacity: 0}}
               animate={{opacity: 1}}

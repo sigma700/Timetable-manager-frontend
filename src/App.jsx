@@ -22,6 +22,7 @@ import Invite from "./pages/Invite";
 import Contacts from "./pages/Contacts";
 import Footer from "./pages/components/footer";
 import Story from "./pages/Story";
+import AccountSettings from "./pages/Acc-Settings";
 // import Footer from './components/Footer'; // Import the Footer component
 
 // Layout component that includes the footer
@@ -98,6 +99,14 @@ const RouteWrapper = ({
 };
 
 const router = createBrowserRouter([
+  {
+    path: "/settings/account",
+    element: (
+      <RouteWrapper isProtected={true}>
+        <AccountSettings />
+      </RouteWrapper>
+    ),
+  },
   {
     path: "/home/gentable",
     element: (

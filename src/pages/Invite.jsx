@@ -1,4 +1,6 @@
 import React, {useState, useEffect} from "react";
+import {useAuthStore} from "../store/authStore";
+import Navigation from "./components/navigation";
 
 const tokens = {
   surface0: "#0A0B0D",
@@ -132,13 +134,104 @@ const CopyIcon = () => (
   </svg>
 );
 
+const StarIcon = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+  </svg>
+);
+
+const GlobeIcon = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10" />
+    <line x1="2" y1="12" x2="22" y2="12" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+  </svg>
+);
+
+const UsersIcon = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+
+const CodeIcon = () => (
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="16 18 22 12 16 6" />
+    <polyline points="8 6 2 12 8 18" />
+  </svg>
+);
+
+const tierIcons = [<StarIcon />, <GlobeIcon />, <UsersIcon />, <CodeIcon />];
+
 export default function Invite() {
+  const {user, isLoading: authLoading, logout} = useAuthStore();
   const [emails, setEmails] = useState([""]);
   const [message, setMessage] = useState("");
   const [copied, setCopied] = useState(false);
   const [sent, setSent] = useState(false);
   const [mounted, setMounted] = useState(false);
   const countdown = useCountdown(47 * 3600 + 23 * 60 + 9);
+
+  // Navigation props
+  const userName = user || "Guest";
+  const institutionName = "St. Mary's Academy";
+  const notificationCount = 3;
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      if (res.ok) {
+        window.location.href = "/login";
+      }
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+  };
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
@@ -177,40 +270,7 @@ export default function Invite() {
       background: tokens.surface0,
       color: tokens.text1,
       fontFamily: "'Inter',system-ui,sans-serif",
-    },
-    nav: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      padding: "0 48px",
-      height: 56,
-      background: "rgba(10,11,13,0.9)",
-      borderBottom: `1px solid ${tokens.border}`,
-      position: "sticky",
-      top: 0,
-      zIndex: 10,
-    },
-    brand: {
-      display: "flex",
-      alignItems: "center",
-      gap: 10,
-      fontSize: 14,
-      fontWeight: 600,
-      letterSpacing: "-.01em",
-    },
-    dot: {width: 7, height: 7, borderRadius: "50%", background: tokens.accent},
-    navRight: {
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      fontSize: 12,
-      color: tokens.text3,
-    },
-    statusDot: {
-      width: 7,
-      height: 7,
-      borderRadius: "50%",
-      background: tokens.success,
+      paddingTop: "68px", // space for fixed navbar
     },
     hero: {maxWidth: 1080, margin: "0 auto", padding: "64px 40px 40px"},
     eyebrow: {
@@ -562,389 +622,355 @@ export default function Invite() {
     footerText: {fontSize: 11, color: "#3A3E52"},
   };
 
-  const StarIcon = () => (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  );
-  const GlobeIcon = () => (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="2" y1="12" x2="22" y2="12" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
-  );
-  const UsersIcon = () => (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  );
-  const CodeIcon = () => (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="16 18 22 12 16 6" />
-      <polyline points="8 6 2 12 8 18" />
-    </svg>
-  );
-  const tierIcons = [<StarIcon />, <GlobeIcon />, <UsersIcon />, <CodeIcon />];
+  if (authLoading) {
+    return (
+      <div
+        style={{
+          background: tokens.surface0,
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div className="invite-loading-spinner" />
+      </div>
+    );
+  }
 
   return (
-    <div style={st.root}>
-      <nav style={st.nav}>
-        <div style={st.brand}>
-          <div style={st.dot} />
-          Protiba
-        </div>
-        <div style={st.navRight}>
-          <div style={st.statusDot} />
-          Referral programme active
-        </div>
-      </nav>
+    <>
+      <style>
+        {`
+          @keyframes spin { to { transform: rotate(360deg); } }
+          .invite-loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(79,110,247,0.2);
+            border-top-color: #4F6EF7;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+          }
+        `}
+      </style>
 
-      <div style={{...st.hero, ...fadeIn(0)}}>
-        <div style={st.eyebrow}>
-          <StarIcon />
-          Limited-time referral rewards
-        </div>
-        <h1 style={st.h1}>
-          Every colleague you bring in
-          <br />
-          earns you real value.
-        </h1>
-        <p style={st.sub}>
-          Share your link. When a school signs up and runs their first
-          timetable, your account upgrades automatically — no redemption codes,
-          no waiting.
-        </p>
-        <div style={st.statsRow}>
-          {[
-            {n: "2,500+", l: "Successful invites"},
-            {n: "85%", l: "Acceptance rate"},
-            {n: "1,200+", l: "Active referrers"},
-            {n: countdown, l: "Until deal expires"},
-          ].map((s, i) => (
-            <div key={i} style={st.stat}>
-              <span style={st.statNum}>{s.n}</span>
-              <span style={st.statLabel}>{s.l}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      <Navigation
+        userName={userName}
+        institutionName={institutionName}
+        notificationCount={notificationCount}
+        onLogout={handleLogout}
+      />
 
-      <div style={st.divider} />
+      <div style={st.root}>
+        <div style={{...st.hero, ...fadeIn(0)}}>
+          <div style={st.eyebrow}>
+            <StarIcon />
+            Limited-time referral rewards
+          </div>
+          <h1 style={st.h1}>
+            Every colleague you bring in
+            <br />
+            earns you real value.
+          </h1>
+          <p style={st.sub}>
+            Share your link. When a school signs up and runs their first
+            timetable, your account upgrades automatically — no redemption
+            codes, no waiting.
+          </p>
+          <div style={st.statsRow}>
+            {[
+              {n: "2,500+", l: "Successful invites"},
+              {n: "85%", l: "Acceptance rate"},
+              {n: "1,200+", l: "Active referrers"},
+              {n: countdown, l: "Until deal expires"},
+            ].map((s, i) => (
+              <div key={i} style={st.stat}>
+                <span style={st.statNum}>{s.n}</span>
+                <span style={st.statLabel}>{s.l}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
-      <div style={{...st.main, ...fadeIn(120)}}>
-        <div style={{display: "flex", flexDirection: "column", gap: 14}}>
-          {/* Referral link */}
-          <div style={st.panel}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 18,
-              }}
-            >
-              <p style={{...st.panelLabel, marginBottom: 0}}>
-                Your referral link
-              </p>
-              <span
+        <div style={st.divider} />
+
+        <div style={{...st.main, ...fadeIn(120)}}>
+          <div style={{display: "flex", flexDirection: "column", gap: 14}}>
+            {/* Referral link */}
+            <div style={st.panel}>
+              <div
                 style={{
-                  fontSize: 11,
-                  color: tokens.success,
-                  opacity: copied ? 1 : 0,
-                  transition: "opacity .3s",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 18,
                 }}
               >
-                Copied!
-              </span>
+                <p style={{...st.panelLabel, marginBottom: 0}}>
+                  Your referral link
+                </p>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: tokens.success,
+                    opacity: copied ? 1 : 0,
+                    transition: "opacity .3s",
+                  }}
+                >
+                  Copied!
+                </span>
+              </div>
+              <div style={st.linkBox} onClick={copyLink}>
+                <span style={st.linkText}>{REFERRAL_LINK}</span>
+                <CopyIcon />
+              </div>
+              <div style={st.shareGrid}>
+                {[
+                  {
+                    label: "Email",
+                    action: () =>
+                      window.open(
+                        `mailto:?subject=Try Protiba — school timetabling that actually works&body=Hey,%0A%0AI've been using Protiba. Here's my link: ${REFERRAL_LINK}`,
+                      ),
+                  },
+                  {
+                    label: "WhatsApp",
+                    action: () =>
+                      window.open(
+                        `https://wa.me/?text=I use Protiba to automate our timetable. Worth a look: ${REFERRAL_LINK}`,
+                      ),
+                  },
+                  {label: "Copy link", action: copyLink},
+                ].map((btn, i) => (
+                  <button key={i} style={st.shareBtn} onClick={btn.action}>
+                    {btn.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div style={st.linkBox} onClick={copyLink}>
-              <span style={st.linkText}>{REFERRAL_LINK}</span>
-              <CopyIcon />
-            </div>
-            <div style={st.shareGrid}>
-              {[
-                {
-                  label: "Email",
-                  action: () =>
-                    window.open(
-                      `mailto:?subject=Try Protiba — school timetabling that actually works&body=Hey,%0A%0AI've been using Protiba. Here's my link: ${REFERRAL_LINK}`,
-                    ),
-                },
-                {
-                  label: "WhatsApp",
-                  action: () =>
-                    window.open(
-                      `https://wa.me/?text=I use Protiba to automate our timetable. Worth a look: ${REFERRAL_LINK}`,
-                    ),
-                },
-                {label: "Copy link", action: copyLink},
-              ].map((btn, i) => (
-                <button key={i} style={st.shareBtn} onClick={btn.action}>
-                  {btn.label}
-                </button>
+
+            {/* Tiers */}
+            <div style={st.panel}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 16,
+                }}
+              >
+                <p style={{...st.panelLabel, marginBottom: 0}}>Reward tiers</p>
+                <span
+                  style={{fontSize: 12, color: tokens.accent, fontWeight: 500}}
+                >
+                  0 of 10 referrals
+                </span>
+              </div>
+
+              {TIERS.map((t, i) => (
+                <div
+                  key={i}
+                  style={{
+                    ...st.tierCard,
+                    borderBottom:
+                      i < TIERS.length - 1
+                        ? `1px solid ${tokens.border}`
+                        : "none",
+                    opacity: i > 0 ? 0.45 : 1,
+                    paddingTop: i === 0 ? 0 : 14,
+                  }}
+                >
+                  <div style={{...st.iconBox(t.bg, t.border), color: t.color}}>
+                    {tierIcons[i]}
+                  </div>
+                  <div>
+                    <div style={st.tierTitle}>{t.reward}</div>
+                    <div style={st.tierSub}>{t.sub}</div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: t.color,
+                        fontWeight: 600,
+                        marginTop: 4,
+                      }}
+                    >
+                      {t.ref} referral{t.ref > 1 ? "s" : ""} needed
+                    </div>
+                  </div>
+                </div>
               ))}
+
+              <div style={st.bonusBox}>
+                <div style={st.bonusLabel}>⚡ Bonus deal — active now</div>
+                <div style={st.bonusText}>
+                  Refer your first school{" "}
+                  <strong style={{color: "#FBBF24"}}>
+                    before the timer runs out
+                  </strong>{" "}
+                  and get 3 months free instead of 1. No minimum after that.
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Tiers */}
-          <div style={st.panel}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: 16,
-              }}
-            >
-              <p style={{...st.panelLabel, marginBottom: 0}}>Reward tiers</p>
-              <span
-                style={{fontSize: 12, color: tokens.accent, fontWeight: 500}}
-              >
-                0 of 10 referrals
-              </span>
-            </div>
-
-            {TIERS.map((t, i) => (
-              <div
-                key={i}
-                style={{
-                  ...st.tierCard,
-                  borderBottom:
-                    i < TIERS.length - 1
-                      ? `1px solid ${tokens.border}`
-                      : "none",
-                  opacity: i > 0 ? 0.45 : 1,
-                  paddingTop: i === 0 ? 0 : 14,
-                }}
-              >
-                <div style={{...st.iconBox(t.bg, t.border), color: t.color}}>
-                  {tierIcons[i]}
+          {/* Form */}
+          <div style={st.formCard}>
+            {sent ? (
+              <div style={st.successWrap}>
+                <div style={st.successIcon}>
+                  <CheckIcon size={24} />
                 </div>
-                <div>
-                  <div style={{...st.tierTitle}}>{t.reward}</div>
-                  <div style={st.tierSub}>{t.sub}</div>
+                <h2 style={st.successTitle}>Invitations sent</h2>
+                <p style={st.successBody}>
+                  Each recipient got your personal link. Once they run their
+                  first timetable, your reward unlocks automatically.
+                </p>
+                <div style={st.bonusRemind}>
                   <div
                     style={{
                       fontSize: 11,
-                      color: t.color,
                       fontWeight: 600,
-                      marginTop: 4,
+                      color: tokens.amber,
+                      letterSpacing: ".06em",
+                      textTransform: "uppercase",
+                      marginBottom: 6,
                     }}
                   >
-                    {t.ref} referral{t.ref > 1 ? "s" : ""} needed
+                    ⚡ Don't forget your bonus window
+                  </div>
+                  <div
+                    style={{fontSize: 13, color: "#D4A820", lineHeight: 1.55}}
+                  >
+                    Your first successful referral — if it converts before the
+                    timer hits zero — earns{" "}
+                    <strong style={{color: "#FBBF24"}}>3 months free</strong>{" "}
+                    instead of 1.
                   </div>
                 </div>
+                <button
+                  style={st.resetBtn}
+                  onClick={() => {
+                    setSent(false);
+                    setEmails([""]);
+                    setMessage("");
+                  }}
+                >
+                  Send more invites
+                </button>
               </div>
-            ))}
-
-            <div style={st.bonusBox}>
-              <div style={st.bonusLabel}>⚡ Bonus deal — active now</div>
-              <div style={st.bonusText}>
-                Refer your first school{" "}
-                <strong style={{color: "#FBBF24"}}>
-                  before the timer runs out
-                </strong>{" "}
-                and get 3 months free instead of 1. No minimum after that.
-              </div>
-            </div>
+            ) : (
+              <>
+                <h2 style={st.formTitle}>Send invitations</h2>
+                <p style={st.formSub}>
+                  Each address gets a personalised invite with your referral
+                  link attached automatically.
+                </p>
+                <form onSubmit={handleSend}>
+                  <div style={{marginBottom: 18}}>
+                    <label style={st.label}>Email addresses</label>
+                    {emails.map((email, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          display: "flex",
+                          gap: 8,
+                          marginBottom: 8,
+                          alignItems: "center",
+                        }}
+                      >
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => updateEmail(i, e.target.value)}
+                          placeholder="colleague@school.edu"
+                          style={st.input}
+                        />
+                        {emails.length > 1 && (
+                          <button
+                            type="button"
+                            style={st.removeBtn}
+                            onClick={() => removeEmail(i)}
+                          >
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button type="button" style={st.addBtn} onClick={addEmail}>
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                      Add another address
+                    </button>
+                  </div>
+                  <div style={{marginBottom: 4}}>
+                    <label style={st.label}>Personal note (optional)</label>
+                    <textarea
+                      rows={3}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Add context — mention which problem Protiba solved for you."
+                      style={st.textarea}
+                    />
+                  </div>
+                  <button type="submit" style={st.submitBtn}>
+                    Send invitations <SendIcon />
+                  </button>
+                </form>
+                <div style={st.howItWorks}>
+                  <div style={st.howLabel}>How it works</div>
+                  <div style={st.howStep}>
+                    <div style={st.stepNum}>1</div> They click your link and
+                    create an account
+                  </div>
+                  <div style={st.howStep}>
+                    <div style={st.stepNum}>2</div> Their institution runs its
+                    first timetable
+                  </div>
+                  <div style={{...st.howStep, marginBottom: 0}}>
+                    <div style={st.stepCheck}>
+                      <CheckIcon size={10} />
+                    </div>
+                    <span style={{color: tokens.text1, fontWeight: 500}}>
+                      Your reward unlocks instantly
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Form */}
-        <div style={st.formCard}>
-          {sent ? (
-            <div style={st.successWrap}>
-              <div style={st.successIcon}>
-                <CheckIcon size={24} />
-              </div>
-              <h2 style={st.successTitle}>Invitations sent</h2>
-              <p style={st.successBody}>
-                Each recipient got your personal link. Once they run their first
-                timetable, your reward unlocks automatically.
-              </p>
-              <div style={st.bonusRemind}>
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: tokens.amber,
-                    letterSpacing: ".06em",
-                    textTransform: "uppercase",
-                    marginBottom: 6,
-                  }}
-                >
-                  ⚡ Don't forget your bonus window
-                </div>
-                <div style={{fontSize: 13, color: "#D4A820", lineHeight: 1.55}}>
-                  Your first successful referral — if it converts before the
-                  timer hits zero — earns{" "}
-                  <strong style={{color: "#FBBF24"}}>3 months free</strong>{" "}
-                  instead of 1.
-                </div>
-              </div>
-              <button
-                style={st.resetBtn}
-                onClick={() => {
-                  setSent(false);
-                  setEmails([""]);
-                  setMessage("");
-                }}
-              >
-                Send more invites
-              </button>
-            </div>
-          ) : (
-            <>
-              <h2 style={st.formTitle}>Send invitations</h2>
-              <p style={st.formSub}>
-                Each address gets a personalised invite with your referral link
-                attached automatically.
-              </p>
-              <form onSubmit={handleSend}>
-                <div style={{marginBottom: 18}}>
-                  <label style={st.label}>Email addresses</label>
-                  {emails.map((email, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        marginBottom: 8,
-                        alignItems: "center",
-                      }}
-                    >
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => updateEmail(i, e.target.value)}
-                        placeholder="colleague@school.edu"
-                        style={st.input}
-                      />
-                      {emails.length > 1 && (
-                        <button
-                          type="button"
-                          style={st.removeBtn}
-                          onClick={() => removeEmail(i)}
-                        >
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button type="button" style={st.addBtn} onClick={addEmail}>
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <line x1="12" y1="5" x2="12" y2="19" />
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                    Add another address
-                  </button>
-                </div>
-                <div style={{marginBottom: 4}}>
-                  <label style={st.label}>Personal note (optional)</label>
-                  <textarea
-                    rows={3}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Add context — mention which problem Protiba solved for you."
-                    style={st.textarea}
-                  />
-                </div>
-                <button type="submit" style={st.submitBtn}>
-                  Send invitations <SendIcon />
-                </button>
-              </form>
-              <div style={st.howItWorks}>
-                <div style={st.howLabel}>How it works</div>
-                <div style={st.howStep}>
-                  <div style={st.stepNum}>1</div> They click your link and
-                  create an account
-                </div>
-                <div style={st.howStep}>
-                  <div style={st.stepNum}>2</div> Their institution runs its
-                  first timetable
-                </div>
-                <div style={{...st.howStep, marginBottom: 0}}>
-                  <div style={st.stepCheck}>
-                    <CheckIcon size={10} />
-                  </div>
-                  <span style={{color: tokens.text1, fontWeight: 500}}>
-                    Your reward unlocks instantly
-                  </span>
-                </div>
-              </div>
-            </>
-          )}
+        <div style={st.divider} />
+        <div style={st.footer}>
+          <span style={st.footerText}>
+            © 2025 Protiba. Academic scheduling infrastructure.
+          </span>
+          <span style={st.footerText}>Kenya · protiba.com</span>
         </div>
       </div>
-
-      <div style={st.divider} />
-      <div style={st.footer}>
-        <span style={st.footerText}>
-          © 2025 Protiba. Academic scheduling infrastructure.
-        </span>
-        <span style={st.footerText}>Kenya · protiba.com</span>
-      </div>
-    </div>
+    </>
   );
 }
