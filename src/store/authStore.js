@@ -1,9 +1,7 @@
-// import { isCSSRequest } from 'vite';
 import {create} from "zustand";
 
 export const useAuthStore = create((set, get) => ({
-  user: null,
-  value: null,
+  user: null, // full user object — not just firstName
   isLoading: false,
   error: null,
   isAuthenticated: false,
@@ -12,10 +10,9 @@ export const useAuthStore = create((set, get) => ({
 
   initialize: async () => {
     if (get().isAuthenticated) return;
-
     set({isCheckingAuth: true});
     try {
-      await get().checkAuth(); // Reuse your existing checkAuth function
+      await get().checkAuth();
     } finally {
       set({isCheckingAuth: false});
     }
@@ -38,23 +35,17 @@ export const useAuthStore = create((set, get) => ({
         throw new Error(fetchedData.message || "Signup failed !");
       }
 
-      const userFirstName = fetchedData.data?.firstName || firstName || "User";
-
       set({
         isLoading: false,
         isAuthenticated: true,
-        user: userFirstName,
+        user: fetchedData.data || null,
         requiredData: null,
       });
 
       return fetchedData;
     } catch (error) {
       console.log(error);
-      set({
-        error: error.message,
-        isLoading: false,
-        isAuthenticated: false,
-      });
+      set({error: error.message, isLoading: false, isAuthenticated: false});
       return Promise.reject(error);
     }
   },
@@ -80,30 +71,21 @@ export const useAuthStore = create((set, get) => ({
         throw new Error(data.message || "LOGIN FAILED !");
       }
 
-      // ✅ Extract user first name from data.data
-      const userFirstName = data.data?.firstName || "User";
-      // No timetables array in this response → requiredData stays null
-      // (the home page will show "No timetables yet")
-
       set({
         isLoading: false,
         isAuthenticated: true,
-        user: userFirstName,
-        requiredData: null, // will be fetched later if needed
+        user: data.data || null, // full user object
+        requiredData: null,
       });
 
       return data;
     } catch (error) {
       console.log(error);
-      set({
-        isLoading: false,
-        error: error.message,
-        isAuthenticated: false,
-      });
-      throw error; // re-throw so the caller can handle it
+      set({isLoading: false, error: error.message, isAuthenticated: false});
+      throw error;
     }
   },
-  //action for email verification
+
   verify: async (code) => {
     set({isLoading: true, isAuthenticated: false, error: null});
 
@@ -111,9 +93,7 @@ export const useAuthStore = create((set, get) => ({
       const fetchurl = import.meta.env.VITE_BACKEND_URL;
       const response = await fetch(`${fetchurl}/api/verify`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: {"Content-Type": "application/json"},
         credentials: "include",
         body: JSON.stringify({code}),
       });
@@ -121,20 +101,12 @@ export const useAuthStore = create((set, get) => ({
       const data = await response.json();
       console.log("data", data);
 
-      set({
-        isLoading: false,
-        isAuthenticated: true,
-        error: null,
-      });
+      set({isLoading: false, isAuthenticated: true, error: null});
 
       return data;
     } catch (error) {
-      set({
-        error: error.message,
-        isLoading: false,
-      });
+      set({error: error.message, isLoading: false});
       console.log(error);
-
       throw new Error(error.message);
     }
   },
@@ -157,12 +129,13 @@ export const useAuthStore = create((set, get) => ({
         },
       );
       const data = await response.json();
+
       if (!response.ok) {
         throw new Error("Authentication check failed !");
       }
-      // ✅ Safe extraction
-      const userFirstName = data.data?.firstName || null;
-      const timetablesArray = data.data?.timetables;
+
+      const userData = data.data || null;
+      const timetablesArray = userData?.timetables;
       const firstTimetableId =
         timetablesArray?.length > 0 ? timetablesArray[0] : null;
 
@@ -170,9 +143,10 @@ export const useAuthStore = create((set, get) => ({
         isCheckingAuth: false,
         error: null,
         isAuthenticated: true,
-        user: userFirstName,
+        user: userData, // full user object
         requiredData: firstTimetableId,
       });
+
       return true;
     } catch (error) {
       set({
@@ -184,6 +158,15 @@ export const useAuthStore = create((set, get) => ({
       });
       return false;
     }
+  },
+
+  logout: () => {
+    set({
+      user: null,
+      isAuthenticated: false,
+      requiredData: null,
+      error: null,
+    });
   },
 }));
 

@@ -376,7 +376,9 @@ const MainPg = () => {
   const isVisible = useStaggeredReveal(8, 55);
 
   // User data for Navigation
-  const userName = user || "Guest";
+  const userName = user
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+    : "Guest";
   const institutionName = "St. Mary's Academy"; // fallback – can be fetched from store
   const notificationCount = 3; // placeholder
 
@@ -587,7 +589,7 @@ const MainPg = () => {
                       WebkitTextFillColor: "transparent",
                     }}
                   >
-                    {user}
+                    {user?.firstName}
                   </span>
                 </h1>
                 <p style={{fontSize: 14, color: "#64748b", lineHeight: 1.6}}>

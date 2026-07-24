@@ -477,9 +477,12 @@ const isParentActive = (currentPath, navPath) => {
   return currentPath.startsWith(navPath) && navPath !== "/dashboard";
 };
 
+// NEW
 const getInitials = (name) => {
+  if (!name || typeof name !== "string") return "?";
   return name
     .split(" ")
+    .filter(Boolean)
     .map((n) => n[0])
     .join("")
     .toUpperCase()

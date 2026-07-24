@@ -9,7 +9,9 @@ const Timetables = () => {
   const [selectedClass, setSelectedClass] = useState(null);
 
   // User data for Navigation
-  const userName = user || "Guest";
+  const userName = user
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+    : "Guest";
   const institutionName = "St. Mary's Academy"; // fallback – can be fetched from store if available
   const notificationCount = 3; // placeholder
 
@@ -607,7 +609,7 @@ const Timetables = () => {
       >
         <div className="p-4 max-w-full">
           <h1 className="text-2xl font-bold text-white mb-6">
-            {user}'s Timetables
+            {user?.firstName}'s Timetables
           </h1>
           {renderClassTabs()}
           <div className="bg-white rounded-lg shadow-sm p-4">
