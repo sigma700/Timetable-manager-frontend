@@ -5,6 +5,8 @@ import {
   Navigate,
   Outlet,
 } from "react-router-dom";
+
+// ─── Existing pages ───────────────────────────────────────────────────────────
 import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
 import Verif from "./pages/Verif";
@@ -23,57 +25,69 @@ import Contacts from "./pages/Contacts";
 import Footer from "./pages/components/footer";
 import Story from "./pages/Story";
 import AccountSettings from "./pages/Acc-Settings";
-// import Footer from './components/Footer'; // Import the Footer component
 
-// Layout component that includes the footer
-const Layout = ({children}) => {
+// ─── New dashboard pages ──────────────────────────────────────────────────────
+// import Shell from "./components/layout/Shell";
+import Analytics from "./pages/Analytics";
+import Shell from "./pages/components/layout/Shell";
+
+// ─────────────────────────────────────────────
+// LAYOUT — wraps existing pages with footer
+// ─────────────────────────────────────────────
+const Layout = ({children}) => (
+  <div className="flex flex-col min-h-screen">
+    <div className="flex-grow">{children}</div>
+    <Footer />
+  </div>
+);
+
+// ─────────────────────────────────────────────
+// DASHBOARD LAYOUT — wraps new dashboard pages
+// with Shell (sidebar + topbar)
+// ─────────────────────────────────────────────
+const DashboardLayout = ({children}) => {
+  const {user, isCheckingAuth} = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Logout error", err);
+    } finally {
+      useAuthStore.getState().logout();
+      window.location.href = "/";
+    }
+  };
+
+  if (isCheckingAuth) return <LoadingSpinner />;
+
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex-grow">{children}</div>
-      <Footer />
-    </div>
+    <Shell user={user} onLogout={handleLogout}>
+      {children}
+    </Shell>
   );
 };
 
-// Protected route component
+// ─────────────────────────────────────────────
+// ROUTE GUARDS
+// ─────────────────────────────────────────────
 const ProtectedRoute = ({children}) => {
   const {isAuthenticated, isCheckingAuth} = useAuthStore();
-
-  if (isCheckingAuth) {
-    return (
-      <div>
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-
+  if (isCheckingAuth) return <LoadingSpinner />;
+  if (!isAuthenticated) return <Navigate to="/" replace />;
   return children;
 };
 
-// Public-only route component
 const PublicOnlyRoute = ({children}) => {
-  const {isAuthenticated, isCheckingAuth, user} = useAuthStore();
-
-  if (isCheckingAuth) {
-    return (
-      <div>
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    return <Navigate to="/home" replace />;
-  }
-
+  const {isAuthenticated, isCheckingAuth} = useAuthStore();
+  if (isCheckingAuth) return <LoadingSpinner />;
+  if (isAuthenticated) return <Navigate to="/home" replace />;
   return children;
 };
 
-// Create a wrapper component for each route
 const RouteWrapper = ({
   children,
   isProtected = false,
@@ -86,7 +100,6 @@ const RouteWrapper = ({
       </ProtectedRoute>
     );
   }
-
   if (isPublicOnly) {
     return (
       <PublicOnlyRoute>
@@ -94,15 +107,18 @@ const RouteWrapper = ({
       </PublicOnlyRoute>
     );
   }
-
   return <Layout>{children}</Layout>;
 };
 
+// ─────────────────────────────────────────────
+// ROUTER
+// ─────────────────────────────────────────────
 const router = createBrowserRouter([
+  // ── Existing routes ──────────────────────────
   {
     path: "/settings/account",
     element: (
-      <RouteWrapper isProtected={true}>
+      <RouteWrapper isProtected>
         <AccountSettings />
       </RouteWrapper>
     ),
@@ -110,7 +126,7 @@ const router = createBrowserRouter([
   {
     path: "/home/gentable",
     element: (
-      <RouteWrapper isProtected={true}>
+      <RouteWrapper isProtected>
         <Generation />
       </RouteWrapper>
     ),
@@ -118,7 +134,7 @@ const router = createBrowserRouter([
   {
     path: "/home/timetables",
     element: (
-      <RouteWrapper isProtected={true}>
+      <RouteWrapper isProtected>
         <Timetables />
       </RouteWrapper>
     ),
@@ -126,7 +142,7 @@ const router = createBrowserRouter([
   {
     path: "/home/manual",
     element: (
-      <RouteWrapper isProtected={true}>
+      <RouteWrapper isProtected>
         <UserManual />
       </RouteWrapper>
     ),
@@ -134,7 +150,7 @@ const router = createBrowserRouter([
   {
     path: "/home/demo",
     element: (
-      <RouteWrapper isProtected={true}>
+      <RouteWrapper isProtected>
         <Demo />
       </RouteWrapper>
     ),
@@ -142,7 +158,7 @@ const router = createBrowserRouter([
   {
     path: "/home/invite",
     element: (
-      <RouteWrapper isProtected={true}>
+      <RouteWrapper isProtected>
         <Invite />
       </RouteWrapper>
     ),
@@ -150,7 +166,7 @@ const router = createBrowserRouter([
   {
     path: "/home/story",
     element: (
-      <RouteWrapper isProtected={false}>
+      <RouteWrapper>
         <Story />
       </RouteWrapper>
     ),
@@ -158,7 +174,7 @@ const router = createBrowserRouter([
   {
     path: "/home/create-table",
     element: (
-      <RouteWrapper isProtected={true}>
+      <RouteWrapper isProtected>
         <Create />
       </RouteWrapper>
     ),
@@ -166,7 +182,7 @@ const router = createBrowserRouter([
   {
     path: "/home/contacts",
     element: (
-      <RouteWrapper isProtected={true}>
+      <RouteWrapper isProtected>
         <Contacts />
       </RouteWrapper>
     ),
@@ -174,7 +190,7 @@ const router = createBrowserRouter([
   {
     path: "/logIn",
     element: (
-      <RouteWrapper isPublicOnly={true}>
+      <RouteWrapper isPublicOnly>
         <Login />
       </RouteWrapper>
     ),
@@ -182,7 +198,7 @@ const router = createBrowserRouter([
   {
     path: "/terms",
     element: (
-      <RouteWrapper isPublicOnly={true}>
+      <RouteWrapper isPublicOnly>
         <Terms />
       </RouteWrapper>
     ),
@@ -190,7 +206,7 @@ const router = createBrowserRouter([
   {
     path: "/signUp",
     element: (
-      <RouteWrapper isPublicOnly={true}>
+      <RouteWrapper isPublicOnly>
         <SignUp />
       </RouteWrapper>
     ),
@@ -198,7 +214,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <RouteWrapper isPublicOnly={true}>
+      <RouteWrapper isPublicOnly>
         <Home />
       </RouteWrapper>
     ),
@@ -206,23 +222,37 @@ const router = createBrowserRouter([
   {
     path: "/home",
     element: (
-      <RouteWrapper isProtected={true}>
+      <RouteWrapper isProtected>
         <MainPg />
       </RouteWrapper>
     ),
   },
+
+  // ── Dashboard routes ─────────────────────────
+  {
+    path: "/analytics",
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout>
+          <Analytics />
+        </DashboardLayout>
+      </ProtectedRoute>
+    ),
+  },
 ]);
 
+// ─────────────────────────────────────────────
+// APP
+// ─────────────────────────────────────────────
 const App = () => {
-  const {checkAuth, user} = useAuthStore();
-  // console.log(user); got back allan
+  const {checkAuth} = useAuthStore();
 
   useEffect(() => {
     checkAuth();
   }, []);
 
   return (
-    <main className="">
+    <main>
       <RouterProvider router={router} />
     </main>
   );

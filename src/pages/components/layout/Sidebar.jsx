@@ -1,6 +1,7 @@
 import {NavLink} from "react-router-dom";
 import clsx from "clsx";
-import useUiStore from "../../store/uiStore.js";
+import useUiStore from "../../../store/uiStore";
+// import useUiStore from "../../store/uiStore.js";
 
 // ─────────────────────────────────────────────
 // NAV ITEMS PER ROLE

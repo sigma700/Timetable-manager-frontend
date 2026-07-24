@@ -1,4 +1,5 @@
-import useUiStore from "../../store/uiStore.js";
+// import useUiStore from "../../store/uiStore.js";
+import useUiStore from "../../../store/uiStore.js";
 import {RoleBadge} from "../ui/Badge.jsx";
 import clsx from "clsx";
 

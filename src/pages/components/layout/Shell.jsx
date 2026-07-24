@@ -1,8 +1,7 @@
 import Sidebar from "./Sidebar.jsx";
 import Topbar from "./Topbar.jsx";
-import useUiStore from "../../store/uiStore.js";
 import clsx from "clsx";
-
+import useUiStore from "../../../store/uiStore.js";
 /**
  * Shell — the outer dashboard layout wrapper.
  * Wraps every authenticated page with sidebar + topbar.
