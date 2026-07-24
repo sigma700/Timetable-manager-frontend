@@ -513,7 +513,9 @@ const Demo = () => {
   const [mounted, setMounted] = useState(false);
 
   // Navigation props
-  const userName = user || "Guest";
+  const userName = user
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+    : "Guest";
   const institutionName = "St. Mary's Academy";
   const notificationCount = 3;
 
@@ -585,8 +587,7 @@ const Demo = () => {
     transition: `opacity 0.55s ease ${delay}ms, transform 0.55s ease ${delay}ms`,
   });
 
-  const firstName = user ? user.split(" ")[0] : "there";
-
+  const firstName = user?.firstName || "there";
   if (authLoading) {
     return (
       <div

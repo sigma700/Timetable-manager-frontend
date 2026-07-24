@@ -587,7 +587,9 @@ const Create = () => {
   const navigate = useNavigate();
 
   // User data for Navigation
-  const userName = user || "Guest";
+  const userName = user
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+    : "Guest";
   const institutionName = "St. Mary's Academy";
   const notificationCount = 3;
 

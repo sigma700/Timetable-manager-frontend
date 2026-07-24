@@ -212,7 +212,9 @@ export default function Invite() {
   const countdown = useCountdown(47 * 3600 + 23 * 60 + 9);
 
   // Navigation props
-  const userName = user || "Guest";
+  const userName = user
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+    : "Guest";
   const institutionName = "St. Mary's Academy";
   const notificationCount = 3;
 
