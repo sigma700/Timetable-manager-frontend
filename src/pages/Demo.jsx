@@ -3,433 +3,101 @@ import {useAuthStore} from "../store/authStore";
 import {useSubStore} from "../store/subsidiary";
 import Navigation from "./components/navigation";
 
-// ─── Design tokens ──────────────────────────────────────────────────────────
-const tokens = {
-  surface0: "#0A0B0D",
-  surface1: "#111318",
-  surface2: "#181B22",
-  surface3: "#1E222C",
-  border: "rgba(255,255,255,0.07)",
-  borderHover: "rgba(255,255,255,0.13)",
-  text1: "#F0F2F7",
-  text2: "#8B8FA8",
-  text3: "#5A5E72",
+// ─── Tokens ───────────────────────────────────────────────────────────────────
+
+const tk = {
+  bg0: "#09090C",
+  bg1: "#0F1015",
+  bg2: "#14151C",
+  bg3: "#1A1B25",
+  bg4: "#1F2130",
+  border: "rgba(255,255,255,0.06)",
+  borderHov: "rgba(255,255,255,0.12)",
+  borderAccent: "rgba(79,110,247,0.38)",
+  text1: "#EDEEF5",
+  text2: "#8B90AA",
+  text3: "#52566A",
   accent: "#4F6EF7",
-  accentSubtle: "rgba(79,110,247,0.12)",
-  accentBorder: "rgba(79,110,247,0.35)",
+  accentHov: "#3D5CE8",
+  accentGlow: "rgba(79,110,247,0.18)",
+  accentSubtle: "rgba(79,110,247,0.09)",
   success: "#22C55E",
-  successSubtle: "rgba(34,197,94,0.10)",
+  successSubtle: "rgba(34,197,94,0.08)",
+  successBorder: "rgba(34,197,94,0.22)",
+  error: "#F87171",
+  errorSubtle: "rgba(248,113,113,0.07)",
+  errorBorder: "rgba(248,113,113,0.2)",
 };
 
-// ─── Inline styles (updated to work with fixed navbar) ──────────────────────
-const s = {
-  root: {
-    minHeight: "100vh",
-    background: tokens.surface0,
-    color: tokens.text1,
-    fontFamily: "'Inter', 'SF Pro Text', system-ui, sans-serif",
-    paddingTop: "68px", // space for fixed navbar
-  },
-  hero: {
-    maxWidth: 1120,
-    margin: "0 auto",
-    padding: "88px 48px 64px",
-  },
-  eyebrow: {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    fontSize: 12,
-    fontWeight: 500,
-    color: tokens.accent,
-    letterSpacing: "0.08em",
-    textTransform: "uppercase",
-    marginBottom: 24,
-    background: tokens.accentSubtle,
-    border: `1px solid ${tokens.accentBorder}`,
-    borderRadius: 20,
-    padding: "5px 12px",
-  },
-  heroTitle: {
-    fontSize: "clamp(36px, 5vw, 56px)",
-    fontWeight: 600,
-    lineHeight: 1.05,
-    letterSpacing: "-0.03em",
-    color: tokens.text1,
-    marginBottom: 20,
-    maxWidth: 640,
-  },
-  heroSub: {
-    fontSize: 17,
-    lineHeight: 1.65,
-    color: tokens.text2,
-    maxWidth: 520,
-    marginBottom: 48,
-  },
-  statsRow: {
-    display: "flex",
-    gap: 32,
-    flexWrap: "wrap",
-  },
-  stat: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 2,
-  },
-  statNum: {
-    fontSize: 22,
-    fontWeight: 600,
-    color: tokens.text1,
-    letterSpacing: "-0.03em",
-  },
-  statLabel: {
-    fontSize: 12,
-    color: tokens.text3,
-    fontWeight: 500,
-    letterSpacing: "0.02em",
-    textTransform: "uppercase",
-  },
-  divider: {
-    height: 1,
-    background: tokens.border,
-    maxWidth: 1120,
-    margin: "0 auto",
-  },
-  main: {
-    maxWidth: 1120,
-    margin: "0 auto",
-    padding: "64px 48px 80px",
-    display: "grid",
-    gridTemplateColumns: "1fr 1.1fr",
-    gap: 48,
-    alignItems: "start",
-  },
-  panel: {
-    background: tokens.surface1,
-    border: `1px solid ${tokens.border}`,
-    borderRadius: 16,
-    padding: 32,
-  },
-  panelTitle: {
-    fontSize: 13,
-    fontWeight: 600,
-    color: tokens.text2,
-    letterSpacing: "0.06em",
-    textTransform: "uppercase",
-    marginBottom: 24,
-  },
-  contactCard: {
-    display: "flex",
-    alignItems: "center",
-    gap: 16,
-    padding: "16px 20px",
-    background: tokens.surface2,
-    border: `1px solid ${tokens.border}`,
-    borderRadius: 12,
-    marginBottom: 12,
-    textDecoration: "none",
-    transition: "border-color 0.2s, background 0.2s",
-    cursor: "pointer",
-  },
-  iconBox: (color) => ({
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    background: color,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  }),
-  contactTitle: {
-    fontSize: 12,
-    color: tokens.text3,
-    fontWeight: 500,
-    marginBottom: 2,
-  },
-  contactValue: {
-    fontSize: 14,
-    fontWeight: 600,
-    color: tokens.text1,
-  },
-  benefitRow: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: 12,
-    padding: "12px 0",
-    borderBottom: `1px solid ${tokens.border}`,
-  },
-  checkBox: {
-    width: 20,
-    height: 20,
-    borderRadius: 6,
-    background: tokens.successSubtle,
-    border: `1px solid rgba(34,197,94,0.25)`,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-    marginTop: 1,
-  },
-  benefitText: {
-    fontSize: 14,
-    color: tokens.text2,
-    lineHeight: 1.5,
-  },
-  benefitStrong: {
-    color: tokens.text1,
-    fontWeight: 500,
-  },
-  formCard: {
-    background: tokens.surface1,
-    border: `1px solid ${tokens.border}`,
-    borderRadius: 16,
-    padding: 36,
-  },
-  formTitle: {
-    fontSize: 20,
-    fontWeight: 600,
-    color: tokens.text1,
-    letterSpacing: "-0.02em",
-    marginBottom: 6,
-  },
-  formSub: {
-    fontSize: 13,
-    color: tokens.text3,
-    marginBottom: 32,
-    lineHeight: 1.5,
-  },
-  fieldGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    display: "block",
-    fontSize: 12,
-    fontWeight: 500,
-    color: tokens.text2,
-    marginBottom: 7,
-    letterSpacing: "0.02em",
-  },
-  input: {
-    width: "100%",
-    background: tokens.surface2,
-    border: `1px solid ${tokens.border}`,
-    borderRadius: 10,
-    padding: "11px 14px",
-    fontSize: 14,
-    color: tokens.text1,
-    outline: "none",
-    boxSizing: "border-box",
-    transition: "border-color 0.2s, background 0.2s",
-    fontFamily: "inherit",
-  },
-  gridTwo: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: 16,
-  },
-  selectWrap: {
-    position: "relative",
-  },
-  select: {
-    width: "100%",
-    background: tokens.surface2,
-    border: `1px solid ${tokens.border}`,
-    borderRadius: 10,
-    padding: "11px 14px",
-    fontSize: 14,
-    color: tokens.text1,
-    outline: "none",
-    appearance: "none",
-    cursor: "pointer",
-    boxSizing: "border-box",
-    transition: "border-color 0.2s",
-    fontFamily: "inherit",
-  },
-  chevron: {
-    position: "absolute",
-    right: 12,
-    top: "50%",
-    transform: "translateY(-50%)",
-    pointerEvents: "none",
-    color: tokens.text3,
-  },
-  submitBtn: {
-    width: "100%",
-    padding: "13px 24px",
-    background: tokens.accent,
-    color: "#fff",
-    border: "none",
-    borderRadius: 10,
-    fontSize: 14,
-    fontWeight: 600,
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    transition: "background 0.2s, transform 0.1s",
-    marginTop: 28,
-    fontFamily: "inherit",
-    letterSpacing: "-0.01em",
-  },
-  formNote: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: 10,
-    marginTop: 16,
-    padding: "12px 14px",
-    background: tokens.surface2,
-    borderRadius: 10,
-    border: `1px solid ${tokens.border}`,
-  },
-  noteText: {
-    fontSize: 12,
-    color: tokens.text3,
-    lineHeight: 1.55,
-  },
-  successState: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    textAlign: "center",
-    padding: "40px 16px",
-  },
-  successIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: "50%",
-    background: tokens.successSubtle,
-    border: `1px solid rgba(34,197,94,0.25)`,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 24,
-  },
-  successTitle: {
-    fontSize: 20,
-    fontWeight: 600,
-    color: tokens.text1,
-    letterSpacing: "-0.02em",
-    marginBottom: 10,
-  },
-  successBody: {
-    fontSize: 14,
-    color: tokens.text2,
-    lineHeight: 1.65,
-    marginBottom: 28,
-    maxWidth: 340,
-  },
-  resetBtn: {
-    padding: "10px 22px",
-    background: tokens.surface3,
-    color: tokens.text1,
-    border: `1px solid ${tokens.border}`,
-    borderRadius: 10,
-    fontSize: 13,
-    fontWeight: 500,
-    cursor: "pointer",
-    fontFamily: "inherit",
-  },
-  confirmCard: {
-    background: tokens.surface2,
-    border: `1px solid ${tokens.accentBorder}`,
-    borderRadius: 12,
-    padding: "16px 20px",
-    marginTop: 24,
-    textAlign: "left",
-    width: "100%",
-  },
-  confirmLabel: {
-    fontSize: 11,
-    color: tokens.text3,
-    fontWeight: 600,
-    letterSpacing: "0.06em",
-    textTransform: "uppercase",
-    marginBottom: 12,
-  },
-  confirmRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    fontSize: 13,
-    paddingBottom: 8,
-    marginBottom: 8,
-    borderBottom: `1px solid ${tokens.border}`,
-  },
-  confirmKey: {
-    color: tokens.text3,
-  },
-  confirmVal: {
-    color: tokens.text1,
-    fontWeight: 500,
-  },
-};
+// ─── useInView ────────────────────────────────────────────────────────────────
 
-// ─── Micro-components (icons) ───────────────────────────────────────────────
-const PhoneIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12.6 19.79 19.79 0 0 1 1.59 4.1 2 2 0 0 1 3.56 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-  </svg>
-);
+function useInView(threshold = 0.12) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) setInView(true);
+      },
+      {threshold},
+    );
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return [ref, inView];
+}
 
-const MailIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-    <polyline points="22,6 12,13 2,6" />
-  </svg>
-);
+// ─── Icons ────────────────────────────────────────────────────────────────────
 
-const VideoIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <polygon points="23 7 16 12 23 17 23 7" />
-    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-  </svg>
-);
-
-const ArrowRight = ({size = 14}) => (
+const Icon = ({
+  d,
+  size = 18,
+  strokeWidth = 1.8,
+  children,
+  viewBox = "0 0 24 24",
+}) => (
   <svg
     width={size}
     height={size}
-    viewBox="0 0 24 24"
+    viewBox={viewBox}
     fill="none"
     stroke="currentColor"
-    strokeWidth="2"
+    strokeWidth={strokeWidth}
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <line x1="5" y1="12" x2="19" y2="12" />
-    <polyline points="12 5 19 12 12 19" />
+    {d ? <path d={d} /> : children}
   </svg>
 );
 
-const CheckIcon = ({size = 11, color = tokens.success}) => (
+const PhoneIcon = ({size = 18}) => (
+  <Icon size={size}>
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12.6 19.79 19.79 0 0 1 1.59 4.1 2 2 0 0 1 3.56 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+  </Icon>
+);
+
+const MailIcon = ({size = 18}) => (
+  <Icon size={size}>
+    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+    <polyline points="22,6 12,13 2,6" />
+  </Icon>
+);
+
+const VideoIcon = ({size = 14}) => (
+  <Icon size={size}>
+    <polygon points="23 7 16 12 23 17 23 7" />
+    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+  </Icon>
+);
+
+const ArrowRight = ({size = 14}) => (
+  <Icon size={size} strokeWidth={2}>
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
+  </Icon>
+);
+
+const Check = ({size = 11, color = tk.success}) => (
   <svg
     width={size}
     height={size}
@@ -444,47 +112,72 @@ const CheckIcon = ({size = 11, color = tokens.success}) => (
   </svg>
 );
 
-const ChevronDown = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
+const ChevronDown = ({size = 14}) => (
+  <Icon size={size} strokeWidth={2}>
     <polyline points="6 9 12 15 18 9" />
-  </svg>
+  </Icon>
 );
 
-// ─── Hook: focus styles ──────────────────────────────────────────────────────
-function useFocusStyle(base) {
-  const [focused, setFocused] = useState(false);
-  return {
-    style: {
-      ...base,
-      borderColor: focused ? tokens.accent : tokens.border,
-      background: focused ? "rgba(79,110,247,0.04)" : tokens.surface2,
-    },
-    onFocus: () => setFocused(true),
-    onBlur: () => setFocused(false),
-  };
-}
+const ShieldIcon = ({size = 13}) => (
+  <Icon size={size} strokeWidth={1.6}>
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </Icon>
+);
 
-// ─── Field Components ────────────────────────────────────────────────────────
-function Field({label, children}) {
+const ClockIcon = ({size = 13}) => (
+  <Icon size={size} strokeWidth={1.6}>
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </Icon>
+);
+
+const UsersIcon = ({size = 13}) => (
+  <Icon size={size} strokeWidth={1.6}>
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </Icon>
+);
+
+// ─── Field ────────────────────────────────────────────────────────────────────
+
+function Field({label, error, children}) {
   return (
-    <div style={s.fieldGroup}>
-      <label style={s.label}>{label}</label>
+    <div style={{marginBottom: 18}}>
+      <label
+        style={{
+          display: "block",
+          fontSize: 12,
+          fontWeight: 500,
+          color: tk.text2,
+          marginBottom: 7,
+          letterSpacing: "0.02em",
+        }}
+      >
+        {label}
+      </label>
       {children}
+      {error && (
+        <p
+          style={{fontSize: 11, color: tk.error, marginTop: 5, lineHeight: 1.4}}
+        >
+          {error}
+        </p>
+      )}
     </div>
   );
 }
 
-function TextInput({value, onChange, placeholder, type = "text", required}) {
-  const focus = useFocusStyle(s.input);
+function TextInput({
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  required,
+  hasError,
+}) {
+  const [focused, setFocused] = useState(false);
   return (
     <input
       type={type}
@@ -492,32 +185,235 @@ function TextInput({value, onChange, placeholder, type = "text", required}) {
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      {...focus}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      style={{
+        width: "100%",
+        boxSizing: "border-box",
+        background: focused ? "rgba(79,110,247,0.04)" : tk.bg2,
+        border: `1px solid ${hasError ? tk.errorBorder : focused ? tk.borderAccent : tk.border}`,
+        borderRadius: 10,
+        padding: "11px 14px",
+        fontSize: 14,
+        color: tk.text1,
+        outline: "none",
+        transition: "border-color 0.18s, background 0.18s",
+        fontFamily: "inherit",
+      }}
     />
   );
 }
 
-// ─── Main Component ──────────────────────────────────────────────────────────
+// ─── Stat chip ────────────────────────────────────────────────────────────────
+
+function StatChip({num, label, delay}) {
+  const [ref, inView] = useInView(0.3);
+  return (
+    <div
+      ref={ref}
+      style={{
+        opacity: inView ? 1 : 0,
+        transform: inView ? "translateY(0)" : "translateY(12px)",
+        transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms`,
+      }}
+    >
+      <div
+        style={{
+          padding: "16px 20px",
+          background: tk.bg2,
+          border: `1px solid ${tk.border}`,
+          borderRadius: 12,
+          minWidth: 100,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 22,
+            fontWeight: 600,
+            color: tk.text1,
+            letterSpacing: "-0.04em",
+            lineHeight: 1,
+            marginBottom: 5,
+          }}
+        >
+          {num}
+        </div>
+        <div
+          style={{
+            fontSize: 11,
+            color: tk.text3,
+            fontWeight: 500,
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+          }}
+        >
+          {label}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Contact card ─────────────────────────────────────────────────────────────
+
+function ContactCard({icon, iconBg, iconColor, label, value, href}) {
+  const [hov, setHov] = useState(false);
+  return (
+    <a
+      href={href}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        padding: "15px 18px",
+        background: hov ? tk.bg3 : tk.bg2,
+        border: `1px solid ${hov ? tk.borderHov : tk.border}`,
+        borderRadius: 12,
+        marginBottom: 10,
+        textDecoration: "none",
+        transition: "border-color 0.2s, background 0.2s, transform 0.2s",
+        transform: hov ? "translateX(3px)" : "translateX(0)",
+      }}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+    >
+      <div
+        style={{
+          width: 38,
+          height: 38,
+          borderRadius: 9,
+          background: iconBg,
+          color: iconColor,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          transition: "transform 0.2s",
+          transform: hov ? "scale(1.08)" : "scale(1)",
+        }}
+      >
+        {icon}
+      </div>
+      <div>
+        <div
+          style={{
+            fontSize: 11,
+            color: tk.text3,
+            fontWeight: 500,
+            marginBottom: 2,
+          }}
+        >
+          {label}
+        </div>
+        <div style={{fontSize: 13, fontWeight: 600, color: tk.text1}}>
+          {value}
+        </div>
+      </div>
+    </a>
+  );
+}
+
+// ─── Benefit row ──────────────────────────────────────────────────────────────
+
+function BenefitRow({title, desc, isLast, delay}) {
+  const [ref, inView] = useInView(0.1);
+  return (
+    <div
+      ref={ref}
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 12,
+        padding: "13px 0",
+        borderBottom: isLast ? "none" : `1px solid ${tk.border}`,
+        opacity: inView ? 1 : 0,
+        transform: inView ? "translateX(0)" : "translateX(-8px)",
+        transition: `opacity 0.4s ease ${delay}ms, transform 0.4s ease ${delay}ms`,
+      }}
+    >
+      <div
+        style={{
+          width: 20,
+          height: 20,
+          borderRadius: 6,
+          flexShrink: 0,
+          marginTop: 1,
+          background: tk.successSubtle,
+          border: `1px solid ${tk.successBorder}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Check />
+      </div>
+      <div>
+        <span style={{fontSize: 13, fontWeight: 600, color: tk.text1}}>
+          {title}
+        </span>
+        <span style={{fontSize: 13, color: tk.text2, lineHeight: 1.6}}>
+          {" "}
+          {desc}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Panel wrapper ────────────────────────────────────────────────────────────
+
+function Panel({title, children, style = {}}) {
+  return (
+    <div
+      style={{
+        background: tk.bg1,
+        border: `1px solid ${tk.border}`,
+        borderRadius: 16,
+        padding: 28,
+        ...style,
+      }}
+    >
+      {title && (
+        <p
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: tk.text3,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            marginBottom: 20,
+          }}
+        >
+          {title}
+        </p>
+      )}
+      {children}
+    </div>
+  );
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+
 const Demo = () => {
-  const {user, isLoading: authLoading, logout, checkAuth} = useAuthStore();
+  const {user, isLoading: authLoading} = useAuthStore();
   const {bookSess, isLoading, error} = useSubStore();
 
-  const [date, setSelectedDate] = useState("");
-  const [time, setSelectedTime] = useState("");
-  const [fullName, setName] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [schName, setInstitution] = useState("");
+  const [schName, setSchName] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [btnHover, setBtnHover] = useState(false);
-  const [hoveredContact, setHoveredContact] = useState(null);
+  const [btnHov, setBtnHov] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Navigation props
+  const [heroRef, heroInView] = useInView(0.05);
+  const [formRef, formInView] = useInView(0.05);
+  const [leftRef, leftInView] = useInView(0.05);
+
   const userName = user
     ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
     : "Guest";
-  const institutionName = "St. Mary's Academy";
-  const notificationCount = 3;
 
   const handleLogout = async () => {
     try {
@@ -528,9 +424,7 @@ const Demo = () => {
           credentials: "include",
         },
       );
-      if (res.ok) {
-        window.location.href = "/login";
-      }
+      if (res.ok) window.location.href = "/login";
     } catch (err) {
       console.error("Logout error", err);
     }
@@ -554,23 +448,23 @@ const Demo = () => {
 
   const benefits = [
     {
-      title: "Live timetable generation",
-      desc: "Watch Protiba resolve 600+ constraints in real time — rooms, teachers, periods, and clashes handled automatically.",
+      title: "Live timetable generation.",
+      desc: "Watch Protiba resolve 600+ constraints in real time. Rooms, teachers, periods, and clashes handled automatically.",
     },
     {
-      title: "Tailored to your institution",
+      title: "Tailored to your institution.",
       desc: "We configure a demo with your actual structure: departments, subjects, and staffing model.",
     },
     {
-      title: "Direct Q&A with founders",
+      title: "Direct Q&A with founders.",
       desc: "No sales scripts. Talk directly with the engineers who built the product.",
     },
     {
-      title: "Conflict detection showcase",
+      title: "Conflict detection showcase.",
       desc: "See how Protiba surfaces double-bookings, overloaded teachers, and policy violations instantly.",
     },
     {
-      title: "Implementation & pricing walkthrough",
+      title: "Implementation and pricing walkthrough.",
       desc: "Get a clear timeline and a quote scoped to your institution size.",
     },
   ];
@@ -581,384 +475,835 @@ const Demo = () => {
     setIsSubmitted(true);
   };
 
-  const fadeIn = (delay = 0) => ({
-    opacity: mounted ? 1 : 0,
-    transform: mounted ? "translateY(0)" : "translateY(18px)",
-    transition: `opacity 0.55s ease ${delay}ms, transform 0.55s ease ${delay}ms`,
-  });
-
   const firstName = user?.firstName || "there";
+
   if (authLoading) {
     return (
-      <div
-        style={{
-          background: tokens.surface0,
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div className="demo-loading-spinner" />
-      </div>
+      <>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <div
+          style={{
+            background: tk.bg0,
+            height: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 16,
+          }}
+        >
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              border: `2px solid ${tk.accentSubtle}`,
+              borderTopColor: tk.accent,
+              animation: "spin 0.75s linear infinite",
+            }}
+          />
+          <span style={{fontSize: 13, color: tk.text3}}>Loading</span>
+        </div>
+      </>
     );
   }
 
   return (
     <>
-      <style>
-        {`
-          @keyframes spin { to { transform: rotate(360deg); } }
-          .demo-loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(79,110,247,0.2);
-            border-top-color: #4F6EF7;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-          }
-        `}
-      </style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
 
-      {/* Navigation component – replaces old nav bar */}
+        * { box-sizing: border-box; }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+          filter: invert(0.5);
+          cursor: pointer;
+        }
+
+        .demo-select option {
+          background: #14151C;
+          color: #EDEEF5;
+        }
+
+        @media (max-width: 860px) {
+          .demo-main-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .demo-hero {
+            padding: 56px 20px 48px !important;
+          }
+          /* Stats row: 2x2 grid on mobile, no squeezing */
+          .demo-stats-row {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
+          }
+          .demo-stat-chip {
+            min-width: 0 !important;
+            flex: none !important;
+            width: 100% !important;
+          }
+          .demo-footer-strip {
+            flex-direction: column !important;
+            gap: 6px !important;
+            text-align: center;
+          }
+          .demo-main-wrap {
+            padding: 36px 20px 64px !important;
+          }
+          .demo-grid-two {
+            grid-template-columns: 1fr !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .demo-hero {
+            padding: 48px 16px 40px !important;
+          }
+          .demo-main-wrap {
+            padding: 28px 16px 56px !important;
+          }
+          .demo-eyebrow { font-size: 11px !important; }
+          .demo-hero-title { font-size: clamp(26px, 7vw, 40px) !important; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
+      `}</style>
+
       <Navigation
         userName={userName}
-        institutionName={institutionName}
-        notificationCount={notificationCount}
+        institutionName="Protiba"
+        notificationCount={3}
         onLogout={handleLogout}
       />
 
-      <div style={s.root}>
-        {/* ── Hero ── */}
-        <div style={s.hero}>
-          <div style={fadeIn(0)}>
-            <div style={s.eyebrow}>
-              <VideoIcon />
-              30-minute live session
-            </div>
+      <div
+        style={{
+          minHeight: "100vh",
+          background: tk.bg0,
+          color: tk.text1,
+          fontFamily: "'Inter', 'SF Pro Text', system-ui, sans-serif",
+          paddingTop: 64,
+        }}
+      >
+        {/* Ambient glows */}
+        <div
+          style={{
+            position: "fixed",
+            top: -200,
+            left: -100,
+            width: 600,
+            height: 600,
+            background:
+              "radial-gradient(circle, rgba(79,110,247,0.055) 0%, transparent 65%)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+        <div
+          style={{
+            position: "fixed",
+            bottom: -100,
+            right: -100,
+            width: 500,
+            height: 500,
+            background:
+              "radial-gradient(circle, rgba(139,92,246,0.04) 0%, transparent 65%)",
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+        />
+
+        {/* ── Hero ──────────────────────────────────────────────────────────── */}
+        <div
+          ref={heroRef}
+          className="demo-hero"
+          style={{
+            maxWidth: 1120,
+            margin: "0 auto",
+            padding: "80px 48px 64px",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          {/* Eyebrow */}
+          <div
+            className="demo-eyebrow"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 12,
+              fontWeight: 500,
+              color: tk.accent,
+              letterSpacing: "0.07em",
+              textTransform: "uppercase",
+              background: tk.accentSubtle,
+              border: `1px solid ${tk.borderAccent}`,
+              borderRadius: 20,
+              padding: "5px 13px",
+              marginBottom: 24,
+              opacity: heroInView ? 1 : 0,
+              transform: heroInView ? "translateY(0)" : "translateY(10px)",
+              transition: "opacity 0.5s ease, transform 0.5s ease",
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: tk.accent,
+                display: "inline-block",
+                animation: "pulse 2s infinite",
+              }}
+            />
+            30-minute live session
           </div>
 
-          <div style={fadeIn(80)}>
-            <h1 style={s.heroTitle}>
-              {firstName}, see your timetable generate itself.
-            </h1>
-          </div>
+          {/* Title */}
+          <h1
+            className="demo-hero-title"
+            style={{
+              fontSize: "clamp(30px, 4.5vw, 54px)",
+              fontWeight: 600,
+              lineHeight: 1.06,
+              letterSpacing: "-0.03em",
+              color: tk.text1,
+              marginBottom: 18,
+              maxWidth: 620,
+              opacity: heroInView ? 1 : 0,
+              transform: heroInView ? "translateY(0)" : "translateY(16px)",
+              transition:
+                "opacity 0.55s ease 0.08s, transform 0.55s ease 0.08s",
+            }}
+          >
+            {firstName !== "there" ? (
+              <>
+                {firstName}, see your timetable
+                <br />
+                generate itself.
+              </>
+            ) : (
+              <>
+                See your timetable
+                <br />
+                generate itself.
+              </>
+            )}
+          </h1>
 
-          <div style={fadeIn(140)}>
-            <p style={s.heroSub}>
-              Book a session and watch Protiba process your institution's
-              constraints — subjects, rooms, teachers, periods — and produce a
-              conflict-free schedule in under a minute.
-            </p>
-          </div>
+          {/* Subtitle */}
+          <p
+            style={{
+              fontSize: 16,
+              lineHeight: 1.72,
+              color: tk.text2,
+              maxWidth: 500,
+              marginBottom: 44,
+              opacity: heroInView ? 1 : 0,
+              transform: heroInView ? "translateY(0)" : "translateY(16px)",
+              transition:
+                "opacity 0.55s ease 0.16s, transform 0.55s ease 0.16s",
+            }}
+          >
+            Book a session and watch Protiba process your institution's
+            constraints — subjects, rooms, teachers, periods — and produce a
+            conflict-free schedule in under a minute.
+          </p>
 
-          <div style={{...s.statsRow, ...fadeIn(200)}}>
+          {/* Stats */}
+          <div
+            className="demo-stats-row"
+            style={{
+              display: "flex",
+              gap: 12,
+              flexWrap: "wrap",
+              opacity: heroInView ? 1 : 0,
+              transition: "opacity 0.55s ease 0.24s",
+            }}
+          >
             {[
               {n: "500+", l: "Demos conducted"},
               {n: "98%", l: "Satisfaction rate"},
-              {n: "<24 h", l: "Confirmation time"},
-              {n: "60 sec", l: "Avg. generation time"},
+              {n: "<24h", l: "Confirmation"},
+              {n: "60s", l: "Generation time"},
             ].map((st, i) => (
-              <div key={i} style={s.stat}>
-                <span style={s.statNum}>{st.n}</span>
-                <span style={s.statLabel}>{st.l}</span>
+              <div
+                key={i}
+                className="demo-stat-chip"
+                style={{
+                  padding: "14px 18px",
+                  background: tk.bg2,
+                  border: `1px solid ${tk.border}`,
+                  borderRadius: 12,
+                  minWidth: 108,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 21,
+                    fontWeight: 600,
+                    color: tk.text1,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1,
+                    marginBottom: 4,
+                  }}
+                >
+                  {st.n}
+                </div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: tk.text3,
+                    fontWeight: 500,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  {st.l}
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        <div style={s.divider} />
+        {/* Divider */}
+        <div
+          style={{
+            height: 1,
+            background: tk.border,
+            maxWidth: 1120,
+            margin: "0 auto",
+          }}
+        />
 
-        {/* ── Main content ── */}
-        <div style={{...s.main, ...fadeIn(260)}}>
-          {/* Left column */}
-          <div style={{display: "flex", flexDirection: "column", gap: 16}}>
-            {/* Contact */}
-            <div style={s.panel}>
-              <p style={s.panelTitle}>Contact us directly</p>
+        {/* ── Main grid ─────────────────────────────────────────────────────── */}
+        <div
+          className="demo-main-wrap"
+          style={{
+            maxWidth: 1120,
+            margin: "0 auto",
+            padding: "56px 48px 80px",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <div
+            className="demo-main-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1.08fr",
+              gap: 40,
+              alignItems: "start",
+            }}
+          >
+            {/* ── Left column ───────────────────────────────────────────────── */}
+            <div
+              ref={leftRef}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 16,
+                opacity: leftInView ? 1 : 0,
+                transform: leftInView ? "translateY(0)" : "translateY(24px)",
+                transition: "opacity 0.6s ease, transform 0.6s ease",
+              }}
+            >
+              {/* Contact */}
+              <Panel title="Contact us directly">
+                <ContactCard
+                  icon={<PhoneIcon />}
+                  iconBg="rgba(59,130,246,0.12)"
+                  iconColor="#3B82F6"
+                  label="Call us"
+                  value="(+254) 792 624 342"
+                  href="tel:+254792624342"
+                />
+                <ContactCard
+                  icon={<MailIcon />}
+                  iconBg="rgba(139,92,246,0.12)"
+                  iconColor="#8B5CF6"
+                  label="Email us"
+                  value="allankirimi65@gmail.com"
+                  href="mailto:allankirimi65@gmail.com"
+                />
+              </Panel>
 
-              {[
-                {
-                  id: "phone",
-                  icon: <PhoneIcon />,
-                  color: "rgba(59,130,246,0.15)",
-                  iconColor: "#3B82F6",
-                  label: "Call us",
-                  value: "(+254) 792 624 342",
-                  href: "tel:+254792624342",
-                },
-                {
-                  id: "email",
-                  icon: <MailIcon />,
-                  color: "rgba(139,92,246,0.15)",
-                  iconColor: "#8B5CF6",
-                  label: "Email us",
-                  value: "allankirimi65@gmail.com",
-                  href: "mailto:allankirimi65@gmail.com",
-                },
-              ].map((c) => (
-                <a
-                  key={c.id}
-                  href={c.href}
-                  style={{
-                    ...s.contactCard,
-                    borderColor:
-                      hoveredContact === c.id
-                        ? tokens.borderHover
-                        : tokens.border,
-                    background:
-                      hoveredContact === c.id
-                        ? tokens.surface3
-                        : tokens.surface2,
-                  }}
-                  onMouseEnter={() => setHoveredContact(c.id)}
-                  onMouseLeave={() => setHoveredContact(null)}
-                >
-                  <div style={{...s.iconBox(c.color), color: c.iconColor}}>
-                    {c.icon}
-                  </div>
-                  <div>
-                    <div style={s.contactTitle}>{c.label}</div>
-                    <div style={s.contactValue}>{c.value}</div>
-                  </div>
-                </a>
-              ))}
-            </div>
+              {/* Benefits */}
+              <Panel title="What happens in the demo">
+                {benefits.map((b, i) => (
+                  <BenefitRow
+                    key={i}
+                    title={b.title}
+                    desc={b.desc}
+                    isLast={i === benefits.length - 1}
+                    delay={i * 70}
+                  />
+                ))}
+              </Panel>
 
-            {/* Benefits */}
-            <div style={s.panel}>
-              <p style={s.panelTitle}>What happens in the demo</p>
-              {benefits.map((b, i) => (
-                <div
-                  key={i}
-                  style={{
-                    ...s.benefitRow,
-                    borderBottom:
-                      i < benefits.length - 1
-                        ? `1px solid ${tokens.border}`
-                        : "none",
-                    paddingTop: i === 0 ? 0 : 12,
-                  }}
-                >
-                  <div style={s.checkBox}>
-                    <CheckIcon />
-                  </div>
-                  <div style={s.benefitText}>
-                    <span style={s.benefitStrong}>{b.title} — </span>
-                    {b.desc}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right column — form */}
-          <div style={s.formCard}>
-            {isSubmitted ? (
-              <div style={s.successState}>
-                <div style={s.successIcon}>
-                  <CheckIcon size={26} color={tokens.success} />
-                </div>
-                <h2 style={s.successTitle}>Demo confirmed</h2>
-                <p style={s.successBody}>
-                  A Google Meet link and calendar invite are on their way to{" "}
-                  <strong style={{color: tokens.text1}}>{email}</strong>. We'll
-                  see you there.
-                </p>
-
-                {/* Confirmation card */}
-                <div style={s.confirmCard}>
-                  <div style={s.confirmLabel}>Your booking</div>
-                  {[
-                    ["Name", fullName],
-                    ["Institution", schName],
-                    ["Date", date],
-                    ["Time", time],
-                  ].map(([k, v], i) => (
-                    <div
-                      key={i}
-                      style={{
-                        ...s.confirmRow,
-                        borderBottom:
-                          i < 3 ? `1px solid ${tokens.border}` : "none",
-                        marginBottom: i < 3 ? 8 : 0,
-                        paddingBottom: i < 3 ? 8 : 0,
-                      }}
-                    >
-                      <span style={s.confirmKey}>{k}</span>
-                      <span style={s.confirmVal}>{v}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={() => {
-                    setIsSubmitted(false);
-                    setName("");
-                    setEmail("");
-                    setInstitution("");
-                    setSelectedDate("");
-                    setSelectedTime("");
-                  }}
-                  style={s.resetBtn}
-                >
-                  Book another session
-                </button>
-              </div>
-            ) : (
-              <>
-                <h2 style={s.formTitle}>Book your session</h2>
-                <p style={s.formSub}>
-                  30 minutes. No deck, no sales pitch — just a live product
-                  walkthrough built around your institution.
-                </p>
-
-                {error && (
+              {/* Trust strip */}
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 10,
+                  paddingTop: 4,
+                }}
+              >
+                {[
+                  {Icon: ShieldIcon, label: "Data encrypted at rest"},
+                  {Icon: ClockIcon, label: "Confirmed within 24h"},
+                  {Icon: UsersIcon, label: "Bring up to 3 colleagues"},
+                ].map(({Icon, label}) => (
                   <div
+                    key={label}
                     style={{
-                      fontSize: 13,
-                      color: "#F87171",
-                      background: "rgba(248,113,113,0.08)",
-                      border: "1px solid rgba(248,113,113,0.2)",
-                      borderRadius: 8,
-                      padding: "10px 14px",
-                      marginBottom: 20,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      fontSize: 11,
+                      color: tk.text3,
+                      background: tk.bg2,
+                      border: `1px solid ${tk.border}`,
+                      borderRadius: 20,
+                      padding: "5px 12px",
                     }}
                   >
-                    {error}
+                    <Icon />
+                    {label}
                   </div>
-                )}
+                ))}
+              </div>
+            </div>
 
-                <form onSubmit={handleSubmit}>
-                  <Field label="Full name">
-                    <TextInput
-                      required
-                      value={fullName}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Your full name"
-                    />
-                  </Field>
+            {/* ── Right column — form ───────────────────────────────────────── */}
+            <div
+              ref={formRef}
+              style={{
+                background: tk.bg1,
+                border: `1px solid ${tk.border}`,
+                borderRadius: 18,
+                padding: 36,
+                position: "relative",
+                overflow: "hidden",
+                opacity: formInView ? 1 : 0,
+                transform: formInView ? "translateY(0)" : "translateY(24px)",
+                transition: "opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s",
+              }}
+            >
+              {/* Top accent line */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 1,
+                  background: `linear-gradient(90deg, transparent, ${tk.borderAccent}, transparent)`,
+                }}
+              />
 
-                  <Field label="Work email">
-                    <TextInput
-                      required
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@institution.edu"
-                    />
-                  </Field>
+              {isSubmitted ? (
+                /* ── Success state ─────────────────────────────────────────── */
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center",
+                    padding: "32px 16px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: "50%",
+                      background: tk.successSubtle,
+                      border: `1px solid ${tk.successBorder}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: 22,
+                    }}
+                  >
+                    <Check size={24} />
+                  </div>
 
-                  <Field label="Institution name">
-                    <TextInput
-                      required
-                      value={schName}
-                      onChange={(e) => setInstitution(e.target.value)}
-                      placeholder="School, college, or university"
-                    />
-                  </Field>
+                  <h2
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 600,
+                      color: tk.text1,
+                      letterSpacing: "-0.02em",
+                      marginBottom: 10,
+                    }}
+                  >
+                    Demo confirmed
+                  </h2>
+                  <p
+                    style={{
+                      fontSize: 14,
+                      color: tk.text2,
+                      lineHeight: 1.7,
+                      marginBottom: 28,
+                      maxWidth: 320,
+                    }}
+                  >
+                    A Google Meet link and calendar invite are on their way to{" "}
+                    <strong style={{color: tk.text1, fontWeight: 500}}>
+                      {email}
+                    </strong>
+                    . We will see you there.
+                  </p>
 
-                  <div style={s.gridTwo}>
-                    <Field label="Date">
-                      <div style={{position: "relative"}}>
+                  {/* Booking summary */}
+                  <div
+                    style={{
+                      background: tk.bg2,
+                      border: `1px solid ${tk.borderAccent}`,
+                      borderRadius: 12,
+                      padding: "16px 20px",
+                      marginBottom: 24,
+                      textAlign: "left",
+                      width: "100%",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        color: tk.text3,
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        marginBottom: 14,
+                      }}
+                    >
+                      Your booking
+                    </p>
+                    {[
+                      ["Name", fullName],
+                      ["Institution", schName],
+                      ["Date", date],
+                      ["Time", time],
+                    ].map(([k, v], i, arr) => (
+                      <div
+                        key={i}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          fontSize: 13,
+                          paddingBottom: i < arr.length - 1 ? 10 : 0,
+                          marginBottom: i < arr.length - 1 ? 10 : 0,
+                          borderBottom:
+                            i < arr.length - 1
+                              ? `1px solid ${tk.border}`
+                              : "none",
+                        }}
+                      >
+                        <span style={{color: tk.text3}}>{k}</span>
+                        <span style={{color: tk.text1, fontWeight: 500}}>
+                          {v}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setIsSubmitted(false);
+                      setFullName("");
+                      setEmail("");
+                      setSchName("");
+                      setDate("");
+                      setTime("");
+                    }}
+                    style={{
+                      padding: "10px 22px",
+                      background: tk.bg3,
+                      color: tk.text1,
+                      border: `1px solid ${tk.border}`,
+                      borderRadius: 10,
+                      fontSize: 13,
+                      fontWeight: 500,
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      transition: "border-color 0.2s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.borderColor = tk.borderHov)
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.borderColor = tk.border)
+                    }
+                  >
+                    Book another session
+                  </button>
+                </div>
+              ) : (
+                /* ── Form ──────────────────────────────────────────────────── */
+                <>
+                  <h2
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 600,
+                      color: tk.text1,
+                      letterSpacing: "-0.02em",
+                      marginBottom: 6,
+                    }}
+                  >
+                    Book your session
+                  </h2>
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: tk.text3,
+                      marginBottom: 28,
+                      lineHeight: 1.55,
+                    }}
+                  >
+                    30 minutes. No deck, no sales pitch. A live walkthrough
+                    built around your institution.
+                  </p>
+
+                  {error && (
+                    <div
+                      style={{
+                        fontSize: 13,
+                        color: tk.error,
+                        background: tk.errorSubtle,
+                        border: `1px solid ${tk.errorBorder}`,
+                        borderRadius: 9,
+                        padding: "10px 14px",
+                        marginBottom: 20,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {error}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSubmit}>
+                    <Field label="Full name">
+                      <TextInput
+                        required
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Your full name"
+                      />
+                    </Field>
+
+                    <Field label="Work email">
+                      <TextInput
+                        required
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@institution.edu"
+                      />
+                    </Field>
+
+                    <Field label="Institution name">
+                      <TextInput
+                        required
+                        value={schName}
+                        onChange={(e) => setSchName(e.target.value)}
+                        placeholder="School, college, or university"
+                      />
+                    </Field>
+
+                    <div
+                      className="demo-grid-two"
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: 14,
+                      }}
+                    >
+                      <Field label="Date">
                         <TextInput
                           required
                           type="date"
                           value={date}
-                          onChange={(e) => setSelectedDate(e.target.value)}
+                          onChange={(e) => setDate(e.target.value)}
                         />
-                      </div>
-                    </Field>
+                      </Field>
 
-                    <Field label="Time">
-                      <div style={s.selectWrap}>
-                        <select
-                          required
-                          value={time}
-                          onChange={(e) => setSelectedTime(e.target.value)}
-                          style={s.select}
-                        >
-                          <option value="">Pick a slot</option>
-                          {timeSlots.map((t) => (
-                            <option key={t} value={t}>
-                              {t}
-                            </option>
-                          ))}
-                        </select>
-                        <span style={s.chevron}>
-                          <ChevronDown />
-                        </span>
-                      </div>
-                    </Field>
+                      <Field label="Time">
+                        <div style={{position: "relative"}}>
+                          <select
+                            required
+                            value={time}
+                            onChange={(e) => setTime(e.target.value)}
+                            className="demo-select"
+                            style={{
+                              width: "100%",
+                              boxSizing: "border-box",
+                              background: tk.bg2,
+                              border: `1px solid ${tk.border}`,
+                              borderRadius: 10,
+                              padding: "11px 36px 11px 14px",
+                              fontSize: 14,
+                              color: time ? tk.text1 : tk.text3,
+                              outline: "none",
+                              appearance: "none",
+                              cursor: "pointer",
+                              fontFamily: "inherit",
+                              transition: "border-color 0.18s",
+                            }}
+                            onFocus={(e) =>
+                              (e.currentTarget.style.borderColor =
+                                tk.borderAccent)
+                            }
+                            onBlur={(e) =>
+                              (e.currentTarget.style.borderColor = tk.border)
+                            }
+                          >
+                            <option value="">Pick a slot</option>
+                            {timeSlots.map((t) => (
+                              <option key={t} value={t}>
+                                {t}
+                              </option>
+                            ))}
+                          </select>
+                          <span
+                            style={{
+                              position: "absolute",
+                              right: 12,
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              pointerEvents: "none",
+                              color: tk.text3,
+                            }}
+                          >
+                            <ChevronDown />
+                          </span>
+                        </div>
+                      </Field>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      onMouseEnter={() => setBtnHov(true)}
+                      onMouseLeave={() => setBtnHov(false)}
+                      style={{
+                        width: "100%",
+                        padding: "13px 24px",
+                        background: btnHov ? tk.accentHov : tk.accent,
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: 10,
+                        fontSize: 14,
+                        fontWeight: 600,
+                        cursor: isLoading ? "not-allowed" : "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 8,
+                        marginTop: 24,
+                        fontFamily: "inherit",
+                        letterSpacing: "-0.01em",
+                        opacity: isLoading ? 0.65 : 1,
+                        transform:
+                          btnHov && !isLoading
+                            ? "translateY(-1px)"
+                            : "translateY(0)",
+                        boxShadow:
+                          btnHov && !isLoading
+                            ? "0 8px 24px rgba(79,110,247,0.32)"
+                            : "0 2px 8px rgba(79,110,247,0.16)",
+                        transition:
+                          "background 0.18s, transform 0.18s, box-shadow 0.18s, opacity 0.18s",
+                      }}
+                    >
+                      {isLoading ? "Scheduling..." : "Confirm session"}
+                      {!isLoading && <ArrowRight />}
+                    </button>
+                  </form>
+
+                  {/* Meet note */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 10,
+                      marginTop: 16,
+                      padding: "12px 14px",
+                      background: tk.bg2,
+                      borderRadius: 10,
+                      border: `1px solid ${tk.border}`,
+                    }}
+                  >
+                    <span
+                      style={{color: tk.text3, flexShrink: 0, marginTop: 1}}
+                    >
+                      <VideoIcon />
+                    </span>
+                    <span
+                      style={{fontSize: 12, color: tk.text3, lineHeight: 1.6}}
+                    >
+                      Google Meet link sent immediately after booking. No
+                      software to install. Bring up to 3 colleagues to the same
+                      session.
+                    </span>
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={isLoading}
+                  <p
                     style={{
-                      ...s.submitBtn,
-                      background: btnHover ? "#3D5CE8" : tokens.accent,
-                      transform: btnHover
-                        ? "translateY(-1px)"
-                        : "translateY(0)",
-                      boxShadow: btnHover
-                        ? "0 8px 24px rgba(79,110,247,0.35)"
-                        : "none",
-                      opacity: isLoading ? 0.7 : 1,
+                      fontSize: 11,
+                      color: tk.text3,
+                      marginTop: 14,
+                      textAlign: "center",
+                      lineHeight: 1.6,
                     }}
-                    onMouseEnter={() => setBtnHover(true)}
-                    onMouseLeave={() => setBtnHover(false)}
                   >
-                    {isLoading ? "Scheduling…" : "Confirm session"}
-                    {!isLoading && <ArrowRight />}
-                  </button>
-                </form>
-
-                <div style={s.formNote}>
-                  <span
-                    style={{color: tokens.text3, flexShrink: 0, marginTop: 1}}
-                  >
-                    <VideoIcon />
-                  </span>
-                  <span style={s.noteText}>
-                    Google Meet link sent immediately after booking. No software
-                    to install. Invite up to 3 colleagues to the same session.
-                  </span>
-                </div>
-
-                <p
-                  style={{
-                    fontSize: 11,
-                    color: tokens.text3,
-                    marginTop: 14,
-                    textAlign: "center",
-                    lineHeight: 1.6,
-                  }}
-                >
-                  By booking, you agree to our privacy policy. We will not share
-                  your data with third parties.
-                </p>
-              </>
-            )}
+                    By booking you agree to our privacy policy. We will not
+                    share your data with third parties.
+                  </p>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* ── Footer rule ── */}
-        <div style={{...s.divider, marginBottom: 0}} />
+        {/* Divider */}
         <div
+          style={{
+            height: 1,
+            background: tk.border,
+            maxWidth: 1120,
+            margin: "0 auto",
+          }}
+        />
+
+        {/* ── Footer strip ──────────────────────────────────────────────────── */}
+        <div
+          className="demo-footer-strip"
           style={{
             maxWidth: 1120,
             margin: "0 auto",
-            padding: "24px 48px",
+            padding: "22px 48px",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            flexWrap: "wrap",
+            gap: 8,
           }}
         >
-          <span style={{fontSize: 12, color: tokens.text3}}>
-            © 2025 Protiba. Academic scheduling infrastructure.
+          <span style={{fontSize: 12, color: tk.text3}}>
+            2025 Protiba. Academic scheduling infrastructure.
           </span>
-          <span style={{fontSize: 12, color: tokens.text3}}>
+          <span style={{fontSize: 12, color: tk.text3}}>
             Kenya · protiba.com
           </span>
         </div>
