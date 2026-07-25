@@ -1,6 +1,8 @@
 import React, {useState, useEffect, useRef} from "react";
 import {Link} from "react-router-dom";
 import {useAuthStore} from "../store/authStore";
+import Footer from "./components/footer";
+import Navigation from "./components/navigation";
 
 // ─── Intersection observer hook for scroll reveals ────────────────────────────
 function useInView(threshold = 0.15) {
@@ -849,108 +851,7 @@ const UserManual = () => {
         }}
       />
 
-      {/* ── Top nav ── */}
-      <nav
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 50,
-          backdropFilter: "blur(16px)",
-          background: "rgba(13,20,32,0.8)",
-          borderBottom: "0.5px solid rgba(255,255,255,0.06)",
-          padding: "14px 0",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 1000,
-            margin: "0 auto",
-            padding: "0 24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Link
-            to="/"
-            style={{
-              textDecoration: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
-          >
-            <div
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: 7,
-                background: "linear-gradient(135deg, #f59e0b, #d97706)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 13,
-                fontWeight: 700,
-                color: "#fff",
-              }}
-            >
-              P
-            </div>
-            <span
-              style={{
-                fontSize: 16,
-                fontWeight: 500,
-                background: "linear-gradient(120deg,#fbbf24,#d97706)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              Protiba
-            </span>
-          </Link>
-          <div style={{display: "flex", alignItems: "center", gap: 8}}>
-            <Link
-              to="/login"
-              style={{
-                fontSize: 13,
-                color: "#64748b",
-                textDecoration: "none",
-                padding: "6px 14px",
-                borderRadius: 8,
-                transition: "color 0.15s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#e2e8f0")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#64748b")}
-            >
-              Log in
-            </Link>
-            <Link
-              to="/signup"
-              style={{
-                fontSize: 13,
-                fontWeight: 500,
-                color: "#fff",
-                textDecoration: "none",
-                padding: "7px 16px",
-                borderRadius: 8,
-                background: "rgba(99,102,241,0.85)",
-                border: "0.5px solid rgba(99,102,241,0.5)",
-                transition: "all 0.18s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(99,102,241,0.95)";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(99,102,241,0.85)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              Get started
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* ── Hero ── */}
       <div

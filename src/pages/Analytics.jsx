@@ -1,4 +1,5 @@
-import {useState, lazy, Suspense, useMemo, useCallback} from "react";
+import {useState, useEffect, useRef, memo} from "react";
+import {motion, AnimatePresence} from "framer-motion";
 import {
   BarChart,
   Bar,
@@ -12,339 +13,301 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import {motion, AnimatePresence} from "framer-motion";
-
-// Lucide icons – no emojis
 import {
   Users,
   BookOpen,
   School,
   ClipboardList,
-  Clock,
-  CalendarDays,
-  TrendingUp,
-  TrendingDown,
+  GraduationCap,
+  Activity,
   ShieldCheck,
   TriangleAlert,
   CircleAlert,
   BarChart3,
-  PieChartIcon,
-  Activity,
+  TrendingUp,
   Sparkles,
-  Database,
-  GraduationCap,
-  UserRoundCheck,
-  AlertCircle,
-  Inbox,
+  Clock3,
+  CalendarDays,
+  ChevronRight,
 } from "lucide-react";
 
-// hooks – unchanged
 import {
   useAnalyticsOverview,
   useSubjectDistribution,
   useTeacherWorkload,
   useTimetableHealth,
-} from "../hooks/useAnalytics";
-import {useRecentActivity} from "../hooks/useActivity";
+} from "../hooks/useAnalytics.js";
+import {useRecentActivity} from "../hooks/useActivity.js";
+import MetricCard from "./components/ui/metricCard.jsx";
+import HealthScoreCard from "./components/ui/HealthScoreCard.jsx";
+import Table from "./components/ui/Table.jsx";
+import Badge, {HealthBadge} from "./components/ui/Badge.jsx";
+import {MetricGridSkeleton} from "./components/ui/Skeleton.jsx";
+import EmptyState from "./components/ui/EmptyState.jsx";
+import Footer from "./components/footer.jsx";
 
-// ----------------------------------------------------------------------
-// Design tokens – consistent spacing, shadows, radii
-// ----------------------------------------------------------------------
-const cardClasses =
-  "bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200";
+// ─────────────────────────────────────────────
+// DESIGN TOKENS
+// ─────────────────────────────────────────────
+const CHART_COLORS = [
+  "#0b69ff",
+  "#7c3aed",
+  "#10b981",
+  "#f59e0b",
+  "#ef4444",
+  "#3b82f6",
+  "#8b5cf6",
+  "#06b6d4",
+];
 
-const motionContainer = {
-  hidden: {opacity: 0},
+// ─────────────────────────────────────────────
+// MOTION VARIANTS
+// ─────────────────────────────────────────────
+const fadeUp = {
+  hidden: {opacity: 0, y: 16},
   show: {
     opacity: 1,
-    transition: {staggerChildren: 0.05, delayChildren: 0.1},
+    y: 0,
+    transition: {duration: 0.35, ease: [0.16, 1, 0.3, 1]},
   },
 };
 
-const motionItem = {
-  hidden: {opacity: 0, y: 12},
-  show: {opacity: 1, y: 0, transition: {duration: 0.35, ease: "easeOut"}},
+const stagger = {
+  hidden: {},
+  show: {transition: {staggerChildren: 0.07}},
 };
 
-// ----------------------------------------------------------------------
-// Chart colors – more refined palette
-// ----------------------------------------------------------------------
-const CHART_COLORS = [
-  "#2563eb",
-  "#7c3aed",
-  "#059669",
-  "#d97706",
-  "#dc2626",
-  "#0891b2",
-  "#4f46e5",
-  "#be185d",
-];
+const tabContent = {
+  hidden: {opacity: 0, y: 10},
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {duration: 0.28, ease: [0.16, 1, 0.3, 1]},
+  },
+  exit: {opacity: 0, y: -6, transition: {duration: 0.18}},
+};
 
-// ----------------------------------------------------------------------
-// Custom tooltip (premium)
-// ----------------------------------------------------------------------
-const ChartTooltip = ({active, payload, label}) => {
+// ─────────────────────────────────────────────
+// COUNT-UP HOOK
+// ─────────────────────────────────────────────
+const useCountUp = (target, duration = 900) => {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    if (typeof target !== "number") return;
+    let start = null;
+    const step = (ts) => {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(ease * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [target, duration]);
+  return value;
+};
+
+// ─────────────────────────────────────────────
+// ANIMATED METRIC CARD
+// ─────────────────────────────────────────────
+const AnimatedMetricCard = memo(({label, value, Icon, color, description}) => {
+  const numericValue = typeof value === "number" ? value : null;
+  const animated = useCountUp(numericValue ?? 0);
+
+  const colorMap = {
+    primary: {
+      bg: "rgba(11,105,255,0.08)",
+      text: "#0b69ff",
+      border: "rgba(11,105,255,0.15)",
+    },
+    accent: {
+      bg: "rgba(124,58,237,0.08)",
+      text: "#7c3aed",
+      border: "rgba(124,58,237,0.15)",
+    },
+    success: {
+      bg: "rgba(16,185,129,0.08)",
+      text: "#10b981",
+      border: "rgba(16,185,129,0.15)",
+    },
+    warning: {
+      bg: "rgba(245,158,11,0.08)",
+      text: "#f59e0b",
+      border: "rgba(245,158,11,0.15)",
+    },
+    danger: {
+      bg: "rgba(239,68,68,0.08)",
+      text: "#ef4444",
+      border: "rgba(239,68,68,0.15)",
+    },
+  };
+  const c = colorMap[color] ?? colorMap.primary;
+
+  return (
+    <motion.div
+      variants={fadeUp}
+      whileHover={{y: -2, transition: {duration: 0.2}}}
+      className="card group cursor-default select-none"
+      style={{borderColor: "var(--color-border)"}}
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div
+          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+          style={{background: c.bg, border: `1px solid ${c.border}`}}
+        >
+          {Icon && <Icon size={16} strokeWidth={1.8} style={{color: c.text}} />}
+        </div>
+        <TrendingUp
+          size={12}
+          style={{color: "var(--color-subtle)"}}
+          className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+        />
+      </div>
+
+      <p
+        className="text-xs font-medium uppercase tracking-wide mb-1"
+        style={{color: "var(--color-muted)", letterSpacing: "0.06em"}}
+      >
+        {label}
+      </p>
+
+      <p
+        className="text-3xl font-bold tabular-nums leading-none mb-1"
+        style={{color: "var(--color-text)"}}
+      >
+        {numericValue !== null ? animated : (value ?? "—")}
+      </p>
+
+      {description && (
+        <p className="text-xs mt-1" style={{color: "var(--color-subtle)"}}>
+          {description}
+        </p>
+      )}
+    </motion.div>
+  );
+});
+
+// ─────────────────────────────────────────────
+// PREMIUM CHART TOOLTIP
+// ─────────────────────────────────────────────
+const PremiumTooltip = ({active, payload, label}) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-xl shadow-lg p-3 text-xs">
+    <div
+      style={{
+        background: "var(--color-card)",
+        border: "1px solid var(--color-border)",
+        borderRadius: 10,
+        padding: "10px 14px",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+        fontSize: 12,
+        minWidth: 120,
+      }}
+    >
       {label && (
-        <p className="text-[var(--color-muted)] mb-1 font-medium">{label}</p>
+        <p style={{color: "var(--color-muted)", marginBottom: 6, fontSize: 11}}>
+          {label}
+        </p>
       )}
       {payload.map((entry) => (
-        <p
-          key={entry.name}
-          className="font-semibold"
-          style={{color: entry.color}}
-        >
-          {entry.name}: {entry.value}
-        </p>
+        <div key={entry.name} className="flex items-center gap-2">
+          <div
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: entry.color,
+            }}
+          />
+          <p style={{color: "var(--color-text)", fontWeight: 600}}>
+            {entry.name}:{" "}
+            <span style={{color: entry.color}}>{entry.value}</span>
+          </p>
+        </div>
       ))}
     </div>
   );
 };
 
-// ----------------------------------------------------------------------
-// Section Header with Lucide icon
-// ----------------------------------------------------------------------
-const SectionHeader = ({title, subtitle, icon: Icon}) => (
-  <motion.div variants={motionItem} className="mb-6">
-    <div className="flex items-center gap-3 mb-1">
-      {Icon && (
-        <div className="p-2 rounded-lg bg-[var(--color-border)]">
-          <Icon
-            className="w-5 h-5 text-[var(--color-text)]"
-            strokeWidth={1.5}
-          />
-        </div>
-      )}
-      <h2 className="text-lg font-semibold tracking-tight text-[var(--color-text)]">
+// ─────────────────────────────────────────────
+// SECTION HEADER
+// ─────────────────────────────────────────────
+const SectionHeader = ({title, subtitle, action}) => (
+  <div className="flex items-start justify-between mb-5">
+    <div>
+      <h2
+        style={{
+          fontSize: 14,
+          fontWeight: 600,
+          color: "var(--color-text)",
+          marginBottom: 2,
+        }}
+      >
         {title}
       </h2>
+      {subtitle && (
+        <p style={{fontSize: 12, color: "var(--color-muted)"}}>{subtitle}</p>
+      )}
     </div>
-    {subtitle && (
-      <p className="text-sm text-[var(--color-muted)] ml-11">{subtitle}</p>
-    )}
-  </motion.div>
+    {action}
+  </div>
 );
 
-// ----------------------------------------------------------------------
-// Premium Metric Card
-// ----------------------------------------------------------------------
-const MetricCard = ({label, value, icon: Icon, color, trend, description}) => {
-  const colorMap = {
-    primary: "bg-blue-50 text-blue-600",
-    accent: "bg-purple-50 text-purple-600",
-    success: "bg-emerald-50 text-emerald-600",
-    warning: "bg-amber-50 text-amber-600",
-    danger: "bg-red-50 text-red-600",
-    neutral: "bg-gray-100 text-gray-600",
-  };
-
-  return (
-    <motion.div
-      variants={motionItem}
-      whileHover={{y: -2, transition: {duration: 0.2}}}
-      className={`${cardClasses} flex flex-col gap-3`}
-    >
-      <div className="flex items-center justify-between">
-        <div
-          className={`p-2.5 rounded-xl ${colorMap[color] || colorMap.neutral}`}
-        >
-          <Icon className="w-5 h-5" strokeWidth={1.5} />
-        </div>
-        {trend && (
-          <span
-            className={`text-xs font-medium flex items-center gap-1 ${
-              trend > 0 ? "text-emerald-600" : "text-red-500"
-            }`}
-          >
-            {trend > 0 ? (
-              <TrendingUp className="w-3.5 h-3.5" />
-            ) : (
-              <TrendingDown className="w-3.5 h-3.5" />
-            )}
-            {Math.abs(trend)}%
-          </span>
-        )}
-      </div>
-      <div>
-        <p className="text-sm text-[var(--color-muted)]">{label}</p>
-        <p className="text-2xl font-bold tracking-tight text-[var(--color-text)]">
-          {value}
-        </p>
-        {description && (
-          <p className="text-xs text-[var(--color-muted)] mt-1">
-            {description}
-          </p>
-        )}
-      </div>
-    </motion.div>
-  );
+// ─────────────────────────────────────────────
+// ACTIVITY FEED
+// ─────────────────────────────────────────────
+const categoryConfig = {
+  AUTH: {color: "#3b82f6", label: "Auth"},
+  INSTITUTION: {color: "#7c3aed", label: "Institution"},
+  TEACHER: {color: "#0b69ff", label: "Teacher"},
+  SUBJECT: {color: "#10b981", label: "Subject"},
+  CLASS: {color: "#f59e0b", label: "Class"},
+  TIMETABLE: {color: "#9aa4b2", label: "Timetable"},
 };
 
-// ----------------------------------------------------------------------
-// Hero Health Score Ring (animated)
-// ----------------------------------------------------------------------
-const HealthScoreRing = ({data, loading}) => {
-  const score = data?.healthScore ?? 0;
-  const category = data?.category ?? "Unknown";
-  const radius = 70;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (Math.min(score, 100) / 100) * circumference;
+const formatTimeAgo = (dateStr) => {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+};
 
-  const categoryConfig = {
-    Excellent: {color: "#059669", bg: "bg-emerald-50 text-emerald-700"},
-    Good: {color: "#2563eb", bg: "bg-blue-50 text-blue-700"},
-    Fair: {color: "#d97706", bg: "bg-amber-50 text-amber-700"},
-    Poor: {color: "#dc2626", bg: "bg-red-50 text-red-700"},
-  };
-
-  const {color, bg} = categoryConfig[category] || categoryConfig.Fair;
-
+const ActivityTimeline = ({activities, loading}) => {
   if (loading) {
     return (
-      <div className={cardClasses}>
-        <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-36 h-36 rounded-full bg-[var(--color-border)]" />
-          <div className="h-4 w-24 rounded bg-[var(--color-border)]" />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <motion.div
-      variants={motionItem}
-      className={`${cardClasses} flex flex-col items-center text-center`}
-    >
-      <div className="relative mb-4">
-        <svg width="160" height="160" className="transform -rotate-90">
-          <circle
-            cx="80"
-            cy="80"
-            r={radius}
-            fill="none"
-            stroke="var(--color-border)"
-            strokeWidth="10"
-          />
-          <motion.circle
-            cx="80"
-            cy="80"
-            r={radius}
-            fill="none"
-            stroke={color}
-            strokeWidth="10"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            initial={{strokeDashoffset: circumference}}
-            animate={{strokeDashoffset: offset}}
-            transition={{duration: 1.5, ease: "easeOut"}}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <motion.span
-            className="text-4xl font-bold tabular-nums text-[var(--color-text)]"
-            initial={{opacity: 0}}
-            animate={{opacity: 1}}
-            transition={{delay: 0.5}}
-          >
-            {score}
-          </motion.span>
-          <span className="text-sm text-[var(--color-muted)]">/100</span>
-        </div>
-      </div>
-      <span className={`px-3 py-1 rounded-full text-sm font-medium ${bg}`}>
-        {category}
-      </span>
-      <p className="text-xs text-[var(--color-muted)] mt-2 max-w-[200px]">
-        {score >= 80
-          ? "Your timetable is well balanced."
-          : score >= 60
-            ? "Some areas need attention."
-            : "Significant improvements needed."}
-      </p>
-    </motion.div>
-  );
-};
-
-// ----------------------------------------------------------------------
-// Activity feed item
-// ----------------------------------------------------------------------
-const ActivityItem = ({activity}) => {
-  const eventName = activity.event?.replace(/_/g, " ");
-  const variantColors = {
-    AUTH: "bg-blue-100 text-blue-600",
-    INSTITUTION: "bg-purple-100 text-purple-600",
-    TEACHER: "bg-indigo-100 text-indigo-600",
-    SUBJECT: "bg-emerald-100 text-emerald-600",
-    CLASS: "bg-amber-100 text-amber-600",
-    TIMETABLE: "bg-gray-100 text-gray-600",
-  };
-
-  const badgeClass =
-    variantColors[activity.eventCategory] || variantColors.TIMETABLE;
-
-  const timeAgo = (dateStr) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "just now";
-    if (mins < 60) return `${mins}m`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h`;
-    return `${Math.floor(hrs / 24)}d`;
-  };
-
-  return (
-    <motion.div
-      variants={motionItem}
-      className="flex items-center gap-4 py-3 px-2 -mx-2 rounded-xl hover:bg-[var(--color-hover)] transition-colors"
-    >
-      <div className="relative flex-shrink-0">
-        <div className="w-2.5 h-2.5 rounded-full bg-primary shadow-glow" />
-        <div className="absolute left-1/2 top-full w-px h-5 bg-[var(--color-border)] -translate-x-1/2 hidden last:hidden" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[var(--color-text)] truncate">
-          {eventName}
-        </p>
-        <p className="text-xs text-[var(--color-muted)] truncate">
-          {activity.userId?.firstName} {activity.userId?.lastName}
-        </p>
-      </div>
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <span className={`px-2 py-0.5 text-xs rounded-full ${badgeClass}`}>
-          {activity.eventCategory}
-        </span>
-        <span className="text-xs text-[var(--color-muted)] tabular-nums w-10 text-right">
-          {timeAgo(activity.createdAt)}
-        </span>
-      </div>
-    </motion.div>
-  );
-};
-
-// ----------------------------------------------------------------------
-// Responsive table that becomes stacked cards on mobile
-// ----------------------------------------------------------------------
-const ResponsiveTable = ({
-  columns,
-  data,
-  loading,
-  emptyTitle,
-  emptyMessage,
-}) => {
-  if (loading) {
-    return (
-      <div className="space-y-3">
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className="animate-pulse flex gap-4 p-4 rounded-xl bg-[var(--color-card)] border border-[var(--color-border)]"
-          >
-            <div className="h-10 w-10 rounded-full bg-[var(--color-border)]" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 w-1/3 rounded bg-[var(--color-border)]" />
-              <div className="h-3 w-1/4 rounded bg-[var(--color-border)]" />
+      <div className="space-y-4 py-2">
+        {Array.from({length: 5}).map((_, i) => (
+          <div key={i} className="flex gap-3 animate-pulse">
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: "var(--color-border)",
+                flexShrink: 0,
+              }}
+            />
+            <div style={{flex: 1}}>
+              <div
+                style={{
+                  height: 10,
+                  width: "60%",
+                  borderRadius: 6,
+                  background: "var(--color-border)",
+                  marginBottom: 6,
+                }}
+              />
+              <div
+                style={{
+                  height: 10,
+                  width: "40%",
+                  borderRadius: 6,
+                  background: "var(--color-border)",
+                }}
+              />
             </div>
           </div>
         ))}
@@ -352,204 +315,822 @@ const ResponsiveTable = ({
     );
   }
 
-  if (!data || data.length === 0) {
+  if (!activities?.length) {
     return (
-      <motion.div variants={motionItem} className={cardClasses}>
-        <div className="flex flex-col items-center text-center py-8">
-          <div className="p-4 rounded-full bg-[var(--color-border)] mb-4">
-            <Inbox className="w-8 h-8 text-[var(--color-muted)]" />
-          </div>
-          <h3 className="text-lg font-semibold text-[var(--color-text)] mb-1">
-            {emptyTitle}
-          </h3>
-          <p className="text-sm text-[var(--color-muted)] max-w-md">
-            {emptyMessage}
-          </p>
-        </div>
-      </motion.div>
+      <div style={{padding: "32px 0", textAlign: "center"}}>
+        <Activity
+          size={28}
+          style={{color: "var(--color-border)", margin: "0 auto 12px"}}
+        />
+        <p style={{fontSize: 13, color: "var(--color-muted)", fontWeight: 500}}>
+          No activity yet
+        </p>
+        <p style={{fontSize: 12, color: "var(--color-subtle)", marginTop: 4}}>
+          Events appear here as your institution uses the platform.
+        </p>
+      </div>
     );
   }
 
   return (
-    <motion.div variants={motionItem}>
-      {/* Desktop table */}
-      <div className="hidden md:block overflow-hidden rounded-2xl border border-[var(--color-border)]">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-[var(--color-bg-secondary)]">
-              {columns.map((col) => (
-                <th
-                  key={col.key}
-                  className="px-4 py-3 text-left text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider"
-                >
-                  {col.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--color-border)]">
-            {data.map((row, i) => (
-              <tr
-                key={i}
-                className="hover:bg-[var(--color-hover)] transition-colors"
-              >
-                {columns.map((col) => (
-                  <td
-                    key={col.key}
-                    className="px-4 py-3 text-sm text-[var(--color-text)]"
-                  >
-                    {col.render ? col.render(row[col.key], row) : row[col.key]}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className="relative">
+      {/* Vertical line */}
+      <div
+        style={{
+          position: "absolute",
+          left: 13,
+          top: 14,
+          bottom: 14,
+          width: 1,
+          background: "var(--color-border)",
+          zIndex: 0,
+        }}
+      />
 
-      {/* Mobile cards */}
-      <div className="md:hidden space-y-3">
-        {data.map((row, i) => (
-          <motion.div
-            key={i}
-            variants={motionItem}
-            className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-2xl p-4 space-y-3"
-          >
-            {columns.map((col) => (
-              <div key={col.key} className="flex items-center justify-between">
-                <span className="text-xs font-medium text-[var(--color-muted)] uppercase tracking-wider">
-                  {col.label}
-                </span>
-                <span className="text-sm text-[var(--color-text)] font-medium">
-                  {col.render ? col.render(row[col.key], row) : row[col.key]}
-                </span>
+      <div className="space-y-1">
+        {activities.map((activity, i) => {
+          const cfg = categoryConfig[activity.eventCategory] ?? {
+            color: "#9aa4b2",
+            label: activity.eventCategory,
+          };
+          return (
+            <motion.div
+              key={activity._id || i}
+              initial={{opacity: 0, x: -8}}
+              animate={{opacity: 1, x: 0}}
+              transition={{delay: i * 0.04, duration: 0.25}}
+              className="flex gap-3 relative z-10"
+              style={{padding: "6px 0"}}
+            >
+              {/* Dot */}
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  flexShrink: 0,
+                  background: "var(--color-card)",
+                  border: `2px solid ${cfg.color}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: "50%",
+                    background: cfg.color,
+                  }}
+                />
               </div>
-            ))}
-          </motion.div>
-        ))}
+
+              <div style={{flex: 1, minWidth: 0, paddingTop: 4}}>
+                <div className="flex items-center justify-between gap-2">
+                  <p
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: "var(--color-text)",
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {activity.event?.replace(/_/g, " ")}
+                  </p>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: "var(--color-subtle)",
+                      whiteSpace: "nowrap",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {formatTimeAgo(activity.createdAt)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  {(activity.userId?.firstName ||
+                    activity.userId?.lastName) && (
+                    <span style={{fontSize: 11, color: "var(--color-muted)"}}>
+                      {activity.userId?.firstName} {activity.userId?.lastName}
+                    </span>
+                  )}
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 500,
+                      padding: "1px 7px",
+                      borderRadius: 20,
+                      background: `${cfg.color}18`,
+                      color: cfg.color,
+                      border: `1px solid ${cfg.color}30`,
+                    }}
+                  >
+                    {cfg.label}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
-// ----------------------------------------------------------------------
-// Lazy-loaded chart wrappers with motion
-// ----------------------------------------------------------------------
-const MotionBarChart = motion(
-  lazy(() =>
-    Promise.resolve({
-      default: ({data, dataKey, name, color, layout, height}) => (
-        <ResponsiveContainer width="100%" height={height || 280}>
-          <BarChart
-            data={data}
-            layout={layout}
-            margin={{
-              top: 5,
-              right: 20,
-              left: layout === "vertical" ? 0 : -15,
-              bottom: 5,
+// ─────────────────────────────────────────────
+// PREMIUM HEALTH RING (replaces basic HealthScoreCard)
+// ─────────────────────────────────────────────
+const PremiumHealthCard = ({data, loading}) => {
+  const animatedScore = useCountUp(data?.healthScore ?? 0, 1200);
+
+  const scoreColor = (s) => {
+    if (s >= 80) return "#10b981";
+    if (s >= 60) return "#3b82f6";
+    if (s >= 40) return "#f59e0b";
+    return "#ef4444";
+  };
+
+  const categoryBg = (cat) => {
+    const map = {
+      Excellent: {
+        bg: "rgba(16,185,129,0.1)",
+        text: "#10b981",
+        border: "rgba(16,185,129,0.2)",
+      },
+      Good: {
+        bg: "rgba(59,130,246,0.1)",
+        text: "#3b82f6",
+        border: "rgba(59,130,246,0.2)",
+      },
+      "Needs Attention": {
+        bg: "rgba(245,158,11,0.1)",
+        text: "#f59e0b",
+        border: "rgba(245,158,11,0.2)",
+      },
+      Critical: {
+        bg: "rgba(239,68,68,0.1)",
+        text: "#ef4444",
+        border: "rgba(239,68,68,0.2)",
+      },
+    };
+    return map[cat] ?? map.Good;
+  };
+
+  if (loading) {
+    return (
+      <div className="card" style={{minHeight: 280}}>
+        <div className="animate-pulse flex flex-col items-center gap-4 py-6">
+          <div
+            style={{
+              width: 140,
+              height: 140,
+              borderRadius: "50%",
+              background: "var(--color-border)",
+            }}
+          />
+          <div
+            style={{
+              height: 12,
+              width: 80,
+              borderRadius: 6,
+              background: "var(--color-border)",
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  const radius = 56;
+  const circ = 2 * Math.PI * radius;
+  const filled = (animatedScore / 100) * circ;
+  const color = scoreColor(animatedScore);
+  const cat = categoryBg(data.category);
+
+  const issues = [
+    {
+      label: "Warnings",
+      value: data.issues?.warnings ?? 0,
+      icon: TriangleAlert,
+      color: "#f59e0b",
+    },
+    {
+      label: "Empty slots",
+      value: data.issues?.emptySlots ?? 0,
+      icon: CircleAlert,
+      color: "#ef4444",
+    },
+    {
+      label: "No teacher",
+      value: data.issues?.unassignedTeachers ?? 0,
+      icon: Users,
+      color: "#f59e0b",
+    },
+    {
+      label: "Gap days",
+      value: data.issues?.coverageGaps ?? 0,
+      icon: CalendarDays,
+      color: "#3b82f6",
+    },
+  ];
+
+  return (
+    <div className="card flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <p
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.07em",
+              color: "var(--color-muted)",
             }}
           >
-            <CartesianGrid
-              strokeDasharray="3 3"
+            Timetable Health
+          </p>
+          <p style={{fontSize: 12, color: "var(--color-subtle)", marginTop: 2}}>
+            {data.timetableName}
+          </p>
+        </div>
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 600,
+            padding: "3px 10px",
+            borderRadius: 20,
+            background: cat.bg,
+            color: cat.text,
+            border: `1px solid ${cat.border}`,
+          }}
+        >
+          {data.category}
+        </span>
+      </div>
+
+      {/* Ring */}
+      <div className="flex flex-col items-center mb-5">
+        <div style={{position: "relative", width: 148, height: 148}}>
+          <svg
+            style={{
+              position: "absolute",
+              inset: 0,
+              transform: "rotate(-90deg)",
+            }}
+            viewBox="0 0 128 128"
+          >
+            <circle
+              cx="64"
+              cy="64"
+              r={radius}
+              fill="none"
               stroke="var(--color-border)"
-              vertical={layout !== "vertical"}
-              horizontal={layout === "vertical"}
+              strokeWidth="9"
             />
-            {layout === "vertical" ? (
-              <>
-                <XAxis
-                  type="number"
-                  tick={{fontSize: 11, fill: "var(--color-muted)"}}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  dataKey="teacherName"
-                  type="category"
-                  tick={{fontSize: 11, fill: "var(--color-muted)"}}
-                  tickLine={false}
-                  axisLine={false}
-                  width={90}
-                />
-              </>
-            ) : (
-              <>
-                <XAxis
-                  dataKey="subjectName"
-                  tick={{fontSize: 11, fill: "var(--color-muted)"}}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  tick={{fontSize: 11, fill: "var(--color-muted)"}}
-                  tickLine={false}
-                  axisLine={false}
-                />
-              </>
-            )}
-            <Tooltip content={<ChartTooltip />} />
-            <Bar
-              dataKey={dataKey}
-              name={name}
-              fill={color}
-              radius={layout === "vertical" ? [0, 4, 4, 0] : [4, 4, 0, 0]}
-              maxBarSize={layout === "vertical" ? 24 : 40}
+            <circle
+              cx="64"
+              cy="64"
+              r={radius}
+              fill="none"
+              stroke={color}
+              strokeWidth="9"
+              strokeLinecap="round"
+              strokeDasharray={`${filled} ${circ}`}
+              style={{
+                transition: "stroke-dasharray 1.2s cubic-bezier(0.16,1,0.3,1)",
+              }}
             />
-          </BarChart>
-        </ResponsiveContainer>
-      ),
-    }),
-  ),
-);
-
-const MotionPieChart = motion(
-  lazy(() =>
-    Promise.resolve({
-      default: ({data, dataKey, nameKey}) => (
-        <ResponsiveContainer width="100%" height={280}>
-          <PieChart>
-            <Pie
-              data={data}
-              dataKey={dataKey}
-              nameKey={nameKey}
-              cx="50%"
-              cy="50%"
-              outerRadius={100}
-              innerRadius={55}
-              paddingAngle={2}
+          </svg>
+          {/* Glow */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 12,
+              borderRadius: "50%",
+              background: `radial-gradient(circle, ${color}14 0%, transparent 70%)`,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <span
+              style={{
+                fontSize: 32,
+                fontWeight: 700,
+                color,
+                lineHeight: 1,
+                fontVariantNumeric: "tabular-nums",
+              }}
             >
-              {data.map((_, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={CHART_COLORS[index % CHART_COLORS.length]}
-                />
-              ))}
-            </Pie>
-            <Tooltip content={<ChartTooltip />} />
-            <Legend
-              iconType="circle"
-              iconSize={8}
-              formatter={(value) => (
-                <span className="text-xs text-[var(--color-muted)]">
-                  {value}
-                </span>
-              )}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-      ),
-    }),
-  ),
+              {animatedScore}
+            </span>
+            <span
+              style={{fontSize: 11, color: "var(--color-muted)", marginTop: 2}}
+            >
+              / 100
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Issues grid */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 8,
+          marginTop: "auto",
+        }}
+      >
+        {issues.map(({label, value, icon: Icon, color: ic}) => (
+          <div
+            key={label}
+            style={{
+              padding: "10px 12px",
+              borderRadius: 8,
+              background: value > 0 ? `${ic}0d` : "rgba(16,185,129,0.06)",
+              border: `1px solid ${value > 0 ? `${ic}22` : "rgba(16,185,129,0.15)"}`,
+            }}
+          >
+            <div className="flex items-center gap-1.5 mb-1">
+              <Icon size={12} style={{color: value > 0 ? ic : "#10b981"}} />
+              <span
+                style={{
+                  fontSize: 10,
+                  color: "var(--color-muted)",
+                  fontWeight: 500,
+                }}
+              >
+                {label}
+              </span>
+            </div>
+            <p
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: value > 0 ? ic : "#10b981",
+                lineHeight: 1,
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────
+// TEACHER MOBILE CARD (stacked for mobile)
+// ─────────────────────────────────────────────
+const TeacherCard = ({teacher}) => (
+  <motion.div variants={fadeUp} className="card" style={{padding: "16px"}}>
+    <div className="flex items-start justify-between mb-3">
+      <div className="flex items-center gap-3">
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            background: "rgba(11,105,255,0.1)",
+            border: "1px solid rgba(11,105,255,0.2)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 13,
+            fontWeight: 700,
+            color: "#0b69ff",
+          }}
+        >
+          {teacher.teacherName?.[0]?.toUpperCase()}
+        </div>
+        <div>
+          <p
+            style={{fontSize: 13, fontWeight: 600, color: "var(--color-text)"}}
+          >
+            {teacher.teacherName}
+          </p>
+          <p style={{fontSize: 11, color: "var(--color-muted)"}}>
+            {teacher.subjectCount} subjects · {teacher.classCount} classes
+          </p>
+        </div>
+      </div>
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          padding: "2px 8px",
+          borderRadius: 20,
+          background:
+            teacher.utilizationPercent > 80
+              ? "rgba(239,68,68,0.1)"
+              : teacher.utilizationPercent > 60
+                ? "rgba(245,158,11,0.1)"
+                : "rgba(16,185,129,0.1)",
+          color:
+            teacher.utilizationPercent > 80
+              ? "#ef4444"
+              : teacher.utilizationPercent > 60
+                ? "#f59e0b"
+                : "#10b981",
+        }}
+      >
+        {teacher.utilizationPercent}%
+      </span>
+    </div>
+
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 8,
+        marginBottom: 12,
+      }}
+    >
+      {[
+        {label: "Weekly periods", value: teacher.weeklyLoad},
+        {label: "Daily average", value: teacher.dailyLoad},
+      ].map(({label, value}) => (
+        <div
+          key={label}
+          style={{
+            padding: "8px 10px",
+            borderRadius: 7,
+            background: "var(--color-bg)",
+            border: "1px solid var(--color-border)",
+          }}
+        >
+          <p
+            style={{fontSize: 10, color: "var(--color-muted)", marginBottom: 2}}
+          >
+            {label}
+          </p>
+          <p
+            style={{
+              fontSize: 16,
+              fontWeight: 700,
+              color: "var(--color-text)",
+              lineHeight: 1,
+            }}
+          >
+            {value}
+          </p>
+        </div>
+      ))}
+    </div>
+
+    {/* Utilization bar */}
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <span style={{fontSize: 11, color: "var(--color-muted)"}}>
+          Utilization
+        </span>
+        <span style={{fontSize: 11, color: "var(--color-muted)"}}>
+          {teacher.weeklyLoad} /{" "}
+          {teacher.weeklyLoad > 0
+            ? Math.round(
+                teacher.weeklyLoad / (teacher.utilizationPercent / 100),
+              )
+            : "—"}{" "}
+          periods
+        </span>
+      </div>
+      <div
+        style={{
+          height: 6,
+          borderRadius: 3,
+          background: "var(--color-border)",
+          overflow: "hidden",
+        }}
+      >
+        <motion.div
+          initial={{width: 0}}
+          animate={{width: `${Math.min(teacher.utilizationPercent, 100)}%`}}
+          transition={{duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1]}}
+          style={{
+            height: "100%",
+            borderRadius: 3,
+            background:
+              teacher.utilizationPercent > 80
+                ? "#ef4444"
+                : teacher.utilizationPercent > 60
+                  ? "#f59e0b"
+                  : "#10b981",
+          }}
+        />
+      </div>
+    </div>
+  </motion.div>
 );
 
-// ----------------------------------------------------------------------
-// Main Analytics Page
-// ----------------------------------------------------------------------
+// ─────────────────────────────────────────────
+// DESKTOP TEACHER TABLE COLUMNS
+// ─────────────────────────────────────────────
+const teacherColumns = [
+  {
+    key: "teacherName",
+    label: "Teacher",
+    render: (val) => (
+      <div className="flex items-center gap-2">
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: "50%",
+            background: "rgba(11,105,255,0.1)",
+            border: "1px solid rgba(11,105,255,0.15)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 11,
+            fontWeight: 700,
+            color: "#0b69ff",
+            flexShrink: 0,
+          }}
+        >
+          {val?.[0]?.toUpperCase()}
+        </div>
+        <span
+          style={{fontSize: 13, fontWeight: 500, color: "var(--color-text)"}}
+        >
+          {val}
+        </span>
+      </div>
+    ),
+  },
+  {
+    key: "weeklyLoad",
+    label: "Weekly",
+    render: (val) => (
+      <span
+        style={{
+          fontWeight: 600,
+          color: "var(--color-text)",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {val}
+      </span>
+    ),
+  },
+  {
+    key: "dailyLoad",
+    label: "Daily Avg",
+    render: (val) => (
+      <span
+        style={{
+          color: "var(--color-muted)",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {val}
+      </span>
+    ),
+  },
+  {
+    key: "utilizationPercent",
+    label: "Utilization",
+    render: (val) => (
+      <div className="flex items-center gap-2">
+        <div
+          style={{
+            width: 72,
+            height: 5,
+            borderRadius: 3,
+            background: "var(--color-border)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              height: "100%",
+              borderRadius: 3,
+              width: `${Math.min(val, 100)}%`,
+              background:
+                val > 80 ? "#ef4444" : val > 60 ? "#f59e0b" : "#10b981",
+              transition: "width 0.8s cubic-bezier(0.16,1,0.3,1)",
+            }}
+          />
+        </div>
+        <span
+          style={{
+            fontSize: 12,
+            color: "var(--color-muted)",
+            fontVariantNumeric: "tabular-nums",
+            minWidth: 32,
+          }}
+        >
+          {val}%
+        </span>
+      </div>
+    ),
+  },
+  {
+    key: "subjectCount",
+    label: "Subjects",
+    render: (val) => (
+      <span
+        style={{
+          color: "var(--color-muted)",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {val}
+      </span>
+    ),
+  },
+  {
+    key: "classCount",
+    label: "Classes",
+    render: (val) => (
+      <span
+        style={{
+          color: "var(--color-muted)",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {val}
+      </span>
+    ),
+  },
+];
+
+// ─────────────────────────────────────────────
+// SUBJECT TABLE COLUMNS
+// ─────────────────────────────────────────────
+const subjectColumns = [
+  {
+    key: "subjectName",
+    label: "Subject",
+    render: (val) => (
+      <span style={{fontWeight: 500, color: "var(--color-text)"}}>{val}</span>
+    ),
+  },
+  {
+    key: "periodsAssigned",
+    label: "Periods",
+    render: (val) => (
+      <span
+        style={{
+          fontWeight: 600,
+          color: "var(--color-text)",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {val}
+      </span>
+    ),
+  },
+  {
+    key: "allocationPercent",
+    label: "Share",
+    render: (val) => (
+      <div className="flex items-center gap-2">
+        <div
+          style={{
+            width: 64,
+            height: 5,
+            borderRadius: 3,
+            background: "var(--color-border)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              height: "100%",
+              borderRadius: 3,
+              width: `${Math.min(val, 100)}%`,
+              background: "#0b69ff",
+            }}
+          />
+        </div>
+        <span
+          style={{
+            fontSize: 12,
+            color: "var(--color-muted)",
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          {val}%
+        </span>
+      </div>
+    ),
+  },
+  {
+    key: "classCount",
+    label: "Classes",
+    render: (val) => (
+      <span
+        style={{
+          color: "var(--color-muted)",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {val}
+      </span>
+    ),
+  },
+  {
+    key: "dailyAverage",
+    label: "Daily Avg",
+    render: (val) => (
+      <span
+        style={{
+          color: "var(--color-muted)",
+          fontVariantNumeric: "tabular-nums",
+        }}
+      >
+        {val}
+      </span>
+    ),
+  },
+];
+
+// ─────────────────────────────────────────────
+// PENALTY BAR
+// ─────────────────────────────────────────────
+const PenaltyBar = ({label, description, value, max, color}) => (
+  <div>
+    <div className="flex items-start justify-between mb-2">
+      <div>
+        <p style={{fontSize: 13, fontWeight: 500, color: "var(--color-text)"}}>
+          {label}
+        </p>
+        <p style={{fontSize: 11, color: "var(--color-muted)", marginTop: 1}}>
+          {description}
+        </p>
+      </div>
+      <span
+        style={{
+          fontSize: 13,
+          fontWeight: 700,
+          fontVariantNumeric: "tabular-nums",
+          color: value > 0 ? color : "#10b981",
+          minWidth: 36,
+          textAlign: "right",
+        }}
+      >
+        -{value}
+      </span>
+    </div>
+    <div
+      style={{
+        height: 6,
+        borderRadius: 3,
+        background: "var(--color-border)",
+        overflow: "hidden",
+      }}
+    >
+      <motion.div
+        initial={{width: 0}}
+        animate={{width: `${(value / max) * 100}%`}}
+        transition={{duration: 0.9, ease: [0.16, 1, 0.3, 1]}}
+        style={{height: "100%", borderRadius: 3, background: color}}
+      />
+    </div>
+    <p style={{fontSize: 11, color: "var(--color-subtle)", marginTop: 4}}>
+      Max deduction: {max} pts
+    </p>
+  </div>
+);
+
+// ─────────────────────────────────────────────
+// TABS CONFIG
+// ─────────────────────────────────────────────
+const TABS = [
+  {id: "overview", label: "Overview", Icon: BarChart3},
+  {id: "teachers", label: "Teachers", Icon: GraduationCap},
+  {id: "subjects", label: "Subjects", Icon: BookOpen},
+  {id: "health", label: "Health", Icon: ShieldCheck},
+];
+
+// ─────────────────────────────────────────────
+// MAIN PAGE
+// ─────────────────────────────────────────────
 const Analytics = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  // unchanged hooks
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+
   const {data: overview, isLoading: overviewLoading} = useAnalyticsOverview();
   const {data: teacherData, isLoading: teacherLoading} = useTeacherWorkload();
   const {data: subjectData, isLoading: subjectLoading} =
@@ -558,690 +1139,737 @@ const Analytics = () => {
   const {data: recentActivity, isLoading: activityLoading} =
     useRecentActivity(8);
 
-  const tabs = useMemo(
-    () => [
-      {id: "overview", label: "Overview", icon: BarChart3},
-      {id: "teachers", label: "Teachers", icon: GraduationCap},
-      {id: "subjects", label: "Subjects", icon: BookOpen},
-      {id: "health", label: "Health", icon: ShieldCheck},
-    ],
-    [],
-  );
-
-  const tabContent = useMemo(() => {
-    return {
-      overview: (
-        <motion.div
-          key="overview"
-          initial={{opacity: 0, y: 8}}
-          animate={{opacity: 1, y: 0}}
-          exit={{opacity: 0, y: -8}}
-          transition={{duration: 0.2}}
-          className="space-y-8"
-        >
-          {/* Metric Cards */}
-          {overviewLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className="animate-pulse h-32 rounded-2xl bg-[var(--color-border)]"
-                />
-              ))}
-            </div>
-          ) : (
-            <motion.div
-              variants={motionContainer}
-              initial="hidden"
-              animate="show"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
-            >
-              <MetricCard
-                label="Total Teachers"
-                value={overview?.totalTeachers ?? "—"}
-                icon={Users}
-                color="primary"
-                description="Active educators"
-              />
-              <MetricCard
-                label="Total Subjects"
-                value={overview?.totalSubjects ?? "—"}
-                icon={BookOpen}
-                color="accent"
-              />
-              <MetricCard
-                label="Total Classes"
-                value={overview?.totalClasses ?? "—"}
-                icon={School}
-                color="success"
-              />
-              <MetricCard
-                label="Total Timetables"
-                value={overview?.totalTimetables ?? "—"}
-                icon={ClipboardList}
-                color="warning"
-              />
-            </motion.div>
-          )}
-
-          {/* Health + Activity row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <HealthScoreRing data={healthData} loading={healthLoading} />
-
-            <motion.div
-              variants={motionContainer}
-              initial="hidden"
-              animate="show"
-              className="lg:col-span-2"
-            >
-              <div className={cardClasses}>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-[var(--color-border)]">
-                      <Activity className="w-5 h-5 text-[var(--color-text)]" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-[var(--color-text)]">
-                        Recent Activity
-                      </h3>
-                      <p className="text-xs text-[var(--color-muted)]">
-                        Latest platform events
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-xs text-[var(--color-muted)]">
-                    Last 8 events
-                  </span>
-                </div>
-
-                {activityLoading ? (
-                  <div className="space-y-4">
-                    {[...Array(4)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-4 animate-pulse"
-                      >
-                        <div className="w-2.5 h-2.5 rounded-full bg-[var(--color-border)]" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-4 w-3/4 rounded bg-[var(--color-border)]" />
-                          <div className="h-3 w-1/2 rounded bg-[var(--color-border)]" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : !recentActivity || recentActivity.length === 0 ? (
-                  <motion.div
-                    variants={motionItem}
-                    className="flex flex-col items-center py-6 text-center"
-                  >
-                    <div className="p-3 rounded-full bg-[var(--color-border)] mb-3">
-                      <Inbox className="w-6 h-6 text-[var(--color-muted)]" />
-                    </div>
-                    <p className="text-sm font-medium text-[var(--color-text)]">
-                      No recent activity
-                    </p>
-                    <p className="text-xs text-[var(--color-muted)] mt-1">
-                      Events will appear here as your institution uses the
-                      platform.
-                    </p>
-                  </motion.div>
-                ) : (
-                  <div className="space-y-1">
-                    {recentActivity.map((activity, i) => (
-                      <ActivityItem
-                        key={activity._id || i}
-                        activity={activity}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Subject Allocation Chart */}
-          {!subjectLoading && subjectData?.subjects?.length > 0 && (
-            <motion.div
-              variants={motionContainer}
-              initial="hidden"
-              animate="show"
-            >
-              <div className={cardClasses}>
-                <SectionHeader
-                  title="Subject Allocation"
-                  subtitle="Periods assigned per subject"
-                  icon={BarChart3}
-                />
-                <Suspense
-                  fallback={
-                    <div className="h-64 animate-pulse rounded-xl bg-[var(--color-border)]" />
-                  }
-                >
-                  <MotionBarChart
-                    variants={motionItem}
-                    data={subjectData.subjects.slice(0, 10)}
-                    dataKey="periodsAssigned"
-                    name="Periods"
-                    color={CHART_COLORS[0]}
-                    height={260}
-                  />
-                </Suspense>
-              </div>
-            </motion.div>
-          )}
-        </motion.div>
-      ),
-
-      teachers: (
-        <motion.div
-          key="teachers"
-          initial={{opacity: 0, y: 8}}
-          animate={{opacity: 1, y: 0}}
-          exit={{opacity: 0, y: -8}}
-          className="space-y-8"
-        >
-          {!teacherLoading && teacherData && (
-            <motion.div
-              variants={motionContainer}
-              initial="hidden"
-              animate="show"
-              className="grid grid-cols-1 sm:grid-cols-3 gap-5"
-            >
-              <MetricCard
-                label="Total Teachers"
-                value={teacherData.totalTeachers}
-                icon={Users}
-                color="primary"
-              />
-              <MetricCard
-                label="Periods Per Day"
-                value={teacherData.periodsPerDay}
-                icon={Clock}
-                color="accent"
-                description="Daily workload target"
-              />
-              <MetricCard
-                label="Max Weekly Periods"
-                value={teacherData.maxPeriodsPerWeek}
-                icon={CalendarDays}
-                color="success"
-              />
-            </motion.div>
-          )}
-
-          {!teacherLoading && teacherData?.teachers?.length > 0 && (
-            <motion.div variants={motionItem}>
-              <div className={cardClasses}>
-                <SectionHeader
-                  title="Teacher Utilization"
-                  subtitle="Weekly period load per teacher"
-                  icon={BarChart3}
-                />
-                <Suspense
-                  fallback={
-                    <div className="h-64 animate-pulse rounded-xl bg-[var(--color-border)]" />
-                  }
-                >
-                  <MotionBarChart
-                    data={teacherData.teachers}
-                    dataKey="weeklyLoad"
-                    name="Weekly Periods"
-                    color="#2563eb"
-                    layout="vertical"
-                    height={300}
-                  />
-                </Suspense>
-              </div>
-            </motion.div>
-          )}
-
-          <div>
-            <SectionHeader
-              title="Workload Breakdown"
-              subtitle="Detailed period assignments per teacher"
-              icon={ClipboardList}
-            />
-            <ResponsiveTable
-              columns={[
-                {key: "teacherName", label: "Teacher"},
-                {
-                  key: "weeklyLoad",
-                  label: "Weekly Load",
-                  render: (val) => (
-                    <span className="tabular-nums font-medium">{val}</span>
-                  ),
-                },
-                {
-                  key: "dailyLoad",
-                  label: "Daily Avg",
-                  render: (val) => (
-                    <span className="text-[var(--color-muted)]">{val}</span>
-                  ),
-                },
-                {
-                  key: "utilizationPercent",
-                  label: "Utilization",
-                  render: (val) => (
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${Math.min(val, 100)}%`,
-                            background:
-                              val > 80
-                                ? "#ef4444"
-                                : val > 60
-                                  ? "#f59e0b"
-                                  : "#10b981",
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs tabular-nums">{val}%</span>
-                    </div>
-                  ),
-                },
-                {
-                  key: "subjectCount",
-                  label: "Subjects",
-                  render: (val) => (
-                    <span className="text-[var(--color-muted)]">{val}</span>
-                  ),
-                },
-                {
-                  key: "classCount",
-                  label: "Classes",
-                  render: (val) => (
-                    <span className="text-[var(--color-muted)]">{val}</span>
-                  ),
-                },
-              ]}
-              data={teacherData?.teachers ?? []}
-              loading={teacherLoading}
-              emptyTitle="No teachers found"
-              emptyMessage="Add teachers to your school to see workload analytics."
-            />
-          </div>
-        </motion.div>
-      ),
-
-      subjects: (
-        <motion.div
-          key="subjects"
-          initial={{opacity: 0, y: 8}}
-          animate={{opacity: 1, y: 0}}
-          exit={{opacity: 0, y: -8}}
-          className="space-y-8"
-        >
-          {!subjectLoading && subjectData && (
-            <motion.div
-              variants={motionContainer}
-              initial="hidden"
-              animate="show"
-              className="grid grid-cols-1 sm:grid-cols-3 gap-5"
-            >
-              <MetricCard
-                label="Total Subjects"
-                value={subjectData.totalSubjects}
-                icon={BookOpen}
-                color="primary"
-              />
-              <MetricCard
-                label="Total Periods"
-                value={subjectData.totalPeriods}
-                icon={Database}
-                color="accent"
-              />
-              <MetricCard
-                label="Avg Periods / Subject"
-                value={
-                  subjectData.totalSubjects > 0
-                    ? Math.round(
-                        subjectData.totalPeriods / subjectData.totalSubjects,
-                      )
-                    : "—"
-                }
-                icon={Sparkles}
-                color="success"
-              />
-            </motion.div>
-          )}
-
-          {!subjectLoading && subjectData?.subjects?.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-              <motion.div variants={motionItem}>
-                <div className={cardClasses}>
-                  <SectionHeader
-                    title="Subject Distribution"
-                    subtitle="Proportional period allocation"
-                    icon={PieChartIcon}
-                  />
-                  <Suspense
-                    fallback={
-                      <div className="h-64 animate-pulse rounded-xl bg-[var(--color-border)]" />
-                    }
-                  >
-                    <MotionPieChart
-                      data={subjectData.subjects}
-                      dataKey="periodsAssigned"
-                      nameKey="subjectName"
-                    />
-                  </Suspense>
-                </div>
-              </motion.div>
-              <motion.div variants={motionItem}>
-                <div className={cardClasses}>
-                  <SectionHeader
-                    title="Periods Per Subject"
-                    subtitle="Total assigned periods"
-                    icon={BarChart3}
-                  />
-                  <Suspense
-                    fallback={
-                      <div className="h-64 animate-pulse rounded-xl bg-[var(--color-border)]" />
-                    }
-                  >
-                    <MotionBarChart
-                      data={subjectData.subjects}
-                      dataKey="periodsAssigned"
-                      name="Periods"
-                      color={CHART_COLORS[2]}
-                      height={280}
-                    >
-                      {subjectData.subjects.map((_, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={CHART_COLORS[index % CHART_COLORS.length]}
-                        />
-                      ))}
-                    </MotionBarChart>
-                  </Suspense>
-                </div>
-              </motion.div>
-            </div>
-          )}
-
-          <div>
-            <SectionHeader
-              title="Subject Breakdown"
-              subtitle="Detailed allocation per subject"
-              icon={BookOpen}
-            />
-            <ResponsiveTable
-              columns={[
-                {key: "subjectName", label: "Subject"},
-                {
-                  key: "periodsAssigned",
-                  label: "Periods",
-                  render: (val) => <span className="font-medium">{val}</span>,
-                },
-                {
-                  key: "allocationPercent",
-                  label: "Allocation",
-                  render: (val) => (
-                    <div className="flex items-center gap-2">
-                      <div className="w-20 h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-primary"
-                          style={{width: `${Math.min(val, 100)}%`}}
-                        />
-                      </div>
-                      <span className="text-xs tabular-nums">{val}%</span>
-                    </div>
-                  ),
-                },
-                {
-                  key: "classCount",
-                  label: "Classes",
-                  render: (val) => (
-                    <span className="text-[var(--color-muted)]">{val}</span>
-                  ),
-                },
-                {
-                  key: "dailyAverage",
-                  label: "Daily Avg",
-                  render: (val) => (
-                    <span className="text-[var(--color-muted)]">{val}</span>
-                  ),
-                },
-              ]}
-              data={subjectData?.subjects ?? []}
-              loading={subjectLoading}
-              emptyTitle="No subjects found"
-              emptyMessage="Add subjects to your school to see distribution analytics."
-            />
-          </div>
-        </motion.div>
-      ),
-
-      health: (
-        <motion.div
-          key="health"
-          initial={{opacity: 0, y: 8}}
-          animate={{opacity: 1, y: 0}}
-          exit={{opacity: 0, y: -8}}
-          className="space-y-8"
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <HealthScoreRing data={healthData} loading={healthLoading} />
-
-            {!healthLoading && healthData && (
-              <motion.div
-                variants={motionContainer}
-                initial="hidden"
-                animate="show"
-                className="lg:col-span-2"
-              >
-                <div className={cardClasses}>
-                  <SectionHeader
-                    title="Score Breakdown"
-                    subtitle="How the health score is calculated"
-                    icon={AlertCircle}
-                  />
-
-                  <div className="space-y-5">
-                    {[
-                      {
-                        label: "Warning Penalty",
-                        value: healthData.breakdown?.warningPenalty ?? 0,
-                        max: 40,
-                        color: "#f59e0b",
-                        description:
-                          "Periods where generator had to compromise",
-                      },
-                      {
-                        label: "Empty Slot Penalty",
-                        value: healthData.breakdown?.emptySlotPenalty ?? 0,
-                        max: 30,
-                        color: "#ef4444",
-                        description: "Periods with no subject assigned",
-                      },
-                      {
-                        label: "No Teacher Penalty",
-                        value: healthData.breakdown?.noTeacherPenalty ?? 0,
-                        max: 20,
-                        color: "#f59e0b",
-                        description: "Periods with subject but no teacher",
-                      },
-                      {
-                        label: "Coverage Gap Penalty",
-                        value: healthData.breakdown?.coverageGapPenalty ?? 0,
-                        max: 10,
-                        color: "#3b82f6",
-                        description: "Classes with entire days unscheduled",
-                      },
-                    ].map((item) => (
-                      <motion.div key={item.label} variants={motionItem}>
-                        <div className="flex items-center justify-between mb-1">
-                          <div>
-                            <span className="text-sm font-medium text-[var(--color-text)]">
-                              {item.label}
-                            </span>
-                            <p className="text-xs text-[var(--color-muted)]">
-                              {item.description}
-                            </p>
-                          </div>
-                          <span
-                            className="text-sm font-bold tabular-nums"
-                            style={{
-                              color: item.value > 0 ? item.color : "#10b981",
-                            }}
-                          >
-                            -{item.value}
-                          </span>
-                        </div>
-                        <div className="w-full h-2 rounded-full bg-[var(--color-border)] overflow-hidden">
-                          <motion.div
-                            className="h-full rounded-full"
-                            initial={{width: 0}}
-                            animate={{
-                              width: `${(item.value / item.max) * 100}%`,
-                            }}
-                            transition={{duration: 0.8, ease: "easeOut"}}
-                            style={{background: item.color}}
-                          />
-                        </div>
-                        <p className="text-xs text-[var(--color-muted)] mt-0.5">
-                          Max penalty: {item.max} points
-                        </p>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t border-[var(--color-border)] flex items-center justify-between">
-                    <span className="text-sm font-medium text-[var(--color-text)]">
-                      Final Health Score
-                    </span>
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          healthData.category === "Excellent"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : healthData.category === "Good"
-                              ? "bg-blue-50 text-blue-700"
-                              : healthData.category === "Fair"
-                                ? "bg-amber-50 text-amber-700"
-                                : "bg-red-50 text-red-700"
-                        }`}
-                      >
-                        {healthData.category}
-                      </span>
-                      <span className="text-2xl font-bold tabular-nums text-[var(--color-text)]">
-                        {healthData.healthScore}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </div>
-
-          {!healthLoading && healthData && (
-            <motion.div
-              variants={motionContainer}
-              initial="hidden"
-              animate="show"
-              className="grid grid-cols-2 sm:grid-cols-4 gap-5"
-            >
-              {[
-                {
-                  label: "Warnings",
-                  value: healthData.issues?.warnings ?? 0,
-                  color: "warning",
-                  icon: TriangleAlert,
-                },
-                {
-                  label: "Empty Slots",
-                  value: healthData.issues?.emptySlots ?? 0,
-                  color: "danger",
-                  icon: CircleAlert,
-                },
-                {
-                  label: "No Teacher",
-                  value: healthData.issues?.unassignedTeachers ?? 0,
-                  color: "warning",
-                  icon: UserRoundCheck,
-                },
-                {
-                  label: "Coverage Gaps",
-                  value: healthData.issues?.coverageGaps ?? 0,
-                  color: "danger",
-                  icon: Inbox,
-                },
-              ].map((item) => (
-                <MetricCard
-                  key={item.label}
-                  label={item.label}
-                  value={item.value}
-                  icon={item.icon}
-                  color={item.value === 0 ? "success" : item.color}
-                />
-              ))}
-            </motion.div>
-          )}
-        </motion.div>
-      ),
-    };
-  }, [
-    overview,
-    overviewLoading,
-    teacherData,
-    teacherLoading,
-    subjectData,
-    subjectLoading,
-    healthData,
-    healthLoading,
-    recentActivity,
-    activityLoading,
-  ]);
-
   return (
-    <div className="pb-16">
-      {/* Page header */}
+    <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
+      {/* ── Page header ── */}
       <motion.div
         initial={{opacity: 0, y: -10}}
         animate={{opacity: 1, y: 0}}
-        transition={{duration: 0.4, ease: "easeOut"}}
-        className="mb-8"
+        transition={{duration: 0.3}}
+        style={{marginBottom: 28}}
       >
-        <h1 className="text-3xl font-bold tracking-tight text-[var(--color-text)]">
-          Analytics
+        <div className="flex items-center gap-2 mb-1">
+          <Sparkles size={14} style={{color: "#0b69ff"}} />
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.07em",
+              color: "#0b69ff",
+            }}
+          >
+            Analytics
+          </span>
+        </div>
+        <h1
+          style={{
+            fontSize: 24,
+            fontWeight: 700,
+            color: "var(--color-text)",
+            letterSpacing: "-0.02em",
+            marginBottom: 4,
+          }}
+        >
+          Institution Overview
         </h1>
-        <p className="mt-1.5 text-base text-[var(--color-muted)]">
-          Institution performance and timetable insights
+        <p style={{fontSize: 13, color: "var(--color-muted)"}}>
+          Performance insights and timetable health for your school.
         </p>
       </motion.div>
 
-      {/* Tabs with animated underline */}
-      <div className="flex gap-0 border-b border-[var(--color-border)] mb-8 relative">
-        {tabs.map((tab) => (
+      {/* ── Tabs ── */}
+      <div
+        style={{
+          display: "flex",
+          gap: 2,
+          marginBottom: 28,
+          borderBottom: "1px solid var(--color-border)",
+          overflowX: "auto",
+          scrollbarWidth: "none",
+        }}
+      >
+        {TABS.map(({id, label, Icon}) => (
           <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            aria-controls={`panel-${tab.id}`}
-            className={`relative flex items-center gap-2 px-5 py-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-t-lg ${
-              activeTab === tab.id
-                ? "text-primary"
-                : "text-[var(--color-muted)] hover:text-[var(--color-text)]"
-            }`}
+            key={id}
+            onClick={() => setActiveTab(id)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "10px 14px",
+              fontSize: 13,
+              fontWeight: 500,
+              borderBottom: `2px solid ${activeTab === id ? "#0b69ff" : "transparent"}`,
+              color: activeTab === id ? "#0b69ff" : "var(--color-muted)",
+              background: "transparent",
+              border: "none",
+              borderBottom: `2px solid ${activeTab === id ? "#0b69ff" : "transparent"}`,
+              marginBottom: -1,
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              transition: "color 0.15s",
+            }}
           >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-            {activeTab === tab.id && (
-              <motion.div
-                layoutId="activeTab"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                transition={{type: "spring", stiffness: 500, damping: 30}}
-              />
-            )}
+            <Icon size={14} strokeWidth={1.8} />
+            {label}
           </button>
         ))}
       </div>
 
-      {/* Tab panels with AnimatePresence for smooth transitions */}
-      <AnimatePresence mode="wait">{tabContent[activeTab]}</AnimatePresence>
+      {/* ── Tab content ── */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          variants={tabContent}
+          initial="hidden"
+          animate="show"
+          exit="exit"
+        >
+          {/* ════════════════════════════════
+              OVERVIEW TAB
+          ════════════════════════════════ */}
+          {activeTab === "overview" && (
+            <div style={{display: "flex", flexDirection: "column", gap: 24}}>
+              {/* Metric cards */}
+              {overviewLoading ? (
+                <MetricGridSkeleton count={4} />
+              ) : (
+                <motion.div
+                  variants={stagger}
+                  initial="hidden"
+                  animate="show"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                    gap: 12,
+                  }}
+                >
+                  <AnimatedMetricCard
+                    label="Teachers"
+                    value={overview?.totalTeachers ?? "—"}
+                    Icon={Users}
+                    color="primary"
+                    description="Registered staff"
+                  />
+                  <AnimatedMetricCard
+                    label="Subjects"
+                    value={overview?.totalSubjects ?? "—"}
+                    Icon={BookOpen}
+                    color="accent"
+                    description="Active subjects"
+                  />
+                  <AnimatedMetricCard
+                    label="Classes"
+                    value={overview?.totalClasses ?? "—"}
+                    Icon={School}
+                    color="success"
+                    description="Class groups"
+                  />
+                  <AnimatedMetricCard
+                    label="Timetables"
+                    value={overview?.totalTimetables ?? "—"}
+                    Icon={ClipboardList}
+                    color="warning"
+                    description="Generated schedules"
+                  />
+                </motion.div>
+              )}
+
+              {/* Health + Activity */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 2fr",
+                  gap: 12,
+                }}
+              >
+                <PremiumHealthCard data={healthData} loading={healthLoading} />
+
+                <div
+                  className="card"
+                  style={{display: "flex", flexDirection: "column"}}
+                >
+                  <SectionHeader
+                    title="Recent Activity"
+                    subtitle="Live event stream from your institution"
+                    action={
+                      <div
+                        style={{display: "flex", alignItems: "center", gap: 4}}
+                      >
+                        <div
+                          style={{
+                            width: 6,
+                            height: 6,
+                            borderRadius: "50%",
+                            background: "#10b981",
+                          }}
+                          className="animate-pulse"
+                        />
+                        <span
+                          style={{fontSize: 11, color: "var(--color-muted)"}}
+                        >
+                          Live
+                        </span>
+                      </div>
+                    }
+                  />
+                  <ActivityTimeline
+                    activities={recentActivity}
+                    loading={activityLoading}
+                  />
+                </div>
+              </div>
+
+              {/* Subject bar chart */}
+              {!subjectLoading && subjectData?.subjects?.length > 0 && (
+                <div className="card">
+                  <SectionHeader
+                    title="Subject Allocation"
+                    subtitle="Periods distributed across subjects"
+                  />
+                  <ResponsiveContainer width="100%" height={240}>
+                    <BarChart
+                      data={subjectData.subjects.slice(0, 10)}
+                      margin={{top: 4, right: 8, left: -24, bottom: 0}}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="var(--color-border)"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="subjectName"
+                        tick={{fontSize: 11, fill: "var(--color-muted)"}}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        tick={{fontSize: 11, fill: "var(--color-muted)"}}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip
+                        content={<PremiumTooltip />}
+                        cursor={{fill: "rgba(11,105,255,0.04)"}}
+                      />
+                      <Bar
+                        dataKey="periodsAssigned"
+                        name="Periods"
+                        fill="#0b69ff"
+                        radius={[5, 5, 0, 0]}
+                        maxBarSize={44}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ════════════════════════════════
+              TEACHERS TAB
+          ════════════════════════════════ */}
+          {activeTab === "teachers" && (
+            <div style={{display: "flex", flexDirection: "column", gap: 20}}>
+              {!teacherLoading && teacherData && (
+                <motion.div
+                  variants={stagger}
+                  initial="hidden"
+                  animate="show"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                    gap: 12,
+                  }}
+                >
+                  <AnimatedMetricCard
+                    label="Total Teachers"
+                    value={teacherData.totalTeachers}
+                    Icon={Users}
+                    color="primary"
+                  />
+                  <AnimatedMetricCard
+                    label="Periods Per Day"
+                    value={teacherData.periodsPerDay}
+                    Icon={Clock3}
+                    color="accent"
+                  />
+                  <AnimatedMetricCard
+                    label="Max Weekly Load"
+                    value={teacherData.maxPeriodsPerWeek}
+                    Icon={CalendarDays}
+                    color="success"
+                  />
+                </motion.div>
+              )}
+
+              {/* Horizontal bar chart */}
+              {!teacherLoading && teacherData?.teachers?.length > 0 && (
+                <div className="card">
+                  <SectionHeader
+                    title="Weekly Load"
+                    subtitle="Periods assigned per teacher this week"
+                  />
+                  <ResponsiveContainer
+                    width="100%"
+                    height={Math.max(200, teacherData.teachers.length * 36)}
+                  >
+                    <BarChart
+                      data={teacherData.teachers}
+                      layout="vertical"
+                      margin={{top: 4, right: 16, left: 0, bottom: 4}}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="var(--color-border)"
+                        horizontal={false}
+                      />
+                      <XAxis
+                        type="number"
+                        tick={{fontSize: 11, fill: "var(--color-muted)"}}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        dataKey="teacherName"
+                        type="category"
+                        tick={{fontSize: 11, fill: "var(--color-muted)"}}
+                        tickLine={false}
+                        axisLine={false}
+                        width={96}
+                      />
+                      <Tooltip
+                        content={<PremiumTooltip />}
+                        cursor={{fill: "rgba(11,105,255,0.04)"}}
+                      />
+                      <Bar
+                        dataKey="weeklyLoad"
+                        name="Weekly Periods"
+                        fill="#0b69ff"
+                        radius={[0, 5, 5, 0]}
+                        maxBarSize={22}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
+              {/* Mobile: stacked cards / Desktop: table */}
+              <div>
+                <SectionHeader
+                  title="Workload Breakdown"
+                  subtitle="Period assignments and utilization per teacher"
+                />
+                {isMobile ? (
+                  <motion.div
+                    variants={stagger}
+                    initial="hidden"
+                    animate="show"
+                    style={{display: "flex", flexDirection: "column", gap: 10}}
+                  >
+                    {teacherLoading
+                      ? Array.from({length: 4}).map((_, i) => (
+                          <div
+                            key={i}
+                            className="card animate-pulse"
+                            style={{height: 140}}
+                          />
+                        ))
+                      : (teacherData?.teachers ?? []).map((t) => (
+                          <TeacherCard key={t.teacherId} teacher={t} />
+                        ))}
+                  </motion.div>
+                ) : (
+                  <Table
+                    columns={teacherColumns}
+                    data={teacherData?.teachers ?? []}
+                    loading={teacherLoading}
+                    emptyTitle="No teachers found"
+                    emptyMessage="Add teachers to your school to see workload analytics."
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ════════════════════════════════
+              SUBJECTS TAB
+          ════════════════════════════════ */}
+          {activeTab === "subjects" && (
+            <div style={{display: "flex", flexDirection: "column", gap: 20}}>
+              {!subjectLoading && subjectData && (
+                <motion.div
+                  variants={stagger}
+                  initial="hidden"
+                  animate="show"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                    gap: 12,
+                  }}
+                >
+                  <AnimatedMetricCard
+                    label="Total Subjects"
+                    value={subjectData.totalSubjects}
+                    Icon={BookOpen}
+                    color="primary"
+                  />
+                  <AnimatedMetricCard
+                    label="Total Periods"
+                    value={subjectData.totalPeriods}
+                    Icon={Clock3}
+                    color="accent"
+                  />
+                  <AnimatedMetricCard
+                    label="Avg Periods / Subject"
+                    value={
+                      subjectData.totalSubjects > 0
+                        ? Math.round(
+                            subjectData.totalPeriods /
+                              subjectData.totalSubjects,
+                          )
+                        : 0
+                    }
+                    Icon={BarChart3}
+                    color="success"
+                  />
+                </motion.div>
+              )}
+
+              {/* Charts */}
+              {!subjectLoading && subjectData?.subjects?.length > 0 && (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                    gap: 12,
+                  }}
+                >
+                  <div className="card">
+                    <SectionHeader
+                      title="Distribution"
+                      subtitle="Proportional period allocation"
+                    />
+                    <ResponsiveContainer width="100%" height={260}>
+                      <PieChart>
+                        <Pie
+                          data={subjectData.subjects}
+                          dataKey="periodsAssigned"
+                          nameKey="subjectName"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={96}
+                          innerRadius={52}
+                          paddingAngle={2}
+                        >
+                          {subjectData.subjects.map((_, i) => (
+                            <Cell
+                              key={i}
+                              fill={CHART_COLORS[i % CHART_COLORS.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip content={<PremiumTooltip />} />
+                        <Legend
+                          iconType="circle"
+                          iconSize={7}
+                          formatter={(val) => (
+                            <span
+                              style={{
+                                fontSize: 11,
+                                color: "var(--color-muted)",
+                              }}
+                            >
+                              {val}
+                            </span>
+                          )}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div className="card">
+                    <SectionHeader
+                      title="Periods Per Subject"
+                      subtitle="Total assigned periods"
+                    />
+                    <ResponsiveContainer width="100%" height={260}>
+                      <BarChart
+                        data={subjectData.subjects}
+                        margin={{top: 4, right: 8, left: -24, bottom: 0}}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke="var(--color-border)"
+                          vertical={false}
+                        />
+                        <XAxis
+                          dataKey="subjectName"
+                          tick={{fontSize: 10, fill: "var(--color-muted)"}}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          tick={{fontSize: 11, fill: "var(--color-muted)"}}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <Tooltip
+                          content={<PremiumTooltip />}
+                          cursor={{fill: "rgba(11,105,255,0.04)"}}
+                        />
+                        <Bar
+                          dataKey="periodsAssigned"
+                          name="Periods"
+                          radius={[5, 5, 0, 0]}
+                          maxBarSize={36}
+                        >
+                          {subjectData.subjects.map((_, i) => (
+                            <Cell
+                              key={i}
+                              fill={CHART_COLORS[i % CHART_COLORS.length]}
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <SectionHeader
+                  title="Subject Breakdown"
+                  subtitle="Detailed allocation per subject"
+                />
+                <Table
+                  columns={subjectColumns}
+                  data={subjectData?.subjects ?? []}
+                  loading={subjectLoading}
+                  emptyTitle="No subjects found"
+                  emptyMessage="Add subjects to your school to see distribution analytics."
+                />
+              </div>
+            </div>
+          )}
+
+          {/* ════════════════════════════════
+              HEALTH TAB
+          ════════════════════════════════ */}
+          {activeTab === "health" && (
+            <div style={{display: "flex", flexDirection: "column", gap: 20}}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 2fr",
+                  gap: 12,
+                }}
+              >
+                <PremiumHealthCard data={healthData} loading={healthLoading} />
+
+                {!healthLoading && healthData && (
+                  <div className="card">
+                    <SectionHeader
+                      title="Score Breakdown"
+                      subtitle="How each issue affects the overall health score"
+                    />
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 20,
+                      }}
+                    >
+                      {[
+                        {
+                          label: "Warning Penalty",
+                          value: healthData.breakdown?.warningPenalty ?? 0,
+                          max: 40,
+                          color: "#f59e0b",
+                          description:
+                            "Periods where generator had to compromise",
+                        },
+                        {
+                          label: "Empty Slot Penalty",
+                          value: healthData.breakdown?.emptySlotPenalty ?? 0,
+                          max: 30,
+                          color: "#ef4444",
+                          description: "Periods with no subject assigned",
+                        },
+                        {
+                          label: "No Teacher Penalty",
+                          value: healthData.breakdown?.noTeacherPenalty ?? 0,
+                          max: 20,
+                          color: "#f59e0b",
+                          description: "Periods with a subject but no teacher",
+                        },
+                        {
+                          label: "Coverage Gap",
+                          value: healthData.breakdown?.coverageGapPenalty ?? 0,
+                          max: 10,
+                          color: "#3b82f6",
+                          description: "Classes with full days unscheduled",
+                        },
+                      ].map((item) => (
+                        <PenaltyBar key={item.label} {...item} />
+                      ))}
+                    </div>
+
+                    {/* Final score row */}
+                    <div
+                      style={{
+                        marginTop: 24,
+                        paddingTop: 20,
+                        borderTop: "1px solid var(--color-border)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 600,
+                          color: "var(--color-text)",
+                        }}
+                      >
+                        Final Score
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            padding: "3px 10px",
+                            borderRadius: 20,
+                            background:
+                              healthData.healthScore >= 80
+                                ? "rgba(16,185,129,0.1)"
+                                : healthData.healthScore >= 60
+                                  ? "rgba(59,130,246,0.1)"
+                                  : "rgba(245,158,11,0.1)",
+                            color:
+                              healthData.healthScore >= 80
+                                ? "#10b981"
+                                : healthData.healthScore >= 60
+                                  ? "#3b82f6"
+                                  : "#f59e0b",
+                            border: `1px solid ${healthData.healthScore >= 80 ? "rgba(16,185,129,0.2)" : healthData.healthScore >= 60 ? "rgba(59,130,246,0.2)" : "rgba(245,158,11,0.2)"}`,
+                          }}
+                        >
+                          {healthData.category}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 28,
+                            fontWeight: 800,
+                            color: "var(--color-text)",
+                            fontVariantNumeric: "tabular-nums",
+                          }}
+                        >
+                          {healthData.healthScore}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Issues grid */}
+              {!healthLoading && healthData && (
+                <motion.div
+                  variants={stagger}
+                  initial="hidden"
+                  animate="show"
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                    gap: 12,
+                  }}
+                >
+                  {[
+                    {
+                      label: "Warnings",
+                      value: healthData.issues?.warnings ?? 0,
+                      Icon: TriangleAlert,
+                      color: "#f59e0b",
+                    },
+                    {
+                      label: "Empty Slots",
+                      value: healthData.issues?.emptySlots ?? 0,
+                      Icon: CircleAlert,
+                      color: "#ef4444",
+                    },
+                    {
+                      label: "Unassigned Teachers",
+                      value: healthData.issues?.unassignedTeachers ?? 0,
+                      Icon: Users,
+                      color: "#f59e0b",
+                    },
+                    {
+                      label: "Coverage Gaps",
+                      value: healthData.issues?.coverageGaps ?? 0,
+                      Icon: CalendarDays,
+                      color: "#3b82f6",
+                    },
+                  ].map(({label, value, Icon, color}) => (
+                    <motion.div
+                      key={label}
+                      variants={fadeUp}
+                      className="card"
+                      style={{
+                        borderColor:
+                          value > 0 ? `${color}30` : "rgba(16,185,129,0.2)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 8,
+                          marginBottom: 12,
+                          background:
+                            value > 0 ? `${color}12` : "rgba(16,185,129,0.1)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Icon
+                          size={15}
+                          style={{color: value > 0 ? color : "#10b981"}}
+                        />
+                      </div>
+                      <p
+                        style={{
+                          fontSize: 11,
+                          color: "var(--color-muted)",
+                          marginBottom: 4,
+                          fontWeight: 500,
+                        }}
+                      >
+                        {label}
+                      </p>
+                      <p
+                        style={{
+                          fontSize: 26,
+                          fontWeight: 700,
+                          color: value > 0 ? color : "#10b981",
+                          fontVariantNumeric: "tabular-nums",
+                          lineHeight: 1,
+                        }}
+                      >
+                        {value}
+                      </p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };
