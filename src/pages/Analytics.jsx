@@ -1200,7 +1200,6 @@ const Analytics = () => {
               padding: "10px 14px",
               fontSize: 13,
               fontWeight: 500,
-              borderBottom: `2px solid ${activeTab === id ? "#0b69ff" : "transparent"}`,
               color: activeTab === id ? "#0b69ff" : "var(--color-muted)",
               background: "transparent",
               border: "none",

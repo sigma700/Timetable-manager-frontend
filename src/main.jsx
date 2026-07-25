@@ -7,15 +7,17 @@ import "./index.css";
 import useUiStore from "./store/uiStore.js";
 
 // ─────────────────────────────────────────────
-// REACT QUERY CLIENT
+// REACT QUERY CLIENT (updated)
 // ─────────────────────────────────────────────
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 2, // 2 minutes
+      staleTime: 30000, // 30 seconds
       gcTime: 1000 * 60 * 10, // 10 minutes
-      retry: 1,
-      refetchOnWindowFocus: false,
+      retry: 2,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      refetchInterval: 30000, // 30 seconds
     },
   },
 });

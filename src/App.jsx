@@ -30,6 +30,7 @@ import AccountSettings from "./pages/Acc-Settings";
 // import Shell from "./components/layout/Shell";
 import Analytics from "./pages/Analytics";
 import Shell from "./pages/components/layout/Shell";
+import Settings from "./pages/Settings";
 
 // ─────────────────────────────────────────────
 // LAYOUT — wraps existing pages with footer
@@ -120,6 +121,14 @@ const router = createBrowserRouter([
     element: (
       <RouteWrapper isProtected>
         <AccountSettings />
+      </RouteWrapper>
+    ),
+  },
+  {
+    path: "/settings/preferences",
+    element: (
+      <RouteWrapper isProtected>
+        <Settings />
       </RouteWrapper>
     ),
   },

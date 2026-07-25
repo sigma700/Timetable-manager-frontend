@@ -1,7 +1,8 @@
 @import "tailwindcss";
+@import "./styles/tokens.css";
+
 @plugin 'flowbite-react/plugin/tailwindcss';
 @source '../.flowbite-react/class-list.json';
-@import "./styles/tokens.css";
 
 /* ─────────────────────────────────────────────
    EXISTING ANIMATIONS — PRESERVED
