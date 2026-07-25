@@ -45,7 +45,6 @@ const CSS = `
     animation: spin 0.8s linear infinite;
   }
 
-  /* ── Layout ── */
   .acct-layout {
     display: grid;
     grid-template-columns: 200px 1fr;
@@ -57,38 +56,28 @@ const CSS = `
     top: 80px;
   }
 
-  /* ── Nav (vertical on desktop) ── */
   .acct-nav { display: flex; flex-direction: column; gap: 2px; }
-  .acct-nav-badge-hide { /* visible on desktop */ }
+  .acct-nav-badge-hide { }
 
-  /* ── Form grids ── */
   .fg2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 14px; }
   .fg4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; }
 
-  /* ── Section body ── */
   .sec-body { padding: 22px; }
 
-  /* ── Toast ── */
   .toast-pos { position: fixed; bottom: 28px; right: 28px; z-index: 999; animation: slideInToast 0.3s ease; }
 
-  /* ── Panel animation ── */
   .panel-in { animation: panelIn 0.28s ease both; }
 
-  /* ── Billing ── */
   .billing-scroll { overflow-x: auto; }
   .billing-inner  { min-width: 420px; }
 
-  /* ════════════ TABLET ≤ 860px ════════════ */
   @media (max-width: 860px) {
     .acct-layout { grid-template-columns: 170px 1fr; gap: 16px; }
   }
 
-  /* ════════════ MOBILE ≤ 640px ════════════ */
   @media (max-width: 640px) {
-    /* Stack vertically */
     .acct-layout { grid-template-columns: 1fr; gap: 14px; }
 
-    /* Sidebar → horizontal scrollable pill strip */
     .acct-sidebar { position: static; top: unset; }
     .acct-nav {
       flex-direction: row !important;
@@ -106,20 +95,15 @@ const CSS = `
     }
     .acct-nav-badge-hide { display: none !important; }
 
-    /* Section */
     .sec-body { padding: 14px !important; }
 
-    /* Form grids collapse to 1 col */
     .fg2, .fg4 { grid-template-columns: 1fr !important; }
 
-    /* Toast full-width */
     .toast-pos { bottom: 12px; right: 12px; left: 12px; }
 
-    /* Avatar row wraps */
     .av-row { flex-wrap: wrap; }
   }
 
-  /* ════════════ SMALL ≤ 380px ════════════ */
   @media (max-width: 380px) {
     .sec-body { padding: 10px !important; }
     .acct-nav-item { padding: 6px 10px !important; font-size: 12px !important; }
@@ -671,10 +655,17 @@ function SidebarNav({active, onChange}) {
 }
 
 // ─── Panels ───────────────────────────────────────────────────────────────────
+
 function ProfilePanel({user, onSave}) {
+  // ✅ FIXED: Build name string from user object
+  const userName = user
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+    : "";
+  const userEmail = user?.email ?? "";
+
   const [f, sF] = useState({
-    name: user || "",
-    email: "",
+    name: userName,
+    email: userEmail,
     institution: "",
     role: "",
     bio: "",
@@ -1441,7 +1432,9 @@ const AccountSettings = () => {
   const [toast, setToast] = useState(null);
   const [hRef, hIv] = useInView(0.1);
 
-  const userName = user || "Guest";
+  const userName = user
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+    : "Guest";
 
   const handleLogout = async () => {
     try {
