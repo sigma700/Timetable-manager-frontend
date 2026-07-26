@@ -223,7 +223,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <RouteWrapper isPublicOnly>
+      <RouteWrapper>
         <Home />
       </RouteWrapper>
     ),

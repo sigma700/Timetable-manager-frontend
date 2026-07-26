@@ -636,7 +636,7 @@ export const Navigation = ({
       >
         <div className="nav-header__inner">
           {/* Brand */}
-          <Link to="/dashboard" className="nav-logo">
+          <Link to="/" className="nav-logo">
             <Icons.Logo />
             <span className="nav-logo__text">Protiba</span>
           </Link>
