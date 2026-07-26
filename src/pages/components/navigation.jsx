@@ -6,7 +6,7 @@ import {Link, useLocation} from "react-router-dom";
 //  ICONS — Premium SVG iconography (self-contained, no external deps)
 // ═══════════════════════════════════════════════════════════════════════════════
 const Icons = {
-  // Updated brand logo – a clean, modern "P" mark (replace with your own SVG as needed)
+  // Updated brand logo
   Logo: () => (
     <img
       src="/logo.png"
@@ -97,6 +97,38 @@ const Icons = {
     >
       <path d="M2 14l4-5 3 2.5L14 6l2 3" />
       <path d="M2 16h14" />
+    </svg>
+  ),
+  // NEW – Pricing (dollar sign in a circle)
+  Pricing: () => (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="9" cy="9" r="7" />
+      <path d="M9 4v2M9 12v2M6 9h6" />
+    </svg>
+  ),
+  // NEW – Our Story (folder/book)
+  Story: () => (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 3h6l2 2h4v9H3V3z" />
+      <path d="M3 7h12" />
     </svg>
   ),
   Settings: () => (
@@ -384,7 +416,7 @@ const Icons = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  NAVIGATION DATA — Hierarchical route structure
+//  NAVIGATION DATA — Hierarchical route structure (updated with Pricing & Story)
 // ═══════════════════════════════════════════════════════════════════════════════
 const navStructure = [
   {
@@ -416,29 +448,29 @@ const navStructure = [
     path: "/home/create-table",
     icon: Icons.Generate,
     children: null,
-    highlight: true, // still visually distinct, but no "New" badge
-  },
-  {
-    id: "institution",
-    label: "Institution",
-    path: "/institution",
-    icon: Icons.Institution,
-    children: [
-      {label: "Classes", path: "/institution/classes", icon: Icons.Classes},
-      {label: "Subjects", path: "/institution/subjects", icon: Icons.Subjects},
-      {
-        label: "Departments",
-        path: "/institution/departments",
-        icon: Icons.Departments,
-      },
-      {label: "Teachers", path: "/institution/teachers", icon: Icons.Teachers},
-    ],
+    highlight: true,
   },
   {
     id: "analytics",
     label: "Analytics",
     path: "/analytics",
     icon: Icons.Analytics,
+    children: null,
+  },
+  // ── NEW: Pricing ──
+  {
+    id: "pricing",
+    label: "Pricing",
+    path: "/home/pricing",
+    icon: Icons.Pricing,
+    children: null,
+  },
+  // ── NEW: Our Story ──
+  {
+    id: "story",
+    label: "Our Story",
+    path: "/home/story",
+    icon: Icons.Story,
     children: null,
   },
 ];
@@ -484,7 +516,7 @@ const getInitials = (name) => {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  MOBILE NAV ITEM — Expandable with children
+//  MOBILE NAV ITEM — Expandable with children (unchanged)
 // ═══════════════════════════════════════════════════════════════════════════════
 const MobileNavItem = ({item, currentPath, index, onNavigate}) => {
   const [expanded, setExpanded] = useState(
@@ -548,7 +580,6 @@ const MobileNavItem = ({item, currentPath, index, onNavigate}) => {
         >
           <item.icon />
           <span>{item.label}</span>
-          {/* "New" badge removed */}
         </Link>
       )}
     </motion.div>
@@ -556,7 +587,7 @@ const MobileNavItem = ({item, currentPath, index, onNavigate}) => {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  MAIN NAVIGATION COMPONENT — Top bar + mobile panel
+//  MAIN NAVIGATION COMPONENT — Top bar + mobile panel (unchanged logic)
 // ═══════════════════════════════════════════════════════════════════════════════
 export const Navigation = ({
   userName = "Admin User",
@@ -709,7 +740,6 @@ export const Navigation = ({
                   >
                     <item.icon />
                     <span>{item.label}</span>
-                    {/* "New" badge removed */}
                   </Link>
                 )}
               </div>
@@ -980,9 +1010,7 @@ export const Navigation = ({
   );
 };
 
-// ═══════════════════════════════════════════════════════════════════════════════
-//  STYLES — Glassmorphism effect & premium look
-// ═══════════════════════════════════════════════════════════════════════════════
+// ─── Styles (unchanged) ───────────────────────────────────────────────────────
 const navStyles = `
   :root {
     --nav-bg: rgba(3,3,5,0.7);

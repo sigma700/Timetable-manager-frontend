@@ -1,5 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Link} from "react-router-dom";
+import Navigation from "./components/navigation";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const Icon = {
@@ -269,19 +270,7 @@ const Story = () => {
     <>
       <style>{css}</style>
       <div className="story-root">
-        {/* ── Nav ── */}
-        <nav className="story-nav">
-          <div className="story-nav__inner">
-            <Link to="/" className="story-nav__logo">
-              <Icon.Logo />
-              <span>Protiba</span>
-            </Link>
-            <Link to="/" className="story-nav__back">
-              <Icon.ChevronLeft />
-              Back to Home
-            </Link>
-          </div>
-        </nav>
+        <Navigation />
 
         {/* ── Hero ── */}
         <section className="story-hero">
@@ -497,22 +486,6 @@ const Story = () => {
           </div>
           <div className="story-cta__glow" />
         </section>
-
-        {/* ── Footer ── */}
-        <footer className="story-footer">
-          <div className="story-footer__inner">
-            <Link to="/" className="story-nav__logo">
-              <Icon.Logo />
-              <span>Protiba</span>
-            </Link>
-            <p className="story-footer__copy">
-              © {currentYear} Protiba. All rights reserved.
-            </p>
-            <Link to="/" className="story-footer__link">
-              Back to Home
-            </Link>
-          </div>
-        </footer>
       </div>
     </>
   );
