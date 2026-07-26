@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useRef, useMemo} from "react";
 import {useAuthStore} from "../store/authStore";
 import {Link} from "react-router-dom";
+import {Calendar, ClipboardList, Clock, Users, Check} from "lucide-react";
 
 import HoverDevCards from "./components/gridOPtions";
 import {Navigation} from "./components/navigation";
@@ -106,7 +107,9 @@ function MetricCard({label, value, sub, subColor = "#2B2B2B", icon, delay}) {
         >
           {label}
         </span>
-        <span style={{fontSize: 16, color: "#898989"}}>{icon}</span>
+        <span style={{color: "#898989", display: "flex", alignItems: "center"}}>
+          {icon}
+        </span>
       </div>
       <div
         style={{
@@ -325,11 +328,10 @@ function EmptyTimetableState() {
           alignItems: "center",
           justifyContent: "center",
           margin: "0 auto 20px",
-          fontSize: 22,
           color: "#2B2B2B",
         }}
       >
-        📅
+        <Calendar size={24} />
       </div>
       <p
         style={{
@@ -600,7 +602,7 @@ const MainPg = () => {
           color: "#2B2B2B",
           overflowX: "hidden",
           position: "relative",
-          paddingTop: "68px",
+          paddingTop: "88px", // increased from 68px for more breathing room
         }}
       >
         {/* Ambient glows removed – replaced with light empty space */}
@@ -737,14 +739,14 @@ const MainPg = () => {
                       }`
                     : "None generated"
                 }
-                icon="📋"
+                icon={<ClipboardList size={16} color="#898989" />}
                 delay={180}
               />
               <MetricCard
                 label="Periods scheduled"
                 value={timetableCount > 0 ? "47" : "—"}
                 sub="Across active tables"
-                icon="🕐"
+                icon={<Clock size={16} color="#898989" />}
                 delay={230}
               />
               <MetricCard
@@ -752,7 +754,7 @@ const MainPg = () => {
                 value={timetableCount > 0 ? "12" : "—"}
                 sub="All conflicts resolved"
                 subColor="#2B2B2B"
-                icon="👥"
+                icon={<Users size={16} color="#898989" />}
                 delay={280}
               />
               <MetricCard
@@ -760,7 +762,7 @@ const MainPg = () => {
                 value={timetableCount > 0 ? "0" : "—"}
                 sub="No issues detected"
                 subColor="#2B2B2B"
-                icon="✓"
+                icon={<Check size={16} color="#898989" />}
                 delay={330}
               />
             </div>
@@ -846,12 +848,10 @@ const MainPg = () => {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: 18,
-                      color: "#2B2B2B",
                       flexShrink: 0,
                     }}
                   >
-                    📅
+                    <Calendar size={20} color="#2B2B2B" />
                   </div>
                   <div>
                     <div
@@ -1208,7 +1208,7 @@ const MainPg = () => {
                     color: "#898989",
                   }}
                 >
-                  <span style={{color: "#2B2B2B", fontSize: 12}}>✓</span>
+                  <Check size={12} color="#2B2B2B" />
                   {item}
                 </div>
               ))}
