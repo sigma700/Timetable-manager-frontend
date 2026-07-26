@@ -1562,17 +1562,20 @@ const css = `
   .alert--error { background: rgba(244,63,94,0.08); border: 1px solid rgba(244,63,94,0.2); color: #f87171; }
   .alert--success { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); color: #34d399; }
 
-  /* ── Output ── */
+  /* ── Output (Full‑width responsive) ── */
   .gen-output {
-    max-width: 900px;
-    margin: 40px auto 0;
-    padding: 0 48px;
+    max-width: none;
+    margin: 40px 0 0;
+    padding: 0 20px;
   }
   .gen-output__header {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 20px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
   }
   .gen-output__badge {
     display: inline-flex;
@@ -1589,7 +1592,13 @@ const css = `
     letter-spacing: 0.06em;
   }
   .gen-output__title { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
-  @media (max-width: 720px) { .gen-output { padding: 0 20px; } }
+
+  @media (max-width: 720px) {
+    .gen-output { padding: 0 12px; }
+  }
+  @media (min-width: 1200px) {
+    .gen-output { padding: 0 60px; }
+  }
 `;
 
 export default Generation;
