@@ -1,10 +1,10 @@
 import React, {useState, useEffect, useRef} from "react";
 import {useAuthStore} from "../store/authStore";
-import {useGenStore} from "../store/generativeStore";
 import {Link} from "react-router-dom";
 
 import HoverDevCards from "./components/gridOPtions";
 import {Navigation} from "./components/navigation";
+import {useTimetable} from "../hooks/useTimetable";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 // Surface hierarchy: base → raised → elevated → overlay
@@ -232,7 +232,6 @@ function TimetableCell({period, isDouble}) {
     <div
       style={{
         height: 34,
-        // ❌ removed duplicate "borderRadius: 6"
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -244,7 +243,7 @@ function TimetableCell({period, isDouble}) {
         transition: "background 0.15s, transform 0.15s",
         transform: hovered ? "scale(1.05)" : "scale(1)",
         borderLeft: isDouble ? "2px solid rgba(139,92,246,0.6)" : "none",
-        borderRadius: isDouble ? "0 6px 6px 0" : 6, // ✅ only one borderRadius
+        borderRadius: isDouble ? "0 6px 6px 0" : 6,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -370,17 +369,47 @@ function StatusBadge({
 // ─── Main page ────────────────────────────────────────────────────────────────
 const MainPg = () => {
   const {user, logout, isLoading: authLoading} = useAuthStore();
-  const {gottenTable} = useGenStore();
+
+  // ═══ NEW: Read timetable ID from localStorage ═══
+  const [timetableId, setTimetableId] = useState(() =>
+    localStorage.getItem("currentTimetableId"),
+  );
+
+  // Listen for changes from other tabs (or after generation)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setTimetableId(localStorage.getItem("currentTimetableId"));
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  // React Query timetable fetching using the localStorage ID
+  const {
+    data: timetableData,
+    isLoading: timetableLoading,
+    isError,
+    error: timetableError,
+  } = useTimetable(timetableId);
+
+  // ✅ NEW: Auto‑clear bad timetable ID on error
+  useEffect(() => {
+    if (isError && timetableId) {
+      // Remove the invalid ID so the dashboard falls back to empty state
+      localStorage.removeItem("currentTimetableId");
+      setTimetableId(null);
+    }
+  }, [isError, timetableId]);
+
   const [selectedClass, setSelectedClass] = useState(null);
   const [pageReady, setPageReady] = useState(false);
   const isVisible = useStaggeredReveal(8, 55);
 
-  // User data for Navigation
   const userName = user
     ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
     : "Guest";
-  const institutionName = "St. Mary's Academy"; // fallback – can be fetched from store
-  const notificationCount = 3; // placeholder
+  const institutionName = "St. Mary's Academy";
+  const notificationCount = 3;
 
   const handleLogout = async () => {
     try {
@@ -399,18 +428,17 @@ const MainPg = () => {
     }
   };
 
-  // Check auth on mount
-
   useEffect(() => {
     const t = setTimeout(() => setPageReady(true), 60);
     return () => clearTimeout(t);
   }, []);
 
+  // Auto-select first timetable when data arrives
   useEffect(() => {
-    if (gottenTable?.timetables?.length > 0 && !selectedClass) {
-      setSelectedClass(gottenTable.timetables[0].name);
+    if (timetableData?.timetables?.length > 0 && !selectedClass) {
+      setSelectedClass(timetableData.timetables[0].name);
     }
-  }, [gottenTable, selectedClass]);
+  }, [timetableData, selectedClass]);
 
   const isDoublePeriod = (period) => {
     if (!period?.startTime || !period?.endTime) return false;
@@ -434,10 +462,10 @@ const MainPg = () => {
   };
 
   const selectedTimetable =
-    gottenTable?.timetables?.find((t) => t.name === selectedClass) ||
-    gottenTable?.timetables?.[0];
+    timetableData?.timetables?.find((t) => t.name === selectedClass) ||
+    timetableData?.timetables?.[0];
 
-  const timetableCount = gottenTable?.timetables?.length || 0;
+  const timetableCount = timetableData?.timetables?.length || 0;
 
   const getGreeting = () => {
     const h = new Date().getHours();
@@ -446,7 +474,6 @@ const MainPg = () => {
     return "Good evening";
   };
 
-  // Shared reveal style helper
   const reveal = (i, extra = {}) => ({
     opacity: isVisible(i) ? 1 : 0,
     transform: isVisible(i) ? "translateY(0)" : "translateY(14px)",
@@ -454,6 +481,7 @@ const MainPg = () => {
     ...extra,
   });
 
+  // ── Auth loading state ──
   if (authLoading) {
     return (
       <div
@@ -470,9 +498,29 @@ const MainPg = () => {
     );
   }
 
+  // ── Timetable loading state (reuse spinner) ──
+  if (timetableLoading) {
+    return (
+      <div
+        style={{
+          background: "#0d1420",
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div className="main-loading-spinner" />
+      </div>
+    );
+  }
+
+  // ❌ The previous error screen is completely removed.
+  // Any fetch error will now trigger the cleanup effect above, which resets the ID
+  // and causes the dashboard to gracefully fall back to the empty timetable state.
+
   return (
     <>
-      {/* Add loading spinner styles (inline to avoid external CSS) */}
       <style>
         {`
           .main-loading-spinner {
@@ -489,7 +537,6 @@ const MainPg = () => {
         `}
       </style>
 
-      {/* Navigation bar – replaces old FullMenu */}
       <Navigation
         userName={userName}
         institutionName={institutionName}
@@ -497,7 +544,6 @@ const MainPg = () => {
         onLogout={handleLogout}
       />
 
-      {/* Main content – add top padding to avoid overlap with fixed header */}
       <main
         style={{
           minHeight: "100vh",
@@ -506,7 +552,7 @@ const MainPg = () => {
           color: "#fff",
           overflowX: "hidden",
           position: "relative",
-          paddingTop: "68px", // space for fixed navbar
+          paddingTop: "68px",
         }}
       >
         {/* Ambient background glows */}
@@ -537,7 +583,6 @@ const MainPg = () => {
           }}
         />
 
-        {/* Page content wrapper */}
         <div
           style={{
             position: "relative",
@@ -707,7 +752,6 @@ const MainPg = () => {
               </div>
             </div>
 
-            {/* HoverDevCards rendered inside a styled wrapper */}
             <div
               style={{
                 background: "rgba(255,255,255,0.02)",
@@ -857,7 +901,7 @@ const MainPg = () => {
                       scrollbarWidth: "none",
                     }}
                   >
-                    {gottenTable.timetables.map((tt) => {
+                    {(timetableData?.timetables || []).map((tt) => {
                       const isActive = selectedClass === tt.name;
                       const label = tt.name
                         .replace("Timetable for ", "")
@@ -933,7 +977,6 @@ const MainPg = () => {
                             </div>
                           ),
                         )}
-                        {/* Fill missing day headers */}
                         {Array.from({
                           length: Math.max(
                             0,

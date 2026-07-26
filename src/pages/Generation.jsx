@@ -486,8 +486,9 @@ const Generation = () => {
     useGenStore();
   const {user, logout} = useAuthStore();
 
-  // Navigation props
-  const userName = user || "User";
+  const userName = user
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Guest"
+    : "Guest";
   const institutionName = "St. Mary's Academy";
   const notificationCount = 3;
 
@@ -616,6 +617,13 @@ const Generation = () => {
       console.error("Submission error:", err);
     }
   };
+
+  useEffect(() => {
+    console.log("Effect run:", {isCreated, relValue});
+    if (isCreated && relValue?._id) {
+      localStorage.setItem("currentTimetableId", relValue._id);
+    }
+  }, [isCreated, relValue]);
 
   // Determine progress step
   const currentStep = !formData.name
@@ -928,7 +936,15 @@ const Generation = () => {
               timetableResponse={{
                 success: true,
                 message: "Timetable loaded",
-                data: relValue,
+                data: {
+                  ...relValue,
+                  config: {
+                    periodDuration: parseInt(formData.periodDuration) || 40,
+                    periodsPerDay: parseInt(formData.periodsPerDay) || 7,
+                    startTime: formData.startTime || "08:00",
+                    ...(relValue.config || {}),
+                  },
+                },
               }}
             />
           </div>
@@ -938,7 +954,7 @@ const Generation = () => {
   );
 };
 
-// ─── Schedule Timeline Preview (with improved spacing & time visibility) ───
+// ─── Schedule Timeline Preview ───
 const ScheduleTimeline = ({
   startTime,
   periodsPerDay,
@@ -995,7 +1011,7 @@ const ScheduleTimeline = ({
           className={`timeline__slot timeline__slot--${slot.type}`}
           style={{
             "--w": slot.duration
-              ? `${Math.max(slot.duration / 1.5, 48)}px` // wider boxes
+              ? `${Math.max(slot.duration / 1.5, 48)}px`
               : "60px",
           }}
           title={`${slot.label}${slot.start ? " · " + slot.start : ""}${slot.duration ? " · " + slot.duration + "min" : ""}`}
@@ -1008,7 +1024,7 @@ const ScheduleTimeline = ({
   );
 };
 
-// ─── Styles (updated for timeline spacing & time visibility) ───────────────
+// ─── Styles ───────────────
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -1440,7 +1456,7 @@ const css = `
   .timeline {
     display: flex;
     align-items: stretch;
-    gap: 6px;               /* more spacing between boxes */
+    gap: 6px;
     overflow-x: auto;
     padding-bottom: 6px;
   }
