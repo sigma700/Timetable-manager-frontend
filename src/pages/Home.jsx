@@ -15,7 +15,7 @@ const C = {
   border2: "rgba(43,43,43,0.10)",
   border3: "rgba(43,43,43,0.14)",
   text: "#2B2B2B",
-  text2: "#6E6E6E", // darker for better readability
+  text2: "#6E6E6E",
   text3: "#858585",
   text4: "#9A9A9A",
   accent: "#2B2B2B",
@@ -275,7 +275,7 @@ const Ic = {
 const stats = [
   {value: "94%", label: "Conflict reduction"},
   {value: "3x", label: "Faster generation"},
-  {value: "500+", label: "Institutions served"},
+  {value: "500+", label: "Schools served"},
   {value: "40h", label: "Saved per semester"},
 ];
 
@@ -283,37 +283,37 @@ const features = [
   {
     icon: Ic.zap,
     title: "Automated generation",
-    desc: "Feed in constraints once. Get a fully optimized timetable in minutes.",
+    desc: "Feed in your timetable constraints once. Get a fully optimized schedule in minutes.",
     badge: "2.3s avg",
   },
   {
     icon: Ic.shield,
     title: "Zero conflicts",
     desc: "Our constraint engine resolves teacher, room, and class clashes automatically.",
-    badge: "100% clash-free",
+    badge: "100% clash‑free",
   },
   {
     icon: Ic.layers,
-    title: "Any scale",
-    desc: "Primary schools to universities. One platform, unlimited campuses.",
-    badge: "Unlimited campuses",
+    title: "Any size",
+    desc: "From small rural primary schools to large high schools — one platform, all year levels.",
+    badge: "Unlimited classes",
   },
   {
     icon: Ic.clock,
-    title: "Real-time sync",
-    desc: "Push last-minute changes instantly. Every stakeholder stays in sync.",
+    title: "Real‑time sync",
+    desc: "Push last‑minute changes instantly. Every stakeholder stays in sync.",
     badge: "Instant updates",
   },
   {
     icon: Ic.users,
     title: "Team collaboration",
     desc: "Admins, heads, and teachers all work from a single source of truth.",
-    badge: "Role-based access",
+    badge: "Role‑based access",
   },
   {
     icon: Ic.chart,
     title: "Operational insights",
-    desc: "Track utilization, identify bottlenecks, and plan ahead with analytics.",
+    desc: "Track classroom utilisation, identify bottlenecks, and plan ahead with analytics.",
     badge: "Live dashboards",
   },
 ];
@@ -321,7 +321,7 @@ const features = [
 const testimonials = [
   {
     quote:
-      "We eliminated three full weeks of back-and-forth. Protiba generates what used to take our admin team a month.",
+      "We eliminated three full weeks of back‑and‑forth. Protiba generates what used to take our admin team a month.",
     name: "Margaret Wanjiku",
     role: "Deputy Principal",
     institution: "St. Mary's Academy, Nairobi",
@@ -332,35 +332,35 @@ const testimonials = [
       "The first generated timetable had zero conflicts. I expected to spend days adjusting. I spent twenty minutes.",
     name: "David Omondi",
     role: "Academic Registrar",
-    institution: "Greenfield College, Mombasa",
+    institution: "Greenfield High School, Mombasa",
     initials: "DO",
   },
   {
     quote:
-      "We run six departments and 200 courses. Protiba handles all of it without breaking a sweat.",
-    name: "Prof. Amina Suleiman",
-    role: "Director of Academics",
-    institution: "East Africa Polytechnic",
+      "We run six departments and over 200 class groups. Protiba handles all of it without breaking a sweat.",
+    name: "Amina Suleiman",
+    role: "Head of Academics",
+    institution: "East Africa High School",
     initials: "AS",
   },
 ];
 
 const trustLogos = [
   "St. Mary's Academy",
-  "Greenfield College",
-  "Rift Valley Institute",
-  "Nairobi Technical",
-  "Coastal University",
-  "Mount Kenya University",
+  "Greenfield High School",
+  "Rift Valley Academy",
+  "Nairobi Technical School",
+  "Coastal Secondary School",
+  "Mount Kenya Secondary",
   "Kisumu High School",
-  "Moi University",
+  "Moi High School",
 ];
 
 const analyticsBenefits = [
-  {icon: Ic.barChart, text: "Monitor classroom utilization in real time"},
+  {icon: Ic.barChart, text: "Monitor classroom utilisation in real time"},
   {icon: Ic.users, text: "Track teacher workload across departments"},
   {icon: Ic.activity, text: "Detect scheduling inefficiencies instantly"},
-  {icon: Ic.trendUp, text: "Make data-driven planning decisions"},
+  {icon: Ic.trendUp, text: "Make data‑driven planning decisions"},
 ];
 
 // ─── useScrollReveal ──────────────────────────────────────────────────────────
@@ -521,15 +521,15 @@ function AnalyticsShowcase() {
           className={`showcase__copy ${visible ? "showcase__copy--in" : ""}`}
         >
           <h2 className="showcase__title">
-            Everything happening across your institution.
+            Everything happening across your school.
             <br />
             <span className="showcase__title-dim">At a glance.</span>
           </h2>
           <p className="showcase__desc">
-            After generating a timetable, administrators should instantly
-            understand how efficiently their institution is operating. Instead
-            of manually checking classrooms, teachers, utilization and
-            conflicts, Protiba visualizes everything in one place.
+            After generating a timetable, administrators instantly understand
+            how efficiently their school is operating. Instead of manually
+            checking classrooms, teachers, utilisation and conflicts, Protiba
+            visualises everything in one place.
           </p>
           <ul className="showcase__benefits">
             {analyticsBenefits.map((b, i) => (
@@ -786,10 +786,10 @@ const Home = () => {
   return (
     <>
       <Helmet>
-        <title>Protiba - Academic Scheduling, Automated</title>
+        <title>Protiba – Academic Scheduling for Schools</title>
         <meta
           name="description"
-          content="Protiba automates school timetable generation for institutions of any size. Zero conflicts, instant updates, built for educators."
+          content="Protiba automates school timetable generation for high schools and primary schools. Zero conflicts, instant updates, built for educators."
         />
       </Helmet>
       <style>{CSS}</style>
@@ -817,7 +817,7 @@ const Home = () => {
           <div className="hero__inner">
             <div className="hero__badge hp-anim hp-anim--1">
               <span className="hero__badge-dot" />
-              Now serving 500+ institutions across East Africa
+              Used by 500+ schools across East Africa
               <Ic.arrowUpRight />
             </div>
             <h1 className="hero__title hp-anim hp-anim--2">
@@ -827,8 +827,8 @@ const Home = () => {
             </h1>
             <p className="hero__sub hp-anim hp-anim--3">
               Protiba eliminates weeks of manual timetabling. Feed in your
-              constraints and receive a conflict-free schedule in minutes. Built
-              for schools, colleges, and universities.
+              constraints and receive a conflict‑free schedule in minutes. Built
+              for high schools and primary schools.
             </p>
             <div className="hero__actions hp-anim hp-anim--4">
               <Link to="/signup" className="btn-primary">
@@ -838,6 +838,7 @@ const Home = () => {
                 <Ic.play /> Watch demo
               </Link>
             </div>
+            {/* ── GA‑style live counter ── */}
             <div className="hero__proof hp-anim hp-anim--5">
               <div className="hero__avatars">
                 {["MW", "DO", "AS", "FK", "RN"].map((s, i) => (
@@ -850,8 +851,21 @@ const Home = () => {
                   </div>
                 ))}
               </div>
-              <p className="hero__proof-text">
-                Trusted by <strong>500+ administrators</strong> this semester
+              <p
+                className="hero__proof-text"
+                style={{display: "flex", alignItems: "center", gap: 6}}
+              >
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "#22C55E",
+                    display: "inline-block",
+                    boxShadow: "0 0 6px rgba(34,197,94,0.6)",
+                  }}
+                />
+                <strong>3,247 timetables</strong> generated this semester
               </p>
             </div>
             <div className="hero__trust hp-anim hp-anim--5">
@@ -874,7 +888,7 @@ const Home = () => {
                   <Ic.check />
                 </div>
                 <div>
-                  <div className="float-card__title">Auto-resolved</div>
+                  <div className="float-card__title">Auto‑resolved</div>
                   <div className="float-card__sub">3 room conflicts</div>
                 </div>
               </div>
@@ -913,7 +927,7 @@ const Home = () => {
         <AnalyticsShowcase />
 
         <section className="logos">
-          <p className="logos__label">Trusted by leading institutions</p>
+          <p className="logos__label">Trusted by leading schools</p>
           <div className="logos__wrap">
             <div className="logos__track">
               {[...trustLogos, ...trustLogos, ...trustLogos].map((n, i) => (
@@ -944,13 +958,13 @@ const Home = () => {
             <div className="section-head">
               <span className="eyebrow">Platform capabilities</span>
               <h2 className="section-title">
-                Everything your institution needs.
+                Everything your school needs.
                 <br />
                 <span className="section-title-muted">Nothing it doesn't.</span>
               </h2>
               <p className="section-sub">
-                Built around the real operational complexity of academic
-                institutions, from small schools to multi-campus universities.
+                Built around the real operational complexity of secondary and
+                primary schools, from small rural schools to large high schools.
               </p>
             </div>
             <div className="features__grid">
@@ -992,18 +1006,18 @@ const Home = () => {
               {[
                 {
                   n: "01",
-                  title: "Configure your institution",
+                  title: "Configure your school",
                   desc: "Enter teachers, rooms, subjects, and class groups. Set availability windows, preferences, and hard constraints.",
                 },
                 {
                   n: "02",
                   title: "Let the engine run",
-                  desc: "Our constraint-satisfaction algorithm generates thousands of valid permutations and selects the optimal schedule.",
+                  desc: "Our constraint‑satisfaction algorithm generates thousands of valid permutations and selects the optimal schedule.",
                 },
                 {
                   n: "03",
                   title: "Publish and manage",
-                  desc: "Review, fine-tune, and publish with one click. Push updates in real time and all stakeholders see changes instantly.",
+                  desc: "Review, fine‑tune, and publish with one click. Push updates in real time and all stakeholders see changes instantly.",
                 },
               ].map((s, i) => {
                 const [ref, visible] = useScrollReveal();
@@ -1031,7 +1045,7 @@ const Home = () => {
               <h2 className="section-title">
                 Real results from
                 <br />
-                <span className="section-title-muted">real institutions.</span>
+                <span className="section-title-muted">real schools.</span>
               </h2>
             </div>
             <div className="testi-grid">
@@ -1075,12 +1089,12 @@ const Home = () => {
               Start today, it's free
             </span>
             <h2 className="cta__title">
-              Your institution deserves
+              Your school deserves
               <br />a better way to schedule.
             </h2>
             <p className="cta__sub">
-              Join 500+ schools and universities that have reclaimed weeks of
-              administrative time every semester.
+              Join 500+ schools that have reclaimed weeks of administrative time
+              every semester.
             </p>
             <div className="cta__actions">
               <Link to="/signup" className="btn-primary btn-primary--lg">
