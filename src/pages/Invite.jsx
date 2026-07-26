@@ -1400,28 +1400,6 @@ export default function Invite() {
             margin: "0 auto",
           }}
         />
-
-        {/* ── Footer ────────────────────────────────────────────────────────── */}
-        <div
-          className="invite-footer"
-          style={{
-            maxWidth: 1080,
-            margin: "0 auto",
-            padding: "22px 40px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 8,
-          }}
-        >
-          <span style={{fontSize: 11, color: tk.text3}}>
-            2025 Protiba. Academic scheduling infrastructure.
-          </span>
-          <span style={{fontSize: 11, color: tk.text3}}>
-            Kenya · protiba.com
-          </span>
-        </div>
       </div>
     </>
   );
