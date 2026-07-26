@@ -143,25 +143,18 @@ const Footer = () => {
                 marginBottom: 16,
               }}
             >
-              {/* Logo mark */}
-              <div
+              {/* Logo image – replaced the hardcoded “P” mark */}
+              <img
+                src="/logo.png"
+                alt="Protiba"
                 style={{
                   width: 30,
                   height: 30,
                   borderRadius: 8,
-                  background: "linear-gradient(135deg, #f59e0b, #d97706)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: "#fff",
-                  letterSpacing: "-0.5px",
+                  objectFit: "contain",
                   flexShrink: 0,
                 }}
-              >
-                P
-              </div>
+              />
               <span
                 style={{
                   fontSize: 18,

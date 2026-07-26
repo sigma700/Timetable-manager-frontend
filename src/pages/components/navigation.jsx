@@ -6,24 +6,19 @@ import {Link, useLocation} from "react-router-dom";
 //  ICONS — Premium SVG iconography (self-contained, no external deps)
 // ═══════════════════════════════════════════════════════════════════════════════
 const Icons = {
+  // Updated brand logo – a clean, modern "P" mark (replace with your own SVG as needed)
   Logo: () => (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <rect width="32" height="32" rx="9" fill="url(#navLogoGrad)" />
-      <defs>
-        <linearGradient id="navLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#6366f1" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M9 16L13.5 11L18.5 16L24 8.5"
-        stroke="white"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="24" cy="23" r="3.5" fill="rgba(255,255,255,0.3)" />
-    </svg>
+    <img
+      src="/logo.png"
+      alt="Protiba"
+      style={{
+        width: 32,
+        height: 32,
+        borderRadius: 8,
+        objectFit: "contain",
+        flexShrink: 0,
+      }}
+    />
   ),
   Dashboard: () => (
     <svg
@@ -421,7 +416,7 @@ const navStructure = [
     path: "/home/create-table",
     icon: Icons.Generate,
     children: null,
-    highlight: true,
+    highlight: true, // still visually distinct, but no "New" badge
   },
   {
     id: "institution",
@@ -477,7 +472,6 @@ const isParentActive = (currentPath, navPath) => {
   return currentPath.startsWith(navPath) && navPath !== "/dashboard";
 };
 
-// NEW
 const getInitials = (name) => {
   if (!name || typeof name !== "string") return "?";
   return name
@@ -554,9 +548,7 @@ const MobileNavItem = ({item, currentPath, index, onNavigate}) => {
         >
           <item.icon />
           <span>{item.label}</span>
-          {item.highlight && (
-            <span className="nav-mobile-link__badge">New</span>
-          )}
+          {/* "New" badge removed */}
         </Link>
       )}
     </motion.div>
@@ -637,16 +629,19 @@ export const Navigation = ({
   return (
     <>
       <style>{navStyles}</style>
+
       {/* TOP NAVIGATION BAR */}
       <header
         className={`nav-header ${scrolled ? "nav-header--scrolled" : ""}`}
       >
         <div className="nav-header__inner">
+          {/* Brand */}
           <Link to="/dashboard" className="nav-logo">
             <Icons.Logo />
             <span className="nav-logo__text">Protiba</span>
           </Link>
 
+          {/* Desktop Nav */}
           <nav className="nav-desktop" ref={dropdownRef}>
             {navStructure.map((item) => (
               <div key={item.id} className="nav-item-wrapper">
@@ -714,15 +709,14 @@ export const Navigation = ({
                   >
                     <item.icon />
                     <span>{item.label}</span>
-                    {item.highlight && (
-                      <span className="nav-link__badge">New</span>
-                    )}
+                    {/* "New" badge removed */}
                   </Link>
                 )}
               </div>
             ))}
           </nav>
 
+          {/* Right actions */}
           <div className="nav-actions">
             <div className="nav-search-wrapper" ref={searchRef}>
               <button
@@ -987,13 +981,13 @@ export const Navigation = ({
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  STYLES — Main Navigation (navStyles)
+//  STYLES — Glassmorphism effect & premium look
 // ═══════════════════════════════════════════════════════════════════════════════
 const navStyles = `
   :root {
-    --nav-bg: rgba(3,3,5,0.8);
+    --nav-bg: rgba(3,3,5,0.7);
     --nav-bg-solid: #0a0a0f;
-    --nav-border: rgba(255,255,255,0.07);
+    --nav-border: rgba(255,255,255,0.08);
     --nav-border-2: rgba(255,255,255,0.12);
     --nav-text: #f0f0f5;
     --nav-text-2: #9ca3af;
@@ -1012,15 +1006,16 @@ const navStyles = `
     left: 0;
     right: 0;
     z-index: 100;
-    background: transparent;
+    background: rgba(3,3,5,0.7);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
     border-bottom: 1px solid transparent;
-    transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s, box-shadow 0.3s;
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
   }
   .nav-header--scrolled {
     background: rgba(3,3,5,0.85);
-    backdrop-filter: blur(20px) saturate(1.5);
     border-bottom-color: var(--nav-border);
-    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.35);
   }
   .nav-header__inner {
     max-width: 1440px;
@@ -1074,26 +1069,16 @@ const navStyles = `
     transition: all var(--nav-transition);
   }
   .nav-link:hover {
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.05);
     color: var(--nav-text);
   }
   .nav-link--active {
-    background: rgba(124,58,237,0.1);
+    background: rgba(124,58,237,0.12);
     color: var(--nav-text);
   }
   .nav-link--highlight {
     background: rgba(124,58,237,0.08);
     border: 0.5px solid rgba(124,58,237,0.3);
-  }
-  .nav-link__badge {
-    font-size: 10px;
-    font-weight: 700;
-    color: #fbbf24;
-    background: rgba(251,191,36,0.12);
-    border: 0.5px solid rgba(251,191,36,0.3);
-    padding: 2px 8px;
-    border-radius: 20px;
-    letter-spacing: 0.3px;
   }
   .nav-link__chevron {
     display: inline-flex;
@@ -1435,15 +1420,6 @@ const navStyles = `
   .nav-mobile-link--highlight {
     background: rgba(124,58,237,0.08);
   }
-  .nav-mobile-link__badge {
-    font-size: 10px;
-    font-weight: 700;
-    color: #fbbf24;
-    background: rgba(251,191,36,0.12);
-    padding: 2px 8px;
-    border-radius: 20px;
-    margin-left: auto;
-  }
   .nav-mobile-group { margin-bottom: 4px; }
   .nav-mobile-group__trigger {
     display: flex;
@@ -1534,4 +1510,4 @@ const navStyles = `
   }
 `;
 
-export default Navigation; // optional default export
+export default Navigation;
