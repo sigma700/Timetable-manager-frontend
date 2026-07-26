@@ -47,7 +47,7 @@ import EmptyState from "./components/ui/EmptyState.jsx";
 import Footer from "./components/footer.jsx";
 
 // ─────────────────────────────────────────────
-// DESIGN TOKENS
+// DESIGN TOKENS – semantic colors preserved
 // ─────────────────────────────────────────────
 const CHART_COLORS = [
   "#0b69ff",
@@ -148,7 +148,6 @@ const AnimatedMetricCard = memo(({label, value, Icon, color, description}) => {
       variants={fadeUp}
       whileHover={{y: -2, transition: {duration: 0.2}}}
       className="card group cursor-default select-none"
-      style={{borderColor: "var(--color-border)"}}
     >
       <div className="flex items-start justify-between mb-4">
         <div
@@ -159,27 +158,27 @@ const AnimatedMetricCard = memo(({label, value, Icon, color, description}) => {
         </div>
         <TrendingUp
           size={12}
-          style={{color: "var(--color-subtle)"}}
           className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{color: "#898989"}}
         />
       </div>
 
       <p
         className="text-xs font-medium uppercase tracking-wide mb-1"
-        style={{color: "var(--color-muted)", letterSpacing: "0.06em"}}
+        style={{color: "#898989", letterSpacing: "0.06em"}}
       >
         {label}
       </p>
 
       <p
         className="text-3xl font-bold tabular-nums leading-none mb-1"
-        style={{color: "var(--color-text)"}}
+        style={{color: "#2B2B2B"}}
       >
         {numericValue !== null ? animated : (value ?? "—")}
       </p>
 
       {description && (
-        <p className="text-xs mt-1" style={{color: "var(--color-subtle)"}}>
+        <p className="text-xs mt-1" style={{color: "#898989"}}>
           {description}
         </p>
       )}
@@ -195,19 +194,17 @@ const PremiumTooltip = ({active, payload, label}) => {
   return (
     <div
       style={{
-        background: "var(--color-card)",
-        border: "1px solid var(--color-border)",
+        background: "#FFFFFF",
+        border: "1px solid #E8E8E8",
         borderRadius: 10,
         padding: "10px 14px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.03)",
         fontSize: 12,
         minWidth: 120,
       }}
     >
       {label && (
-        <p style={{color: "var(--color-muted)", marginBottom: 6, fontSize: 11}}>
-          {label}
-        </p>
+        <p style={{color: "#898989", marginBottom: 6, fontSize: 11}}>{label}</p>
       )}
       {payload.map((entry) => (
         <div key={entry.name} className="flex items-center gap-2">
@@ -219,7 +216,7 @@ const PremiumTooltip = ({active, payload, label}) => {
               background: entry.color,
             }}
           />
-          <p style={{color: "var(--color-text)", fontWeight: 600}}>
+          <p style={{color: "#2B2B2B", fontWeight: 600}}>
             {entry.name}:{" "}
             <span style={{color: entry.color}}>{entry.value}</span>
           </p>
@@ -239,22 +236,20 @@ const SectionHeader = ({title, subtitle, action}) => (
         style={{
           fontSize: 14,
           fontWeight: 600,
-          color: "var(--color-text)",
+          color: "#2B2B2B",
           marginBottom: 2,
         }}
       >
         {title}
       </h2>
-      {subtitle && (
-        <p style={{fontSize: 12, color: "var(--color-muted)"}}>{subtitle}</p>
-      )}
+      {subtitle && <p style={{fontSize: 12, color: "#898989"}}>{subtitle}</p>}
     </div>
     {action}
   </div>
 );
 
 // ─────────────────────────────────────────────
-// ACTIVITY FEED
+// ACTIVITY FEED – color badges preserved
 // ─────────────────────────────────────────────
 const categoryConfig = {
   AUTH: {color: "#3b82f6", label: "Auth"},
@@ -286,7 +281,7 @@ const ActivityTimeline = ({activities, loading}) => {
                 width: 28,
                 height: 28,
                 borderRadius: "50%",
-                background: "var(--color-border)",
+                background: "#E8E8E8",
                 flexShrink: 0,
               }}
             />
@@ -296,7 +291,7 @@ const ActivityTimeline = ({activities, loading}) => {
                   height: 10,
                   width: "60%",
                   borderRadius: 6,
-                  background: "var(--color-border)",
+                  background: "#E8E8E8",
                   marginBottom: 6,
                 }}
               />
@@ -305,7 +300,7 @@ const ActivityTimeline = ({activities, loading}) => {
                   height: 10,
                   width: "40%",
                   borderRadius: 6,
-                  background: "var(--color-border)",
+                  background: "#E8E8E8",
                 }}
               />
             </div>
@@ -318,14 +313,11 @@ const ActivityTimeline = ({activities, loading}) => {
   if (!activities?.length) {
     return (
       <div style={{padding: "32px 0", textAlign: "center"}}>
-        <Activity
-          size={28}
-          style={{color: "var(--color-border)", margin: "0 auto 12px"}}
-        />
-        <p style={{fontSize: 13, color: "var(--color-muted)", fontWeight: 500}}>
+        <Activity size={28} style={{color: "#D0D0D0", margin: "0 auto 12px"}} />
+        <p style={{fontSize: 13, color: "#898989", fontWeight: 500}}>
           No activity yet
         </p>
-        <p style={{fontSize: 12, color: "var(--color-subtle)", marginTop: 4}}>
+        <p style={{fontSize: 12, color: "#898989", marginTop: 4}}>
           Events appear here as your institution uses the platform.
         </p>
       </div>
@@ -334,7 +326,6 @@ const ActivityTimeline = ({activities, loading}) => {
 
   return (
     <div className="relative">
-      {/* Vertical line */}
       <div
         style={{
           position: "absolute",
@@ -342,11 +333,10 @@ const ActivityTimeline = ({activities, loading}) => {
           top: 14,
           bottom: 14,
           width: 1,
-          background: "var(--color-border)",
+          background: "#E8E8E8",
           zIndex: 0,
         }}
       />
-
       <div className="space-y-1">
         {activities.map((activity, i) => {
           const cfg = categoryConfig[activity.eventCategory] ?? {
@@ -362,14 +352,13 @@ const ActivityTimeline = ({activities, loading}) => {
               className="flex gap-3 relative z-10"
               style={{padding: "6px 0"}}
             >
-              {/* Dot */}
               <div
                 style={{
                   width: 28,
                   height: 28,
                   borderRadius: "50%",
                   flexShrink: 0,
-                  background: "var(--color-card)",
+                  background: "#FFFFFF",
                   border: `2px solid ${cfg.color}`,
                   display: "flex",
                   alignItems: "center",
@@ -385,14 +374,13 @@ const ActivityTimeline = ({activities, loading}) => {
                   }}
                 />
               </div>
-
               <div style={{flex: 1, minWidth: 0, paddingTop: 4}}>
                 <div className="flex items-center justify-between gap-2">
                   <p
                     style={{
                       fontSize: 12,
                       fontWeight: 500,
-                      color: "var(--color-text)",
+                      color: "#2B2B2B",
                       lineHeight: 1.3,
                     }}
                   >
@@ -401,7 +389,7 @@ const ActivityTimeline = ({activities, loading}) => {
                   <span
                     style={{
                       fontSize: 11,
-                      color: "var(--color-subtle)",
+                      color: "#898989",
                       whiteSpace: "nowrap",
                       flexShrink: 0,
                     }}
@@ -412,7 +400,7 @@ const ActivityTimeline = ({activities, loading}) => {
                 <div className="flex items-center gap-2 mt-1">
                   {(activity.userId?.firstName ||
                     activity.userId?.lastName) && (
-                    <span style={{fontSize: 11, color: "var(--color-muted)"}}>
+                    <span style={{fontSize: 11, color: "#898989"}}>
                       {activity.userId?.firstName} {activity.userId?.lastName}
                     </span>
                   )}
@@ -440,7 +428,7 @@ const ActivityTimeline = ({activities, loading}) => {
 };
 
 // ─────────────────────────────────────────────
-// PREMIUM HEALTH RING (replaces basic HealthScoreCard)
+// PREMIUM HEALTH RING – colors retained
 // ─────────────────────────────────────────────
 const PremiumHealthCard = ({data, loading}) => {
   const animatedScore = useCountUp(data?.healthScore ?? 0, 1200);
@@ -487,7 +475,7 @@ const PremiumHealthCard = ({data, loading}) => {
               width: 140,
               height: 140,
               borderRadius: "50%",
-              background: "var(--color-border)",
+              background: "#E8E8E8",
             }}
           />
           <div
@@ -495,7 +483,7 @@ const PremiumHealthCard = ({data, loading}) => {
               height: 12,
               width: 80,
               borderRadius: 6,
-              background: "var(--color-border)",
+              background: "#E8E8E8",
             }}
           />
         </div>
@@ -540,7 +528,6 @@ const PremiumHealthCard = ({data, loading}) => {
 
   return (
     <div className="card flex flex-col h-full">
-      {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
           <p
@@ -549,12 +536,12 @@ const PremiumHealthCard = ({data, loading}) => {
               fontWeight: 600,
               textTransform: "uppercase",
               letterSpacing: "0.07em",
-              color: "var(--color-muted)",
+              color: "#898989",
             }}
           >
             Timetable Health
           </p>
-          <p style={{fontSize: 12, color: "var(--color-subtle)", marginTop: 2}}>
+          <p style={{fontSize: 12, color: "#898989", marginTop: 2}}>
             {data.timetableName}
           </p>
         </div>
@@ -573,7 +560,6 @@ const PremiumHealthCard = ({data, loading}) => {
         </span>
       </div>
 
-      {/* Ring */}
       <div className="flex flex-col items-center mb-5">
         <div style={{position: "relative", width: 148, height: 148}}>
           <svg
@@ -589,7 +575,7 @@ const PremiumHealthCard = ({data, loading}) => {
               cy="64"
               r={radius}
               fill="none"
-              stroke="var(--color-border)"
+              stroke="#E8E8E8"
               strokeWidth="9"
             />
             <circle
@@ -606,7 +592,6 @@ const PremiumHealthCard = ({data, loading}) => {
               }}
             />
           </svg>
-          {/* Glow */}
           <div
             style={{
               position: "absolute",
@@ -636,16 +621,13 @@ const PremiumHealthCard = ({data, loading}) => {
             >
               {animatedScore}
             </span>
-            <span
-              style={{fontSize: 11, color: "var(--color-muted)", marginTop: 2}}
-            >
+            <span style={{fontSize: 11, color: "#898989", marginTop: 2}}>
               / 100
             </span>
           </div>
         </div>
       </div>
 
-      {/* Issues grid */}
       <div
         style={{
           display: "grid",
@@ -666,13 +648,7 @@ const PremiumHealthCard = ({data, loading}) => {
           >
             <div className="flex items-center gap-1.5 mb-1">
               <Icon size={12} style={{color: value > 0 ? ic : "#10b981"}} />
-              <span
-                style={{
-                  fontSize: 10,
-                  color: "var(--color-muted)",
-                  fontWeight: 500,
-                }}
-              >
+              <span style={{fontSize: 10, color: "#898989", fontWeight: 500}}>
                 {label}
               </span>
             </div>
@@ -695,7 +671,7 @@ const PremiumHealthCard = ({data, loading}) => {
 };
 
 // ─────────────────────────────────────────────
-// TEACHER MOBILE CARD (stacked for mobile)
+// TEACHER MOBILE CARD
 // ─────────────────────────────────────────────
 const TeacherCard = ({teacher}) => (
   <motion.div variants={fadeUp} className="card" style={{padding: "16px"}}>
@@ -719,12 +695,10 @@ const TeacherCard = ({teacher}) => (
           {teacher.teacherName?.[0]?.toUpperCase()}
         </div>
         <div>
-          <p
-            style={{fontSize: 13, fontWeight: 600, color: "var(--color-text)"}}
-          >
+          <p style={{fontSize: 13, fontWeight: 600, color: "#2B2B2B"}}>
             {teacher.teacherName}
           </p>
-          <p style={{fontSize: 11, color: "var(--color-muted)"}}>
+          <p style={{fontSize: 11, color: "#898989"}}>
             {teacher.subjectCount} subjects · {teacher.classCount} classes
           </p>
         </div>
@@ -752,7 +726,6 @@ const TeacherCard = ({teacher}) => (
         {teacher.utilizationPercent}%
       </span>
     </div>
-
     <div
       style={{
         display: "grid",
@@ -770,20 +743,18 @@ const TeacherCard = ({teacher}) => (
           style={{
             padding: "8px 10px",
             borderRadius: 7,
-            background: "var(--color-bg)",
-            border: "1px solid var(--color-border)",
+            background: "#F8F8F8",
+            border: "1px solid #E8E8E8",
           }}
         >
-          <p
-            style={{fontSize: 10, color: "var(--color-muted)", marginBottom: 2}}
-          >
+          <p style={{fontSize: 10, color: "#898989", marginBottom: 2}}>
             {label}
           </p>
           <p
             style={{
               fontSize: 16,
               fontWeight: 700,
-              color: "var(--color-text)",
+              color: "#2B2B2B",
               lineHeight: 1,
             }}
           >
@@ -792,14 +763,10 @@ const TeacherCard = ({teacher}) => (
         </div>
       ))}
     </div>
-
-    {/* Utilization bar */}
     <div>
       <div className="flex items-center justify-between mb-1">
-        <span style={{fontSize: 11, color: "var(--color-muted)"}}>
-          Utilization
-        </span>
-        <span style={{fontSize: 11, color: "var(--color-muted)"}}>
+        <span style={{fontSize: 11, color: "#898989"}}>Utilization</span>
+        <span style={{fontSize: 11, color: "#898989"}}>
           {teacher.weeklyLoad} /{" "}
           {teacher.weeklyLoad > 0
             ? Math.round(
@@ -813,7 +780,7 @@ const TeacherCard = ({teacher}) => (
         style={{
           height: 6,
           borderRadius: 3,
-          background: "var(--color-border)",
+          background: "#E8E8E8",
           overflow: "hidden",
         }}
       >
@@ -838,7 +805,7 @@ const TeacherCard = ({teacher}) => (
 );
 
 // ─────────────────────────────────────────────
-// DESKTOP TEACHER TABLE COLUMNS
+// DESKTOP TEACHER TABLE COLUMNS (colors kept)
 // ─────────────────────────────────────────────
 const teacherColumns = [
   {
@@ -864,9 +831,7 @@ const teacherColumns = [
         >
           {val?.[0]?.toUpperCase()}
         </div>
-        <span
-          style={{fontSize: 13, fontWeight: 500, color: "var(--color-text)"}}
-        >
+        <span style={{fontSize: 13, fontWeight: 500, color: "#2B2B2B"}}>
           {val}
         </span>
       </div>
@@ -879,7 +844,7 @@ const teacherColumns = [
       <span
         style={{
           fontWeight: 600,
-          color: "var(--color-text)",
+          color: "#2B2B2B",
           fontVariantNumeric: "tabular-nums",
         }}
       >
@@ -891,12 +856,7 @@ const teacherColumns = [
     key: "dailyLoad",
     label: "Daily Avg",
     render: (val) => (
-      <span
-        style={{
-          color: "var(--color-muted)",
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
+      <span style={{color: "#898989", fontVariantNumeric: "tabular-nums"}}>
         {val}
       </span>
     ),
@@ -911,7 +871,7 @@ const teacherColumns = [
             width: 72,
             height: 5,
             borderRadius: 3,
-            background: "var(--color-border)",
+            background: "#E8E8E8",
             overflow: "hidden",
           }}
         >
@@ -929,7 +889,7 @@ const teacherColumns = [
         <span
           style={{
             fontSize: 12,
-            color: "var(--color-muted)",
+            color: "#898989",
             fontVariantNumeric: "tabular-nums",
             minWidth: 32,
           }}
@@ -943,12 +903,7 @@ const teacherColumns = [
     key: "subjectCount",
     label: "Subjects",
     render: (val) => (
-      <span
-        style={{
-          color: "var(--color-muted)",
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
+      <span style={{color: "#898989", fontVariantNumeric: "tabular-nums"}}>
         {val}
       </span>
     ),
@@ -957,12 +912,7 @@ const teacherColumns = [
     key: "classCount",
     label: "Classes",
     render: (val) => (
-      <span
-        style={{
-          color: "var(--color-muted)",
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
+      <span style={{color: "#898989", fontVariantNumeric: "tabular-nums"}}>
         {val}
       </span>
     ),
@@ -977,7 +927,7 @@ const subjectColumns = [
     key: "subjectName",
     label: "Subject",
     render: (val) => (
-      <span style={{fontWeight: 500, color: "var(--color-text)"}}>{val}</span>
+      <span style={{fontWeight: 500, color: "#2B2B2B"}}>{val}</span>
     ),
   },
   {
@@ -987,7 +937,7 @@ const subjectColumns = [
       <span
         style={{
           fontWeight: 600,
-          color: "var(--color-text)",
+          color: "#2B2B2B",
           fontVariantNumeric: "tabular-nums",
         }}
       >
@@ -1005,7 +955,7 @@ const subjectColumns = [
             width: 64,
             height: 5,
             borderRadius: 3,
-            background: "var(--color-border)",
+            background: "#E8E8E8",
             overflow: "hidden",
           }}
         >
@@ -1021,7 +971,7 @@ const subjectColumns = [
         <span
           style={{
             fontSize: 12,
-            color: "var(--color-muted)",
+            color: "#898989",
             fontVariantNumeric: "tabular-nums",
           }}
         >
@@ -1034,12 +984,7 @@ const subjectColumns = [
     key: "classCount",
     label: "Classes",
     render: (val) => (
-      <span
-        style={{
-          color: "var(--color-muted)",
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
+      <span style={{color: "#898989", fontVariantNumeric: "tabular-nums"}}>
         {val}
       </span>
     ),
@@ -1048,12 +993,7 @@ const subjectColumns = [
     key: "dailyAverage",
     label: "Daily Avg",
     render: (val) => (
-      <span
-        style={{
-          color: "var(--color-muted)",
-          fontVariantNumeric: "tabular-nums",
-        }}
-      >
+      <span style={{color: "#898989", fontVariantNumeric: "tabular-nums"}}>
         {val}
       </span>
     ),
@@ -1067,10 +1007,8 @@ const PenaltyBar = ({label, description, value, max, color}) => (
   <div>
     <div className="flex items-start justify-between mb-2">
       <div>
-        <p style={{fontSize: 13, fontWeight: 500, color: "var(--color-text)"}}>
-          {label}
-        </p>
-        <p style={{fontSize: 11, color: "var(--color-muted)", marginTop: 1}}>
+        <p style={{fontSize: 13, fontWeight: 500, color: "#2B2B2B"}}>{label}</p>
+        <p style={{fontSize: 11, color: "#898989", marginTop: 1}}>
           {description}
         </p>
       </div>
@@ -1091,7 +1029,7 @@ const PenaltyBar = ({label, description, value, max, color}) => (
       style={{
         height: 6,
         borderRadius: 3,
-        background: "var(--color-border)",
+        background: "#E8E8E8",
         overflow: "hidden",
       }}
     >
@@ -1102,7 +1040,7 @@ const PenaltyBar = ({label, description, value, max, color}) => (
         style={{height: "100%", borderRadius: 3, background: color}}
       />
     </div>
-    <p style={{fontSize: 11, color: "var(--color-subtle)", marginTop: 4}}>
+    <p style={{fontSize: 11, color: "#898989", marginTop: 4}}>
       Max deduction: {max} pts
     </p>
   </div>
@@ -1140,7 +1078,57 @@ const Analytics = () => {
     useRecentActivity(8);
 
   return (
-    <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
+    <div
+      className="analytics-light mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8"
+      style={{background: "#F8F8F8", minHeight: "100vh"}}
+    >
+      {/* Light theme override for cards and components */}
+      <style>{`
+        .analytics-light {
+          --color-bg: #F8F8F8;
+          --color-card: #FFFFFF;
+          --color-text: #2B2B2B;
+          --color-muted: #898989;
+          --color-subtle: #A0A0A0;
+          --color-border: #E8E8E8;
+          --color-header-bg: #F0F0F0;
+        }
+        .analytics-light .card {
+          background: var(--color-card);
+          border: 1px solid var(--color-border);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+          border-radius: 16px;
+          padding: 24px;
+        }
+        .analytics-light .card:hover {
+          box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        .analytics-light .card .text-muted {
+          color: var(--color-muted);
+        }
+        .analytics-light .card .text-subtle {
+          color: var(--color-subtle);
+        }
+        .analytics-light .card .text-heading {
+          color: var(--color-text);
+        }
+        .analytics-light .border-color-border {
+          border-color: var(--color-border);
+        }
+        .analytics-light .bg-color-card {
+          background-color: var(--color-card);
+        }
+        .analytics-light .bg-color-bg {
+          background-color: var(--color-bg);
+        }
+        .analytics-light .text-color-text {
+          color: var(--color-text);
+        }
+        .analytics-light .text-color-muted {
+          color: var(--color-muted);
+        }
+      `}</style>
+
       {/* ── Page header ── */}
       <motion.div
         initial={{opacity: 0, y: -10}}
@@ -1166,14 +1154,14 @@ const Analytics = () => {
           style={{
             fontSize: 24,
             fontWeight: 700,
-            color: "var(--color-text)",
+            color: "#2B2B2B",
             letterSpacing: "-0.02em",
             marginBottom: 4,
           }}
         >
           Institution Overview
         </h1>
-        <p style={{fontSize: 13, color: "var(--color-muted)"}}>
+        <p style={{fontSize: 13, color: "#898989"}}>
           Performance insights and timetable health for your school.
         </p>
       </motion.div>
@@ -1184,7 +1172,7 @@ const Analytics = () => {
           display: "flex",
           gap: 2,
           marginBottom: 28,
-          borderBottom: "1px solid var(--color-border)",
+          borderBottom: "1px solid #E8E8E8",
           overflowX: "auto",
           scrollbarWidth: "none",
         }}
@@ -1200,7 +1188,7 @@ const Analytics = () => {
               padding: "10px 14px",
               fontSize: 13,
               fontWeight: 500,
-              color: activeTab === id ? "#0b69ff" : "var(--color-muted)",
+              color: activeTab === id ? "#0b69ff" : "#898989",
               background: "transparent",
               border: "none",
               borderBottom: `2px solid ${activeTab === id ? "#0b69ff" : "transparent"}`,
@@ -1225,12 +1213,9 @@ const Analytics = () => {
           animate="show"
           exit="exit"
         >
-          {/* ════════════════════════════════
-              OVERVIEW TAB
-          ════════════════════════════════ */}
+          {/* Overview Tab */}
           {activeTab === "overview" && (
             <div style={{display: "flex", flexDirection: "column", gap: 24}}>
-              {/* Metric cards */}
               {overviewLoading ? (
                 <MetricGridSkeleton count={4} />
               ) : (
@@ -1275,7 +1260,6 @@ const Analytics = () => {
                 </motion.div>
               )}
 
-              {/* Health + Activity */}
               <div
                 style={{
                   display: "grid",
@@ -1284,7 +1268,6 @@ const Analytics = () => {
                 }}
               >
                 <PremiumHealthCard data={healthData} loading={healthLoading} />
-
                 <div
                   className="card"
                   style={{display: "flex", flexDirection: "column"}}
@@ -1305,9 +1288,7 @@ const Analytics = () => {
                           }}
                           className="animate-pulse"
                         />
-                        <span
-                          style={{fontSize: 11, color: "var(--color-muted)"}}
-                        >
+                        <span style={{fontSize: 11, color: "#898989"}}>
                           Live
                         </span>
                       </div>
@@ -1320,7 +1301,6 @@ const Analytics = () => {
                 </div>
               </div>
 
-              {/* Subject bar chart */}
               {!subjectLoading && subjectData?.subjects?.length > 0 && (
                 <div className="card">
                   <SectionHeader
@@ -1334,17 +1314,17 @@ const Analytics = () => {
                     >
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        stroke="var(--color-border)"
+                        stroke="#E8E8E8"
                         vertical={false}
                       />
                       <XAxis
                         dataKey="subjectName"
-                        tick={{fontSize: 11, fill: "var(--color-muted)"}}
+                        tick={{fontSize: 11, fill: "#898989"}}
                         tickLine={false}
                         axisLine={false}
                       />
                       <YAxis
-                        tick={{fontSize: 11, fill: "var(--color-muted)"}}
+                        tick={{fontSize: 11, fill: "#898989"}}
                         tickLine={false}
                         axisLine={false}
                       />
@@ -1366,9 +1346,7 @@ const Analytics = () => {
             </div>
           )}
 
-          {/* ════════════════════════════════
-              TEACHERS TAB
-          ════════════════════════════════ */}
+          {/* Teachers Tab */}
           {activeTab === "teachers" && (
             <div style={{display: "flex", flexDirection: "column", gap: 20}}>
               {!teacherLoading && teacherData && (
@@ -1403,7 +1381,6 @@ const Analytics = () => {
                 </motion.div>
               )}
 
-              {/* Horizontal bar chart */}
               {!teacherLoading && teacherData?.teachers?.length > 0 && (
                 <div className="card">
                   <SectionHeader
@@ -1421,19 +1398,19 @@ const Analytics = () => {
                     >
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        stroke="var(--color-border)"
+                        stroke="#E8E8E8"
                         horizontal={false}
                       />
                       <XAxis
                         type="number"
-                        tick={{fontSize: 11, fill: "var(--color-muted)"}}
+                        tick={{fontSize: 11, fill: "#898989"}}
                         tickLine={false}
                         axisLine={false}
                       />
                       <YAxis
                         dataKey="teacherName"
                         type="category"
-                        tick={{fontSize: 11, fill: "var(--color-muted)"}}
+                        tick={{fontSize: 11, fill: "#898989"}}
                         tickLine={false}
                         axisLine={false}
                         width={96}
@@ -1454,7 +1431,6 @@ const Analytics = () => {
                 </div>
               )}
 
-              {/* Mobile: stacked cards / Desktop: table */}
               <div>
                 <SectionHeader
                   title="Workload Breakdown"
@@ -1492,9 +1468,7 @@ const Analytics = () => {
             </div>
           )}
 
-          {/* ════════════════════════════════
-              SUBJECTS TAB
-          ════════════════════════════════ */}
+          {/* Subjects Tab */}
           {activeTab === "subjects" && (
             <div style={{display: "flex", flexDirection: "column", gap: 20}}>
               {!subjectLoading && subjectData && (
@@ -1536,7 +1510,6 @@ const Analytics = () => {
                 </motion.div>
               )}
 
-              {/* Charts */}
               {!subjectLoading && subjectData?.subjects?.length > 0 && (
                 <div
                   style={{
@@ -1574,12 +1547,7 @@ const Analytics = () => {
                           iconType="circle"
                           iconSize={7}
                           formatter={(val) => (
-                            <span
-                              style={{
-                                fontSize: 11,
-                                color: "var(--color-muted)",
-                              }}
-                            >
+                            <span style={{fontSize: 11, color: "#898989"}}>
                               {val}
                             </span>
                           )}
@@ -1587,7 +1555,6 @@ const Analytics = () => {
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-
                   <div className="card">
                     <SectionHeader
                       title="Periods Per Subject"
@@ -1600,17 +1567,17 @@ const Analytics = () => {
                       >
                         <CartesianGrid
                           strokeDasharray="3 3"
-                          stroke="var(--color-border)"
+                          stroke="#E8E8E8"
                           vertical={false}
                         />
                         <XAxis
                           dataKey="subjectName"
-                          tick={{fontSize: 10, fill: "var(--color-muted)"}}
+                          tick={{fontSize: 10, fill: "#898989"}}
                           tickLine={false}
                           axisLine={false}
                         />
                         <YAxis
-                          tick={{fontSize: 11, fill: "var(--color-muted)"}}
+                          tick={{fontSize: 11, fill: "#898989"}}
                           tickLine={false}
                           axisLine={false}
                         />
@@ -1653,9 +1620,7 @@ const Analytics = () => {
             </div>
           )}
 
-          {/* ════════════════════════════════
-              HEALTH TAB
-          ════════════════════════════════ */}
+          {/* Health Tab */}
           {activeTab === "health" && (
             <div style={{display: "flex", flexDirection: "column", gap: 20}}>
               <div
@@ -1666,7 +1631,6 @@ const Analytics = () => {
                 }}
               >
                 <PremiumHealthCard data={healthData} loading={healthLoading} />
-
                 {!healthLoading && healthData && (
                   <div className="card">
                     <SectionHeader
@@ -1714,13 +1678,11 @@ const Analytics = () => {
                         <PenaltyBar key={item.label} {...item} />
                       ))}
                     </div>
-
-                    {/* Final score row */}
                     <div
                       style={{
                         marginTop: 24,
                         paddingTop: 20,
-                        borderTop: "1px solid var(--color-border)",
+                        borderTop: "1px solid #E8E8E8",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
@@ -1730,7 +1692,7 @@ const Analytics = () => {
                         style={{
                           fontSize: 14,
                           fontWeight: 600,
-                          color: "var(--color-text)",
+                          color: "#2B2B2B",
                         }}
                       >
                         Final Score
@@ -1763,7 +1725,7 @@ const Analytics = () => {
                           style={{
                             fontSize: 28,
                             fontWeight: 800,
-                            color: "var(--color-text)",
+                            color: "#2B2B2B",
                             fontVariantNumeric: "tabular-nums",
                           }}
                         >
@@ -1775,7 +1737,6 @@ const Analytics = () => {
                 )}
               </div>
 
-              {/* Issues grid */}
               {!healthLoading && healthData && (
                 <motion.div
                   variants={stagger}
@@ -1843,7 +1804,7 @@ const Analytics = () => {
                       <p
                         style={{
                           fontSize: 11,
-                          color: "var(--color-muted)",
+                          color: "#898989",
                           marginBottom: 4,
                           fontWeight: 500,
                         }}

@@ -89,14 +89,14 @@ function ScrollProgressBar() {
         right: 0,
         zIndex: 9999,
         height: 2,
-        background: "rgba(255,255,255,0.04)",
+        background: "#E8E8E8",
       }}
     >
       <div
         style={{
           height: "100%",
           width: `${progress}%`,
-          background: "linear-gradient(90deg, #6366f1, #a78bfa, #f472b6)",
+          background: "#2B2B2B",
           transition: "width 0.1s linear",
           borderRadius: "0 1px 1px 0",
         }}
@@ -110,13 +110,11 @@ function ScrollProgressBar() {
 const GlassCard = ({children, style = {}}) => (
   <div
     style={{
-      background: "rgba(255,255,255,0.03)",
-      border: "0.5px solid rgba(255,255,255,0.09)",
+      background: "#FFFFFF",
+      border: "1px solid #E8E8E8",
       borderRadius: 12,
       padding: "20px",
-      backdropFilter: "blur(12px)",
-      boxShadow:
-        "0 8px 32px rgba(0,0,0,0.2), inset 0 0.5px 0 rgba(255,255,255,0.07)",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
       ...style,
     }}
   >
@@ -128,7 +126,7 @@ const MockupLabel = ({children}) => (
   <div
     style={{
       fontSize: 10,
-      color: "#475569",
+      color: "#898989",
       textTransform: "uppercase",
       letterSpacing: "0.7px",
       marginBottom: 12,
@@ -150,9 +148,8 @@ const Visual1 = () => (
       <div
         key={i}
         style={{
-          background:
-            i === 0 ? "rgba(99,102,241,0.06)" : "rgba(255,255,255,0.02)",
-          border: `0.5px solid ${i === 0 ? "rgba(99,102,241,0.25)" : "rgba(255,255,255,0.06)"}`,
+          background: i === 0 ? "#F0F0F0" : "#F8F8F8",
+          border: `1px solid ${i === 0 ? "#D0D0D0" : "#E8E8E8"}`,
           borderRadius: 7,
           padding: "9px 12px",
           marginBottom: 6,
@@ -161,24 +158,23 @@ const Visual1 = () => (
           justifyContent: "space-between",
         }}
       >
-        <span style={{fontSize: 12, color: i === 0 ? "#94a3b8" : "#334155"}}>
+        <span style={{fontSize: 12, color: i === 0 ? "#2B2B2B" : "#898989"}}>
           {i === 0 ? f.value : f.label}
         </span>
-        {f.done && <CheckCircle2 size={13} color="#10b981" />}
+        {f.done && <CheckCircle2 size={13} color="#2B2B2B" />}
       </div>
     ))}
     <div
       style={{
-        background:
-          "linear-gradient(135deg, rgba(99,102,241,0.8), rgba(139,92,246,0.8))",
+        background: "#2B2B2B",
         borderRadius: 7,
         padding: "9px",
         textAlign: "center",
         fontSize: 12,
         fontWeight: 500,
-        color: "#fff",
+        color: "#FFFFFF",
         marginTop: 8,
-        boxShadow: "0 4px 16px rgba(99,102,241,0.3)",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
       }}
     >
       Create account →
@@ -187,9 +183,9 @@ const Visual1 = () => (
       <span
         style={{
           fontSize: 10,
-          background: "rgba(16,185,129,0.08)",
-          color: "#10b981",
-          border: "0.5px solid rgba(16,185,129,0.2)",
+          background: "#E8E8E8",
+          color: "#2B2B2B",
+          border: "1px solid #D0D0D0",
           padding: "3px 10px",
           borderRadius: 20,
           display: "inline-flex",
@@ -224,18 +220,16 @@ const Visual2 = () => (
         <div
           key={i}
           style={{
-            background: card.active
-              ? "rgba(99,102,241,0.12)"
-              : "rgba(255,255,255,0.02)",
-            border: `0.5px solid ${card.active ? "rgba(99,102,241,0.3)" : "rgba(255,255,255,0.06)"}`,
+            background: card.active ? "#E8E8E8" : "#F8F8F8",
+            border: `1px solid ${card.active ? "#D0D0D0" : "#E8E8E8"}`,
             borderRadius: 8,
             padding: "12px 10px",
-            boxShadow: card.active ? "0 4px 12px rgba(99,102,241,0.1)" : "none",
+            boxShadow: card.active ? "0 2px 8px rgba(0,0,0,0.04)" : "none",
           }}
         >
           <div
             style={{
-              color: card.active ? "#818cf8" : "#475569",
+              color: card.active ? "#2B2B2B" : "#898989",
               marginBottom: 6,
             }}
           >
@@ -244,7 +238,7 @@ const Visual2 = () => (
           <div
             style={{
               fontSize: 11,
-              color: card.active ? "#a5b4fc" : "#475569",
+              color: card.active ? "#2B2B2B" : "#898989",
               fontWeight: 500,
             }}
           >
@@ -271,13 +265,13 @@ const Visual3 = () => (
           alignItems: "center",
           justifyContent: "space-between",
           padding: "8px 0",
-          borderBottom: i < 2 ? "0.5px solid rgba(255,255,255,0.05)" : "none",
+          borderBottom: i < 2 ? "1px solid #E8E8E8" : "none",
         }}
       >
-        <span style={{fontSize: 11, color: "#475569"}}>{row.label}</span>
+        <span style={{fontSize: 11, color: "#898989"}}>{row.label}</span>
         <div style={{display: "flex", alignItems: "center", gap: 6}}>
-          <span style={{fontSize: 11, color: "#94a3b8"}}>{row.value}</span>
-          <CheckCircle2 size={12} color="#10b981" />
+          <span style={{fontSize: 11, color: "#2B2B2B"}}>{row.value}</span>
+          <CheckCircle2 size={12} color="#2B2B2B" />
         </div>
       </div>
     ))}
@@ -287,9 +281,9 @@ const Visual3 = () => (
           key={c}
           style={{
             fontSize: 10,
-            background: "rgba(99,102,241,0.1)",
-            border: "0.5px solid rgba(99,102,241,0.25)",
-            color: "#a5b4fc",
+            background: "#E8E8E8",
+            border: "1px solid #D0D0D0",
+            color: "#2B2B2B",
             padding: "2px 8px",
             borderRadius: 20,
           }}
@@ -297,7 +291,7 @@ const Visual3 = () => (
           {c}
         </span>
       ))}
-      <span style={{fontSize: 10, color: "#475569", padding: "2px 6px"}}>
+      <span style={{fontSize: 10, color: "#898989", padding: "2px 6px"}}>
         +7 more
       </span>
     </div>
@@ -319,7 +313,7 @@ const Visual4 = () => (
           alignItems: "center",
           gap: 10,
           padding: "8px 0",
-          borderBottom: i < 2 ? "0.5px solid rgba(255,255,255,0.05)" : "none",
+          borderBottom: i < 2 ? "1px solid #E8E8E8" : "none",
         }}
       >
         <div
@@ -327,28 +321,28 @@ const Visual4 = () => (
             width: 26,
             height: 26,
             borderRadius: "50%",
-            background: "rgba(139,92,246,0.15)",
-            border: "0.5px solid rgba(139,92,246,0.3)",
+            background: "#E8E8E8",
+            border: "1px solid #D0D0D0",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontSize: 10,
             fontWeight: 600,
-            color: "#a78bfa",
+            color: "#2B2B2B",
             flexShrink: 0,
           }}
         >
           {t.name.split(" ")[1][0]}
         </div>
         <div style={{flex: 1, minWidth: 0}}>
-          <div style={{fontSize: 11, fontWeight: 500, color: "#e2e8f0"}}>
+          <div style={{fontSize: 11, fontWeight: 500, color: "#2B2B2B"}}>
             {t.name}
           </div>
-          <div style={{fontSize: 10, color: "#475569", marginTop: 1}}>
+          <div style={{fontSize: 10, color: "#898989", marginTop: 1}}>
             {t.subjects} · {t.classes}
           </div>
         </div>
-        <CheckCircle2 size={12} color="#10b981" />
+        <CheckCircle2 size={12} color="#2B2B2B" />
       </div>
     ))}
   </GlassCard>
@@ -372,7 +366,7 @@ const Visual5 = () => (
           style={{
             textAlign: "center",
             fontSize: 10,
-            color: "#475569",
+            color: "#898989",
             fontWeight: 500,
           }}
         >
@@ -398,7 +392,7 @@ const Visual5 = () => (
         <div
           style={{
             fontSize: 9,
-            color: "#334155",
+            color: "#898989",
             display: "flex",
             alignItems: "center",
           }}
@@ -416,12 +410,9 @@ const Visual5 = () => (
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              background:
-                cell === "Brk"
-                  ? "rgba(234,179,8,0.08)"
-                  : "rgba(99,102,241,0.12)",
-              color: cell === "Brk" ? "#fbbf24" : "#a5b4fc",
-              border: `0.5px solid ${cell === "Brk" ? "rgba(234,179,8,0.15)" : "rgba(99,102,241,0.2)"}`,
+              background: cell === "Brk" ? "#F0F0F0" : "#E8E8E8",
+              color: cell === "Brk" ? "#2B2B2B" : "#2B2B2B",
+              border: `1px solid ${cell === "Brk" ? "#D0D0D0" : "#D0D0D0"}`,
             }}
           >
             {cell}
@@ -440,9 +431,9 @@ const Visual5 = () => (
             padding: "4px 10px",
             borderRadius: 6,
             fontWeight: 500,
-            background: i === 0 ? "rgba(99,102,241,0.15)" : "transparent",
-            border: `0.5px solid ${i === 0 ? "rgba(99,102,241,0.35)" : "rgba(255,255,255,0.07)"}`,
-            color: i === 0 ? "#a5b4fc" : "#64748b",
+            background: i === 0 ? "#2B2B2B" : "transparent",
+            border: `1px solid ${i === 0 ? "#2B2B2B" : "#D0D0D0"}`,
+            color: i === 0 ? "#FFFFFF" : "#898989",
           }}
         >
           {btn}
@@ -482,14 +473,14 @@ function StepCard({step, index, total, isActive}) {
         <span
           style={{
             fontSize: 10,
-            color: step.accentColor,
+            color: "#2B2B2B",
             textTransform: "uppercase",
             letterSpacing: "1px",
             fontWeight: 500,
-            background: step.iconBg,
+            background: "#E8E8E8",
             padding: "3px 12px",
             borderRadius: 20,
-            border: `0.5px solid ${step.borderColor}`,
+            border: "1px solid #D0D0D0",
           }}
         >
           Chapter {step.number}
@@ -518,17 +509,15 @@ function StepCard({step, index, total, isActive}) {
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{
-              background: hovered
-                ? "rgba(255,255,255,0.045)"
-                : "rgba(255,255,255,0.025)",
-              border: `0.5px solid ${hovered ? step.borderColor : "rgba(255,255,255,0.07)"}`,
+              background: hovered ? "#F8F8F8" : "#FFFFFF",
+              border: `1px solid ${hovered ? "#D0D0D0" : "#E8E8E8"}`,
               borderRadius: 16,
               padding: "28px",
               transition: "all 0.3s cubic-bezier(0.22,1,0.36,1)",
               transform: hovered ? "translateY(-5px)" : "translateY(0)",
               boxShadow: hovered
-                ? `0 20px 48px rgba(0,0,0,0.25), 0 0 0 0.5px ${step.borderColor}`
-                : "0 4px 16px rgba(0,0,0,0.1)",
+                ? "0 20px 48px rgba(0,0,0,0.05), 0 0 0 1px #D0D0D0"
+                : "0 4px 16px rgba(0,0,0,0.02)",
               cursor: "default",
             }}
           >
@@ -546,18 +535,16 @@ function StepCard({step, index, total, isActive}) {
                   width: 34,
                   height: 34,
                   borderRadius: 10,
-                  background: step.iconBg,
-                  border: `0.5px solid ${step.borderColor}`,
+                  background: "#E8E8E8",
+                  border: "1px solid #D0D0D0",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: step.accentColor,
+                  color: "#2B2B2B",
                   flexShrink: 0,
                   transition: "transform 0.25s cubic-bezier(0.22,1,0.36,1)",
                   transform: hovered ? "scale(1.12) rotate(-5deg)" : "scale(1)",
-                  boxShadow: hovered
-                    ? `0 4px 12px ${step.accentColor}30`
-                    : "none",
+                  boxShadow: hovered ? "0 4px 12px rgba(0,0,0,0.08)" : "none",
                 }}
               >
                 <IconComponent size={16} strokeWidth={1.5} />
@@ -566,7 +553,7 @@ function StepCard({step, index, total, isActive}) {
                 style={{
                   fontSize: 10,
                   fontWeight: 500,
-                  color: step.accentColor,
+                  color: "#2B2B2B",
                   textTransform: "uppercase",
                   letterSpacing: "0.6px",
                 }}
@@ -579,7 +566,7 @@ function StepCard({step, index, total, isActive}) {
               style={{
                 fontSize: 18,
                 fontWeight: 500,
-                color: "#f1f5f9",
+                color: "#2B2B2B",
                 marginBottom: 8,
                 lineHeight: 1.3,
                 letterSpacing: "-0.2px",
@@ -590,7 +577,7 @@ function StepCard({step, index, total, isActive}) {
             <p
               style={{
                 fontSize: 13,
-                color: "#64748b",
+                color: "#898989",
                 lineHeight: 1.8,
                 marginBottom: 20,
               }}
@@ -618,21 +605,17 @@ function StepCard({step, index, total, isActive}) {
                       borderRadius: 5,
                       flexShrink: 0,
                       marginTop: 1,
-                      background: step.iconBg,
-                      border: `0.5px solid ${step.borderColor}`,
+                      background: "#E8E8E8",
+                      border: "1px solid #D0D0D0",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
-                    <CheckCheck
-                      size={10}
-                      color={step.accentColor}
-                      strokeWidth={2}
-                    />
+                    <CheckCheck size={10} color="#2B2B2B" strokeWidth={2} />
                   </div>
                   <span
-                    style={{fontSize: 13, color: "#94a3b8", lineHeight: 1.6}}
+                    style={{fontSize: 13, color: "#898989", lineHeight: 1.6}}
                   >
                     {detail}
                   </span>
@@ -659,15 +642,16 @@ function StepCard({step, index, total, isActive}) {
               width: 46,
               height: 46,
               borderRadius: "50%",
-              background: step.iconBg,
-              border: `1.5px solid ${step.accentColor}`,
+              background: "#E8E8E8",
+              border: "2px solid #2B2B2B",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               fontSize: 14,
               fontWeight: 600,
-              color: step.accentColor,
-              boxShadow: `0 0 0 4px rgba(0,0,0,0.4), 0 0 24px ${step.accentColor}35`,
+              color: "#2B2B2B",
+              boxShadow:
+                "0 0 0 4px rgba(0,0,0,0.02), 0 0 24px rgba(0,0,0,0.04)",
               transition: "all 0.3s",
               transform: hovered ? "scale(1.15)" : "scale(1)",
               position: "relative",
@@ -726,13 +710,13 @@ function FaqItem({question, answer, index}) {
       <div
         onClick={() => setOpen(!open)}
         style={{
-          background: open ? "rgba(99,102,241,0.06)" : "rgba(255,255,255,0.02)",
-          border: `0.5px solid ${open ? "rgba(99,102,241,0.28)" : "rgba(255,255,255,0.07)"}`,
+          background: open ? "#F0F0F0" : "#FFFFFF",
+          border: `1px solid ${open ? "#D0D0D0" : "#E8E8E8"}`,
           borderRadius: 12,
           padding: "18px 20px",
           cursor: "pointer",
           transition: "all 0.25s ease",
-          boxShadow: open ? "0 4px 20px rgba(99,102,241,0.08)" : "none",
+          boxShadow: open ? "0 4px 20px rgba(0,0,0,0.04)" : "none",
         }}
       >
         <div
@@ -747,7 +731,7 @@ function FaqItem({question, answer, index}) {
             style={{
               fontSize: 14,
               fontWeight: 500,
-              color: "#e2e8f0",
+              color: "#2B2B2B",
               lineHeight: 1.4,
             }}
           >
@@ -758,10 +742,8 @@ function FaqItem({question, answer, index}) {
               width: 24,
               height: 24,
               borderRadius: "50%",
-              background: open
-                ? "rgba(99,102,241,0.15)"
-                : "rgba(255,255,255,0.04)",
-              border: `0.5px solid ${open ? "rgba(99,102,241,0.3)" : "rgba(255,255,255,0.08)"}`,
+              background: open ? "#E8E8E8" : "#F8F8F8",
+              border: `1px solid ${open ? "#D0D0D0" : "#E8E8E8"}`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -772,7 +754,7 @@ function FaqItem({question, answer, index}) {
           >
             <ChevronRight
               size={13}
-              color={open ? "#818cf8" : "#475569"}
+              color="#2B2B2B"
               style={{
                 transform: open ? "rotate(45deg)" : "rotate(0)",
                 transition: "transform 0.25s",
@@ -792,7 +774,7 @@ function FaqItem({question, answer, index}) {
           <p
             style={{
               fontSize: 13,
-              color: "#64748b",
+              color: "#898989",
               lineHeight: 1.8,
               marginTop: 12,
               marginBottom: 0,
@@ -825,32 +807,17 @@ function CTASection({user}) {
         style={{
           position: "relative",
           overflow: "hidden",
-          background: "rgba(99,102,241,0.06)",
-          border: "0.5px solid rgba(99,102,241,0.22)",
+          background: "#FFFFFF",
+          border: "1px solid #E8E8E8",
           borderRadius: 24,
           padding: "clamp(40px, 6vw, 72px) clamp(28px, 5vw, 64px)",
           textAlign: "center",
           opacity: inView ? 1 : 0,
           transform: inView ? "translateY(0)" : "translateY(24px)",
           transition: "all 0.6s cubic-bezier(0.22,1,0.36,1)",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
         }}
       >
-        {/* Ambient glow inside card */}
-        <div
-          style={{
-            position: "absolute",
-            top: "-30%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: 400,
-            height: 300,
-            borderRadius: "50%",
-            background:
-              "radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 65%)",
-            pointerEvents: "none",
-          }}
-        />
-
         {/* Trust badges */}
         <div
           style={{
@@ -873,14 +840,14 @@ function CTASection({user}) {
                 alignItems: "center",
                 gap: 6,
                 fontSize: 11,
-                color: "#64748b",
-                background: "rgba(255,255,255,0.03)",
-                border: "0.5px solid rgba(255,255,255,0.07)",
+                color: "#898989",
+                background: "#F8F8F8",
+                border: "1px solid #E8E8E8",
                 borderRadius: 20,
                 padding: "5px 12px",
               }}
             >
-              <Icon size={12} color="#6366f1" strokeWidth={1.5} />
+              <Icon size={12} color="#2B2B2B" strokeWidth={1.5} />
               {label}
             </div>
           ))}
@@ -890,7 +857,7 @@ function CTASection({user}) {
           style={{
             fontSize: 11,
             fontWeight: 500,
-            color: "#6366f1",
+            color: "#2B2B2B",
             textTransform: "uppercase",
             letterSpacing: "0.8px",
             marginBottom: 16,
@@ -903,28 +870,20 @@ function CTASection({user}) {
           style={{
             fontSize: "clamp(24px, 3.5vw, 38px)",
             fontWeight: 500,
-            color: "#f1f5f9",
+            color: "#2B2B2B",
             marginBottom: 14,
             letterSpacing: "-0.4px",
             lineHeight: 1.2,
           }}
         >
           Your first timetable is{" "}
-          <span
-            style={{
-              background: "linear-gradient(120deg, #818cf8, #c084fc, #f472b6)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            10 minutes away
-          </span>
+          <span style={{color: "#2B2B2B"}}>10 minutes away</span>
         </h2>
 
         <p
           style={{
             fontSize: 15,
-            color: "#64748b",
+            color: "#898989",
             lineHeight: 1.8,
             maxWidth: 440,
             margin: "0 auto 40px",
@@ -952,24 +911,22 @@ function CTASection({user}) {
               borderRadius: 10,
               fontSize: 14,
               fontWeight: 500,
-              background: "rgba(99,102,241,0.85)",
-              color: "#fff",
+              background: "#2B2B2B",
+              color: "#FFFFFF",
               textDecoration: "none",
-              border: "0.5px solid rgba(99,102,241,0.5)",
-              boxShadow: "0 4px 20px rgba(99,102,241,0.25)",
+              border: "1px solid #2B2B2B",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
               transition: "all 0.25s cubic-bezier(0.22,1,0.36,1)",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 12px 32px rgba(99,102,241,0.35)";
-              e.currentTarget.style.background = "rgba(99,102,241,0.95)";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";
+              e.currentTarget.style.background = "#1F1F1F";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 4px 20px rgba(99,102,241,0.25)";
-              e.currentTarget.style.background = "rgba(99,102,241,0.85)";
+              e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.02)";
+              e.currentTarget.style.background = "#2B2B2B";
             }}
           >
             {user ? "Go to dashboard" : "Create free account"}
@@ -987,18 +944,18 @@ function CTASection({user}) {
                 fontSize: 14,
                 fontWeight: 500,
                 background: "transparent",
-                color: "#94a3b8",
+                color: "#2B2B2B",
                 textDecoration: "none",
-                border: "0.5px solid rgba(255,255,255,0.09)",
+                border: "1px solid #E8E8E8",
                 transition: "all 0.25s ease",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)";
-                e.currentTarget.style.color = "#e2e8f0";
+                e.currentTarget.style.borderColor = "#D0D0D0";
+                e.currentTarget.style.color = "#1F1F1F";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)";
-                e.currentTarget.style.color = "#94a3b8";
+                e.currentTarget.style.borderColor = "#E8E8E8";
+                e.currentTarget.style.color = "#2B2B2B";
               }}
             >
               Sign in
@@ -1028,9 +985,9 @@ const UserManual = () => {
         "Verify your email through the link sent to your inbox",
         "You're in — no credit card, no onboarding call required",
       ],
-      accentColor: "#60a5fa",
-      iconBg: "rgba(96,165,250,0.1)",
-      borderColor: "rgba(96,165,250,0.28)",
+      accentColor: "#2B2B2B",
+      iconBg: "#E8E8E8",
+      borderColor: "#D0D0D0",
       visual: <Visual1 />,
     },
     {
@@ -1041,13 +998,12 @@ const UserManual = () => {
         "Your command centre. Every action you need is one click away — create, edit, export, and share timetables.",
       details: [
         "Log in and land on your personal dashboard",
-        // Fixed: escaped inner double quotes
         'Click "Create Timetable" from the quick actions panel',
         "Choose AI-assisted generation for an optimized result",
       ],
-      accentColor: "#a78bfa",
-      iconBg: "rgba(167,139,250,0.1)",
-      borderColor: "rgba(167,139,250,0.28)",
+      accentColor: "#2B2B2B",
+      iconBg: "#E8E8E8",
+      borderColor: "#D0D0D0",
       visual: <Visual2 />,
     },
     {
@@ -1061,9 +1017,9 @@ const UserManual = () => {
         "Set the class type (Form, Grade, or Class) and level range",
         "Add section labels (A, B, C…) and watch classes generate live",
       ],
-      accentColor: "#34d399",
-      iconBg: "rgba(52,211,153,0.1)",
-      borderColor: "rgba(52,211,153,0.28)",
+      accentColor: "#2B2B2B",
+      iconBg: "#E8E8E8",
+      borderColor: "#D0D0D0",
       visual: <Visual3 />,
     },
     {
@@ -1077,9 +1033,9 @@ const UserManual = () => {
         "Use the multi-select dropdowns to assign subjects and classes",
         "Add as many teachers as needed — no limit",
       ],
-      accentColor: "#f59e0b",
-      iconBg: "rgba(245,158,11,0.1)",
-      borderColor: "rgba(245,158,11,0.28)",
+      accentColor: "#2B2B2B",
+      iconBg: "#E8E8E8",
+      borderColor: "#D0D0D0",
       visual: <Visual4 />,
     },
     {
@@ -1093,9 +1049,9 @@ const UserManual = () => {
         "Export as PDF or share a live link with staff and students",
         "Make adjustments at any time — regenerate instantly",
       ],
-      accentColor: "#f472b6",
-      iconBg: "rgba(244,114,182,0.1)",
-      borderColor: "rgba(244,114,182,0.28)",
+      accentColor: "#2B2B2B",
+      iconBg: "#E8E8E8",
+      borderColor: "#D0D0D0",
       visual: <Visual5 />,
     },
   ];
@@ -1137,9 +1093,8 @@ const UserManual = () => {
     <main
       style={{
         minHeight: "100vh",
-        background:
-          "linear-gradient(160deg, #0d1420 0%, #0f172a 50%, #0d1420 100%)",
-        color: "#fff",
+        background: "#F8F8F8",
+        color: "#2B2B2B",
         overflowX: "hidden",
         position: "relative",
       }}
@@ -1151,7 +1106,7 @@ const UserManual = () => {
 
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
 
         @media (max-width: 768px) {
           .step-grid {
@@ -1172,7 +1127,7 @@ const UserManual = () => {
 
       <ScrollProgressBar />
 
-      {/* Ambient glows */}
+      {/* Ambient glows removed, replaced with empty */}
       <div
         style={{
           position: "fixed",
@@ -1180,8 +1135,7 @@ const UserManual = () => {
           left: -200,
           width: 700,
           height: 700,
-          background:
-            "radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 65%)",
+          background: "transparent",
           pointerEvents: "none",
           zIndex: 0,
         }}
@@ -1193,8 +1147,7 @@ const UserManual = () => {
           right: -100,
           width: 500,
           height: 500,
-          background:
-            "radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 65%)",
+          background: "transparent",
           pointerEvents: "none",
           zIndex: 0,
         }}
@@ -1220,8 +1173,8 @@ const UserManual = () => {
             display: "inline-flex",
             alignItems: "center",
             gap: 8,
-            background: "rgba(99,102,241,0.09)",
-            border: "0.5px solid rgba(99,102,241,0.28)",
+            background: "#E8E8E8",
+            border: "1px solid #D0D0D0",
             borderRadius: 20,
             padding: "6px 16px",
             marginBottom: 28,
@@ -1235,7 +1188,7 @@ const UserManual = () => {
               width: 6,
               height: 6,
               borderRadius: "50%",
-              background: "#6366f1",
+              background: "#2B2B2B",
               animation: "pulse-glow 2s infinite",
               display: "inline-block",
             }}
@@ -1244,7 +1197,7 @@ const UserManual = () => {
             style={{
               fontSize: 11,
               fontWeight: 500,
-              color: "#818cf8",
+              color: "#2B2B2B",
               letterSpacing: "0.4px",
             }}
           >
@@ -1256,7 +1209,7 @@ const UserManual = () => {
           style={{
             fontSize: "clamp(32px, 5.5vw, 56px)",
             fontWeight: 500,
-            color: "#f1f5f9",
+            color: "#2B2B2B",
             letterSpacing: "-0.6px",
             lineHeight: 1.12,
             marginBottom: 18,
@@ -1266,23 +1219,13 @@ const UserManual = () => {
           }}
         >
           From setup to schedule{" "}
-          <span
-            style={{
-              background:
-                "linear-gradient(120deg, #818cf8 0%, #c084fc 50%, #f472b6 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundSize: "200% auto",
-            }}
-          >
-            in 5 steps
-          </span>
+          <span style={{color: "#2B2B2B"}}>in 5 steps</span>
         </h1>
 
         <p
           style={{
             fontSize: "clamp(14px, 2vw, 16px)",
-            color: "#64748b",
+            color: "#898989",
             lineHeight: 1.8,
             maxWidth: 500,
             margin: "0 auto 44px",
@@ -1314,20 +1257,19 @@ const UserManual = () => {
             <div
               key={i}
               style={{
-                background: "rgba(255,255,255,0.025)",
-                border: "0.5px solid rgba(255,255,255,0.07)",
+                background: "#FFFFFF",
+                border: "1px solid #E8E8E8",
                 borderRadius: 14,
                 padding: "16px 28px",
                 minWidth: 120,
-                backdropFilter: "blur(8px)",
-                boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
               }}
             >
               <div
                 style={{
                   fontSize: 24,
                   fontWeight: 500,
-                  color: "#f1f5f9",
+                  color: "#2B2B2B",
                   lineHeight: 1,
                 }}
               >
@@ -1336,7 +1278,7 @@ const UserManual = () => {
               <div
                 style={{
                   fontSize: 10,
-                  color: "#475569",
+                  color: "#898989",
                   marginTop: 5,
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
@@ -1364,7 +1306,7 @@ const UserManual = () => {
             style={{
               fontSize: 10,
               fontWeight: 500,
-              color: "#475569",
+              color: "#898989",
               textTransform: "uppercase",
               letterSpacing: "0.8px",
               marginBottom: 10,
@@ -1375,10 +1317,9 @@ const UserManual = () => {
           <div
             style={{
               width: 48,
-              height: "0.5px",
+              height: "1px",
               margin: "0 auto",
-              background:
-                "linear-gradient(90deg, transparent, rgba(99,102,241,0.6), transparent)",
+              background: "#D0D0D0",
             }}
           />
         </div>
@@ -1392,9 +1333,9 @@ const UserManual = () => {
               left: "50%",
               top: 28,
               bottom: 28,
-              width: "0.5px",
+              width: "1px",
               background:
-                "linear-gradient(180deg, transparent 0%, rgba(99,102,241,0.2) 8%, rgba(99,102,241,0.2) 92%, transparent 100%)",
+                "linear-gradient(180deg, transparent 0%, #D0D0D0 8%, #D0D0D0 92%, transparent 100%)",
               transform: "translateX(-50%)",
               zIndex: 0,
             }}
@@ -1439,7 +1380,7 @@ const UserManual = () => {
             style={{
               fontSize: 10,
               fontWeight: 500,
-              color: "#475569",
+              color: "#898989",
               textTransform: "uppercase",
               letterSpacing: "0.8px",
               marginBottom: 14,
@@ -1451,7 +1392,7 @@ const UserManual = () => {
             style={{
               fontSize: "clamp(20px, 3vw, 28px)",
               fontWeight: 500,
-              color: "#f1f5f9",
+              color: "#2B2B2B",
               letterSpacing: "-0.3px",
             }}
           >
@@ -1473,7 +1414,7 @@ const UserManual = () => {
       {/* ── Footer strip ─────────────────────────────────────────────────────── */}
       <div
         style={{
-          borderTop: "0.5px solid rgba(255,255,255,0.05)",
+          borderTop: "1px solid #E8E8E8",
           padding: "28px 24px",
           display: "flex",
           alignItems: "center",
@@ -1496,10 +1437,10 @@ const UserManual = () => {
               alignItems: "center",
               gap: 7,
               fontSize: 12,
-              color: "#334155",
+              color: "#898989",
             }}
           >
-            <Icon size={13} color="#10b981" strokeWidth={1.5} />
+            <Icon size={13} color="#2B2B2B" strokeWidth={1.5} />
             {label}
           </div>
         ))}

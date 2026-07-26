@@ -6,11 +6,6 @@ import HoverDevCards from "./components/gridOPtions";
 import {Navigation} from "./components/navigation";
 import {useTimetable} from "../hooks/useTimetable";
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
-// Surface hierarchy: base → raised → elevated → overlay
-// Accent: indigo-500 (#6366f1) primary, violet-500 (#8b5cf6) secondary
-// Semantic: amber for warnings, rose for errors, emerald for success
-
 // ─── Animation hook ───────────────────────────────────────────────────────────
 function useStaggeredReveal(count, delay = 60) {
   const [visible, setVisible] = useState([]);
@@ -24,7 +19,7 @@ function useStaggeredReveal(count, delay = 60) {
 }
 
 // ─── Metric card ─────────────────────────────────────────────────────────────
-function MetricCard({label, value, sub, subColor = "#6366f1", icon, delay}) {
+function MetricCard({label, value, sub, subColor = "#2B2B2B", icon, delay}) {
   const [show, setShow] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setShow(true), delay);
@@ -34,8 +29,8 @@ function MetricCard({label, value, sub, subColor = "#6366f1", icon, delay}) {
   return (
     <div
       style={{
-        background: "rgba(255,255,255,0.03)",
-        border: "0.5px solid rgba(255,255,255,0.07)",
+        background: "#FFFFFF",
+        border: "1px solid #E8E8E8",
         borderRadius: 14,
         padding: "18px 20px",
         transition:
@@ -43,15 +38,16 @@ function MetricCard({label, value, sub, subColor = "#6366f1", icon, delay}) {
         opacity: show ? 1 : 0,
         transform: show ? "translateY(0)" : "translateY(12px)",
         cursor: "default",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = "rgba(255,255,255,0.055)";
-        e.currentTarget.style.borderColor = "rgba(99,102,241,0.3)";
+        e.currentTarget.style.background = "#F8F8F8";
+        e.currentTarget.style.borderColor = "#D0D0D0";
         e.currentTarget.style.transform = "translateY(-2px)";
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-        e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
+        e.currentTarget.style.background = "#FFFFFF";
+        e.currentTarget.style.borderColor = "#E8E8E8";
         e.currentTarget.style.transform = "translateY(0)";
       }}
     >
@@ -66,7 +62,7 @@ function MetricCard({label, value, sub, subColor = "#6366f1", icon, delay}) {
         <span
           style={{
             fontSize: 11,
-            color: "#64748b",
+            color: "#898989",
             textTransform: "uppercase",
             letterSpacing: "0.5px",
             fontWeight: 500,
@@ -74,13 +70,13 @@ function MetricCard({label, value, sub, subColor = "#6366f1", icon, delay}) {
         >
           {label}
         </span>
-        <span style={{fontSize: 16, color: "#334155"}}>{icon}</span>
+        <span style={{fontSize: 16, color: "#898989"}}>{icon}</span>
       </div>
       <div
         style={{
           fontSize: 26,
           fontWeight: 500,
-          color: "#f1f5f9",
+          color: "#2B2B2B",
           lineHeight: 1,
           marginBottom: 6,
         }}
@@ -110,12 +106,8 @@ function ActionCard({
   const inner = (
     <div
       style={{
-        background: hovered
-          ? "rgba(255,255,255,0.06)"
-          : "rgba(255,255,255,0.03)",
-        border: hovered
-          ? "0.5px solid rgba(99,102,241,0.38)"
-          : "0.5px solid rgba(255,255,255,0.07)",
+        background: hovered ? "#F8F8F8" : "#FFFFFF",
+        border: hovered ? "1px solid #D0D0D0" : "1px solid #E8E8E8",
         borderRadius: 14,
         padding: "20px 18px",
         cursor: "pointer",
@@ -129,6 +121,7 @@ function ActionCard({
         color: "inherit",
         position: "relative",
         overflow: "hidden",
+        boxShadow: hovered ? "0 4px 12px rgba(0,0,0,0.04)" : "none",
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -142,9 +135,9 @@ function ActionCard({
             right: 14,
             fontSize: 10,
             fontWeight: 500,
-            background: "rgba(251,191,36,0.12)",
-            color: "#fbbf24",
-            border: "0.5px solid rgba(251,191,36,0.25)",
+            background: "#E8E8E8",
+            color: "#2B2B2B",
+            border: "1px solid #D0D0D0",
             padding: "2px 8px",
             borderRadius: 20,
             letterSpacing: "0.3px",
@@ -177,14 +170,14 @@ function ActionCard({
           style={{
             fontSize: 14,
             fontWeight: 500,
-            color: "#e2e8f0",
+            color: "#2B2B2B",
             marginBottom: 5,
             lineHeight: 1.3,
           }}
         >
           {title}
         </div>
-        <div style={{fontSize: 12, color: "#64748b", lineHeight: 1.6}}>
+        <div style={{fontSize: 12, color: "#898989", lineHeight: 1.6}}>
           {description}
         </div>
       </div>
@@ -213,17 +206,17 @@ function TimetableCell({period, isDouble}) {
 
   const bg = isBreak
     ? hovered
-      ? "rgba(234,179,8,0.18)"
-      : "rgba(234,179,8,0.09)"
+      ? "#E8E8E8"
+      : "#F0F0F0"
     : hasSubject
       ? hovered
-        ? "rgba(99,102,241,0.22)"
-        : "rgba(99,102,241,0.13)"
+        ? "#E8E8E8"
+        : "#FFFFFF"
       : hovered
-        ? "rgba(255,255,255,0.06)"
-        : "rgba(255,255,255,0.025)";
+        ? "#F0F0F0"
+        : "#F8F8F8";
 
-  const color = isBreak ? "#fbbf24" : hasSubject ? "#a5b4fc" : "#334155";
+  const color = isBreak ? "#2B2B2B" : hasSubject ? "#2B2B2B" : "#898989";
 
   const label =
     period.subject?.name?.substring(0, 4) || (isBreak ? "Break" : "");
@@ -242,8 +235,10 @@ function TimetableCell({period, isDouble}) {
         cursor: "default",
         transition: "background 0.15s, transform 0.15s",
         transform: hovered ? "scale(1.05)" : "scale(1)",
-        borderLeft: isDouble ? "2px solid rgba(139,92,246,0.6)" : "none",
+        borderLeft: isDouble ? "2px solid #2B2B2B" : "none",
         borderRadius: isDouble ? "0 6px 6px 0" : 6,
+        border: isDouble ? "1px solid #E8E8E8" : "1px solid #E8E8E8",
+        borderLeftColor: isDouble ? "#2B2B2B" : undefined,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -274,14 +269,14 @@ function EmptyTimetableState() {
           width: 52,
           height: 52,
           borderRadius: 14,
-          background: "rgba(99,102,241,0.1)",
-          border: "0.5px solid rgba(99,102,241,0.2)",
+          background: "#E8E8E8",
+          border: "1px solid #D0D0D0",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           margin: "0 auto 20px",
           fontSize: 22,
-          color: "#6366f1",
+          color: "#2B2B2B",
         }}
       >
         📅
@@ -290,7 +285,7 @@ function EmptyTimetableState() {
         style={{
           fontSize: 15,
           fontWeight: 500,
-          color: "#94a3b8",
+          color: "#2B2B2B",
           marginBottom: 8,
         }}
       >
@@ -299,7 +294,7 @@ function EmptyTimetableState() {
       <p
         style={{
           fontSize: 13,
-          color: "#475569",
+          color: "#898989",
           marginBottom: 24,
           lineHeight: 1.7,
           maxWidth: 280,
@@ -316,22 +311,22 @@ function EmptyTimetableState() {
           alignItems: "center",
           gap: 8,
           padding: "10px 20px",
-          background: "rgba(99,102,241,0.15)",
-          border: "0.5px solid rgba(99,102,241,0.4)",
+          background: "#2B2B2B",
+          border: "1px solid #2B2B2B",
           borderRadius: 10,
           fontSize: 13,
           fontWeight: 500,
-          color: "#818cf8",
+          color: "#FFFFFF",
           textDecoration: "none",
           transition: "all 0.2s",
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = "rgba(99,102,241,0.22)";
-          e.currentTarget.style.borderColor = "rgba(99,102,241,0.6)";
+          e.currentTarget.style.background = "#1F1F1F";
+          e.currentTarget.style.borderColor = "#1F1F1F";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = "rgba(99,102,241,0.15)";
-          e.currentTarget.style.borderColor = "rgba(99,102,241,0.4)";
+          e.currentTarget.style.background = "#2B2B2B";
+          e.currentTarget.style.borderColor = "#2B2B2B";
         }}
       >
         <span>Generate timetable</span>
@@ -344,9 +339,9 @@ function EmptyTimetableState() {
 // ─── Status badge ─────────────────────────────────────────────────────────────
 function StatusBadge({
   label,
-  color = "#10b981",
-  bg = "rgba(16,185,129,0.1)",
-  border = "rgba(16,185,129,0.25)",
+  color = "#2B2B2B",
+  bg = "#E8E8E8",
+  border = "#D0D0D0",
 }) {
   return (
     <span
@@ -355,7 +350,7 @@ function StatusBadge({
         fontWeight: 500,
         color,
         background: bg,
-        border: `0.5px solid ${border}`,
+        border: `1px solid ${border}`,
         padding: "3px 10px",
         borderRadius: 20,
         letterSpacing: "0.3px",
@@ -370,12 +365,10 @@ function StatusBadge({
 const MainPg = () => {
   const {user, logout, isLoading: authLoading} = useAuthStore();
 
-  // ═══ NEW: Read timetable ID from localStorage ═══
   const [timetableId, setTimetableId] = useState(() =>
     localStorage.getItem("currentTimetableId"),
   );
 
-  // Listen for changes from other tabs (or after generation)
   useEffect(() => {
     const handleStorageChange = () => {
       setTimetableId(localStorage.getItem("currentTimetableId"));
@@ -384,7 +377,6 @@ const MainPg = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // React Query timetable fetching using the localStorage ID
   const {
     data: timetableData,
     isLoading: timetableLoading,
@@ -392,10 +384,8 @@ const MainPg = () => {
     error: timetableError,
   } = useTimetable(timetableId);
 
-  // ✅ NEW: Auto‑clear bad timetable ID on error
   useEffect(() => {
     if (isError && timetableId) {
-      // Remove the invalid ID so the dashboard falls back to empty state
       localStorage.removeItem("currentTimetableId");
       setTimetableId(null);
     }
@@ -433,7 +423,6 @@ const MainPg = () => {
     return () => clearTimeout(t);
   }, []);
 
-  // Auto-select first timetable when data arrives
   useEffect(() => {
     if (timetableData?.timetables?.length > 0 && !selectedClass) {
       setSelectedClass(timetableData.timetables[0].name);
@@ -481,12 +470,11 @@ const MainPg = () => {
     ...extra,
   });
 
-  // ── Auth loading state ──
   if (authLoading) {
     return (
       <div
         style={{
-          background: "#0d1420",
+          background: "#F8F8F8",
           height: "100vh",
           display: "flex",
           alignItems: "center",
@@ -498,12 +486,11 @@ const MainPg = () => {
     );
   }
 
-  // ── Timetable loading state (reuse spinner) ──
   if (timetableLoading) {
     return (
       <div
         style={{
-          background: "#0d1420",
+          background: "#F8F8F8",
           height: "100vh",
           display: "flex",
           alignItems: "center",
@@ -514,10 +501,6 @@ const MainPg = () => {
       </div>
     );
   }
-
-  // ❌ The previous error screen is completely removed.
-  // Any fetch error will now trigger the cleanup effect above, which resets the ID
-  // and causes the dashboard to gracefully fall back to the empty timetable state.
 
   return (
     <>
@@ -526,8 +509,8 @@ const MainPg = () => {
           .main-loading-spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid rgba(99,102,241,0.2);
-            border-top-color: #6366f1;
+            border: 3px solid #E8E8E8;
+            border-top-color: #2B2B2B;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
           }
@@ -547,15 +530,14 @@ const MainPg = () => {
       <main
         style={{
           minHeight: "100vh",
-          background:
-            "linear-gradient(160deg, #0d1420 0%, #0f172a 40%, #0d1420 100%)",
-          color: "#fff",
+          background: "#F8F8F8",
+          color: "#2B2B2B",
           overflowX: "hidden",
           position: "relative",
           paddingTop: "68px",
         }}
       >
-        {/* Ambient background glows */}
+        {/* Ambient glows removed – replaced with light empty space */}
         <div
           style={{
             position: "fixed",
@@ -563,8 +545,7 @@ const MainPg = () => {
             left: -300,
             width: 700,
             height: 700,
-            background:
-              "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%)",
+            background: "transparent",
             pointerEvents: "none",
             zIndex: 0,
           }}
@@ -576,8 +557,7 @@ const MainPg = () => {
             right: -200,
             width: 500,
             height: 500,
-            background:
-              "radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 65%)",
+            background: "transparent",
             pointerEvents: "none",
             zIndex: 0,
           }}
@@ -608,7 +588,7 @@ const MainPg = () => {
                   style={{
                     fontSize: 11,
                     fontWeight: 500,
-                    color: "#6366f1",
+                    color: "#2B2B2B",
                     textTransform: "uppercase",
                     letterSpacing: "0.6px",
                     marginBottom: 8,
@@ -620,24 +600,16 @@ const MainPg = () => {
                   style={{
                     fontSize: 30,
                     fontWeight: 500,
-                    color: "#f1f5f9",
+                    color: "#2B2B2B",
                     lineHeight: 1.2,
                     marginBottom: 6,
                     letterSpacing: "-0.4px",
                   }}
                 >
                   {getGreeting()},{" "}
-                  <span
-                    style={{
-                      background: "linear-gradient(120deg, #818cf8, #c084fc)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                    }}
-                  >
-                    {user?.firstName}
-                  </span>
+                  <span style={{color: "#2B2B2B"}}>{user?.firstName}</span>
                 </h1>
-                <p style={{fontSize: 14, color: "#64748b", lineHeight: 1.6}}>
+                <p style={{fontSize: 14, color: "#898989", lineHeight: 1.6}}>
                   {timetableCount > 0
                     ? `${timetableCount} active schedule${
                         timetableCount > 1 ? "s" : ""
@@ -662,9 +634,8 @@ const MainPg = () => {
           <div
             style={{
               ...reveal(0),
-              height: "0.5px",
-              background:
-                "linear-gradient(90deg, transparent, rgba(99,102,241,0.3), transparent)",
+              height: "1px",
+              background: "#E8E8E8",
               marginBottom: 36,
             }}
           />
@@ -675,7 +646,7 @@ const MainPg = () => {
               style={{
                 fontSize: 11,
                 fontWeight: 500,
-                color: "#475569",
+                color: "#898989",
                 textTransform: "uppercase",
                 letterSpacing: "0.5px",
                 marginBottom: 14,
@@ -714,7 +685,7 @@ const MainPg = () => {
                 label="Teachers assigned"
                 value={timetableCount > 0 ? "12" : "—"}
                 sub="All conflicts resolved"
-                subColor="#10b981"
+                subColor="#2B2B2B"
                 icon="👥"
                 delay={280}
               />
@@ -722,7 +693,7 @@ const MainPg = () => {
                 label="Conflicts"
                 value={timetableCount > 0 ? "0" : "—"}
                 sub="No issues detected"
-                subColor="#10b981"
+                subColor="#2B2B2B"
                 icon="✓"
                 delay={330}
               />
@@ -743,7 +714,7 @@ const MainPg = () => {
                 style={{
                   fontSize: 11,
                   fontWeight: 500,
-                  color: "#475569",
+                  color: "#898989",
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
                 }}
@@ -754,8 +725,8 @@ const MainPg = () => {
 
             <div
               style={{
-                background: "rgba(255,255,255,0.02)",
-                border: "0.5px solid rgba(255,255,255,0.06)",
+                background: "#FFFFFF",
+                border: "1px solid #E8E8E8",
                 borderRadius: 16,
                 padding: "4px",
                 overflow: "hidden",
@@ -777,8 +748,8 @@ const MainPg = () => {
             >
               <div
                 style={{
-                  background: "rgba(99,102,241,0.09)",
-                  border: "0.5px solid rgba(99,102,241,0.28)",
+                  background: "#2B2B2B",
+                  border: "1px solid #2B2B2B",
                   borderRadius: 14,
                   padding: "18px 22px",
                   display: "flex",
@@ -789,13 +760,13 @@ const MainPg = () => {
                   transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(99,102,241,0.15)";
-                  e.currentTarget.style.borderColor = "rgba(99,102,241,0.45)";
+                  e.currentTarget.style.background = "#1F1F1F";
+                  e.currentTarget.style.borderColor = "#1F1F1F";
                   e.currentTarget.style.transform = "translateY(-2px)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(99,102,241,0.09)";
-                  e.currentTarget.style.borderColor = "rgba(99,102,241,0.28)";
+                  e.currentTarget.style.background = "#2B2B2B";
+                  e.currentTarget.style.borderColor = "#2B2B2B";
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
@@ -805,12 +776,12 @@ const MainPg = () => {
                       width: 42,
                       height: 42,
                       borderRadius: 11,
-                      background: "rgba(99,102,241,0.18)",
+                      background: "#FFFFFF",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: 18,
-                      color: "#818cf8",
+                      color: "#2B2B2B",
                       flexShrink: 0,
                     }}
                   >
@@ -818,17 +789,17 @@ const MainPg = () => {
                   </div>
                   <div>
                     <div
-                      style={{fontSize: 15, fontWeight: 500, color: "#e2e8f0"}}
+                      style={{fontSize: 15, fontWeight: 500, color: "#FFFFFF"}}
                     >
                       Full schedule view
                     </div>
-                    <div style={{fontSize: 12, color: "#64748b", marginTop: 2}}>
+                    <div style={{fontSize: 12, color: "#D0D0D0", marginTop: 2}}>
                       Detailed timetables with export, print, and sharing
                       options
                     </div>
                   </div>
                 </div>
-                <div style={{fontSize: 20, color: "#6366f1", flexShrink: 0}}>
+                <div style={{fontSize: 20, color: "#FFFFFF", flexShrink: 0}}>
                   →
                 </div>
               </div>
@@ -849,7 +820,7 @@ const MainPg = () => {
                 style={{
                   fontSize: 11,
                   fontWeight: 500,
-                  color: "#475569",
+                  color: "#898989",
                   textTransform: "uppercase",
                   letterSpacing: "0.5px",
                 }}
@@ -861,7 +832,7 @@ const MainPg = () => {
                   to="/home/timetables"
                   style={{
                     fontSize: 12,
-                    color: "#6366f1",
+                    color: "#2B2B2B",
                     textDecoration: "none",
                     display: "flex",
                     alignItems: "center",
@@ -869,10 +840,10 @@ const MainPg = () => {
                     transition: "color 0.15s",
                   }}
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#818cf8")
+                    (e.currentTarget.style.color = "#898989")
                   }
                   onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "#6366f1")
+                    (e.currentTarget.style.color = "#2B2B2B")
                   }
                 >
                   Full view →
@@ -882,8 +853,8 @@ const MainPg = () => {
 
             <div
               style={{
-                background: "rgba(255,255,255,0.025)",
-                border: "0.5px solid rgba(255,255,255,0.07)",
+                background: "#FFFFFF",
+                border: "1px solid #E8E8E8",
                 borderRadius: 16,
                 overflow: "hidden",
               }}
@@ -896,7 +867,7 @@ const MainPg = () => {
                       display: "flex",
                       gap: 0,
                       padding: "12px 16px",
-                      borderBottom: "0.5px solid rgba(255,255,255,0.06)",
+                      borderBottom: "1px solid #E8E8E8",
                       overflowX: "auto",
                       scrollbarWidth: "none",
                     }}
@@ -921,22 +892,19 @@ const MainPg = () => {
                             outline: "none",
                             transition: "all 0.18s",
                             marginRight: 4,
-                            background: isActive
-                              ? "rgba(99,102,241,0.18)"
-                              : "transparent",
-                            color: isActive ? "#818cf8" : "#64748b",
+                            background: isActive ? "#E8E8E8" : "transparent",
+                            color: isActive ? "#2B2B2B" : "#898989",
                           }}
                           onMouseEnter={(e) => {
                             if (!isActive) {
-                              e.currentTarget.style.background =
-                                "rgba(255,255,255,0.05)";
-                              e.currentTarget.style.color = "#94a3b8";
+                              e.currentTarget.style.background = "#F0F0F0";
+                              e.currentTarget.style.color = "#2B2B2B";
                             }
                           }}
                           onMouseLeave={(e) => {
                             if (!isActive) {
                               e.currentTarget.style.background = "transparent";
-                              e.currentTarget.style.color = "#64748b";
+                              e.currentTarget.style.color = "#898989";
                             }
                           }}
                         >
@@ -967,7 +935,7 @@ const MainPg = () => {
                                 textAlign: "center",
                                 fontSize: 11,
                                 fontWeight: 500,
-                                color: "#475569",
+                                color: "#898989",
                                 padding: "2px 0",
                                 textTransform: "uppercase",
                                 letterSpacing: "0.4px",
@@ -1006,7 +974,7 @@ const MainPg = () => {
                           <div
                             style={{
                               fontSize: 10,
-                              color: "#475569",
+                              color: "#898989",
                               display: "flex",
                               alignItems: "center",
                               paddingRight: 8,
@@ -1046,7 +1014,7 @@ const MainPg = () => {
                   <div
                     style={{
                       padding: "12px 16px",
-                      borderTop: "0.5px solid rgba(255,255,255,0.05)",
+                      borderTop: "1px solid #E8E8E8",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -1062,7 +1030,7 @@ const MainPg = () => {
                           alignItems: "center",
                           gap: 6,
                           fontSize: 11,
-                          color: "#475569",
+                          color: "#898989",
                         }}
                       >
                         <span
@@ -1070,7 +1038,7 @@ const MainPg = () => {
                             width: 10,
                             height: 10,
                             borderRadius: 3,
-                            background: "rgba(99,102,241,0.4)",
+                            background: "#2B2B2B",
                             display: "inline-block",
                           }}
                         />
@@ -1082,7 +1050,7 @@ const MainPg = () => {
                           alignItems: "center",
                           gap: 6,
                           fontSize: 11,
-                          color: "#475569",
+                          color: "#898989",
                         }}
                       >
                         <span
@@ -1090,7 +1058,7 @@ const MainPg = () => {
                             width: 10,
                             height: 10,
                             borderRadius: 3,
-                            background: "rgba(234,179,8,0.3)",
+                            background: "#D0D0D0",
                             display: "inline-block",
                           }}
                         />
@@ -1102,7 +1070,7 @@ const MainPg = () => {
                           alignItems: "center",
                           gap: 6,
                           fontSize: 11,
-                          color: "#475569",
+                          color: "#898989",
                         }}
                       >
                         <span
@@ -1110,7 +1078,7 @@ const MainPg = () => {
                             width: 10,
                             height: 10,
                             borderRadius: 3,
-                            borderLeft: "2px solid rgba(139,92,246,0.7)",
+                            borderLeft: "2px solid #2B2B2B",
                             background: "transparent",
                             display: "inline-block",
                           }}
@@ -1122,7 +1090,7 @@ const MainPg = () => {
                       to="/home/timetables"
                       style={{
                         fontSize: 12,
-                        color: "#6366f1",
+                        color: "#2B2B2B",
                         textDecoration: "none",
                       }}
                     >
@@ -1142,7 +1110,7 @@ const MainPg = () => {
               ...reveal(5),
               marginTop: 48,
               paddingTop: 24,
-              borderTop: "0.5px solid rgba(255,255,255,0.05)",
+              borderTop: "1px solid #E8E8E8",
             }}
           >
             <div
@@ -1166,10 +1134,10 @@ const MainPg = () => {
                     alignItems: "center",
                     gap: 6,
                     fontSize: 11,
-                    color: "#334155",
+                    color: "#898989",
                   }}
                 >
-                  <span style={{color: "#10b981", fontSize: 12}}>✓</span>
+                  <span style={{color: "#2B2B2B", fontSize: 12}}>✓</span>
                   {item}
                 </div>
               ))}
