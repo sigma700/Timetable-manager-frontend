@@ -38,7 +38,7 @@ import {
   useTimetableHealth,
 } from "../hooks/useAnalytics.js";
 import {useRecentActivity} from "../hooks/useActivity.js";
-import MetricCard from "./components/ui/metricCard.jsx";
+// import MetricCard from "./components/ui/metricCard.jsx";
 import HealthScoreCard from "./components/ui/HealthScoreCard.jsx";
 import Table from "./components/ui/Table.jsx";
 import Badge, {HealthBadge} from "./components/ui/Badge.jsx";
