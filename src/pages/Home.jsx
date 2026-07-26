@@ -584,7 +584,7 @@ function AnalyticsShowcase() {
             {/* Image placeholder — replace src with your screenshot */}
             <div className="showcase__img-wrap">
               <img
-                src="https://res.cloudinary.com/dnadawobi/image/upload/v1785099928/Screenshot_2026-07-26_235428_yi7uhf.png"
+                src="https://res.cloudinary.com/dnadawobi/image/upload/v1785103029/Screenshot_2026-07-27_005648_ytqzjo.png"
                 alt="Protiba Analytics Dashboard showing institution overview, teacher workload, and timetable health score"
                 className="showcase__img"
                 onError={(e) => {

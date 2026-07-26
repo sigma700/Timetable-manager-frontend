@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useRef} from "react";
 import {useQuery} from "@tanstack/react-query";
 import {useAuthStore} from "../store/authStore";
-// import {getTable} from "../api/timetable";
 import {Navigation} from "./components/navigation";
 import {
   Calendar,
@@ -13,11 +12,8 @@ import {
   Sparkles,
   AlertTriangle,
   RefreshCw,
-  ChevronLeft,
-  ChevronRight,
   TrendingUp,
   Award,
-  BarChart2,
   Zap,
   CheckCircle,
   XCircle,
@@ -25,41 +21,41 @@ import {
 } from "lucide-react";
 import {getTimetable} from "../api/timetable";
 
-// ─── Tokens ───────────────────────────────────────────────────────────────────
+// ─── Tokens (light theme, semantic colours preserved) ─────────────────────────
 const tk = {
-  bg0: "#09090C",
-  bg1: "#0F1015",
-  bg2: "#14151C",
-  bg3: "#1A1B25",
-  bg4: "#1F2130",
-  border: "rgba(255,255,255,0.06)",
-  borderHov: "rgba(255,255,255,0.12)",
-  borderAccent: "rgba(79,110,247,0.36)",
-  text1: "#EDEEF5",
-  text2: "#8B90AA",
-  text3: "#52566A",
+  bg0: "#F8F8F8",
+  bg1: "#FFFFFF",
+  bg2: "#F0F0F0",
+  bg3: "#E8E8E8",
+  bg4: "#DCDCDC",
+  border: "rgba(0,0,0,0.06)",
+  borderHov: "rgba(0,0,0,0.12)",
+  borderAccent: "rgba(79,110,247,0.28)",
+  text1: "#2B2B2B",
+  text2: "#898989",
+  text3: "#A0A0A0",
   accent: "#4F6EF7",
   accentHov: "#3D5CE8",
-  accentSubtle: "rgba(79,110,247,0.09)",
-  accentBorder: "rgba(79,110,247,0.28)",
+  accentSubtle: "rgba(79,110,247,0.08)",
+  accentBorder: "rgba(79,110,247,0.2)",
   violet: "#8B5CF6",
-  violetSubtle: "rgba(139,92,246,0.09)",
-  violetBorder: "rgba(139,92,246,0.26)",
+  violetSubtle: "rgba(139,92,246,0.08)",
+  violetBorder: "rgba(139,92,246,0.2)",
   amber: "#F59E0B",
   amberSubtle: "rgba(245,158,11,0.08)",
-  amberBorder: "rgba(245,158,11,0.26)",
+  amberBorder: "rgba(245,158,11,0.2)",
   success: "#22C55E",
   successSubtle: "rgba(34,197,94,0.08)",
-  successBorder: "rgba(34,197,94,0.22)",
+  successBorder: "rgba(34,197,94,0.2)",
   danger: "#F87171",
   dangerSubtle: "rgba(248,113,113,0.08)",
-  dangerBorder: "rgba(248,113,113,0.22)",
+  dangerBorder: "rgba(248,113,113,0.2)",
   teal: "#2DD4BF",
   tealSubtle: "rgba(45,212,191,0.08)",
-  tealBorder: "rgba(45,212,191,0.22)",
+  tealBorder: "rgba(45,212,191,0.2)",
 };
 
-// ─── Subject color palette ────────────────────────────────────────────────────
+// ─── Subject colour palette (unchanged) ───────────────────────────────────────
 const SUBJECT_PALETTE = [
   {
     bg: "rgba(79,110,247,0.12)",
@@ -482,16 +478,17 @@ function KpiCard({icon, value, label, color, delay}) {
         transform: inView ? "translateY(0)" : "translateY(16px)",
         transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms`,
         cursor: "default",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = tk.borderHov;
         e.currentTarget.style.transform = "translateY(-3px)";
-        e.currentTarget.style.boxShadow = "0 12px 32px rgba(0,0,0,0.2)";
+        e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.04)";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = tk.border;
         e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "none";
+        e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.02)";
       }}
     >
       <div
@@ -792,7 +789,7 @@ function DesktopTimetable({timetable}) {
                             )}
                           </>
                         ) : (
-                          <span style={{fontSize: 11, color: tk.bg4}}>—</span>
+                          <span style={{fontSize: 11, color: tk.text3}}>—</span>
                         )}
                       </div>
                     </td>
@@ -1000,6 +997,7 @@ function InsightCard({icon, label, value, color, delay}) {
         opacity: inView ? 1 : 0,
         transform: inView ? "translateY(0)" : "translateY(14px)",
         transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms`,
+        boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
       }}
     >
       <div
@@ -1125,13 +1123,10 @@ function buildInsights(timetable) {
   ].filter(Boolean);
 }
 
-// ────────────────────────────────────────────────────────────────────────────────
-// MAIN TIMETABLES COMPONENT
-// ────────────────────────────────────────────────────────────────────────────────
+// ─── MAIN TIMETABLES COMPONENT ─────────────────────────────────────────────────
 const Timetables = () => {
   const {user, isLoading: authLoading, requiredData} = useAuthStore();
 
-  // ═══ React Query data fetching (replaces useGenStore) ═══
   const {
     data: gottenTable,
     isLoading,
@@ -1156,7 +1151,6 @@ const Timetables = () => {
     return () => clearTimeout(t);
   }, []);
   const heroInView = mounted;
-  const metricsInView = mounted;
 
   const userName = user
     ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
@@ -1182,11 +1176,9 @@ const Timetables = () => {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // Auto-select first timetable when data arrives
   useEffect(() => {
-    if (gottenTable?.timetables?.length > 0 && !selectedClass) {
+    if (gottenTable?.timetables?.length > 0 && !selectedClass)
       setSelectedClass(gottenTable.timetables[0].name);
-    }
   }, [gottenTable, selectedClass]);
 
   const navProps = {
@@ -1196,8 +1188,7 @@ const Timetables = () => {
     onLogout: handleLogout,
   };
 
-  // ── Auth loading ──
-  if (authLoading) {
+  if (authLoading)
     return (
       <StateScreen
         icon={<RefreshCw size={22} />}
@@ -1206,13 +1197,8 @@ const Timetables = () => {
         {...navProps}
       />
     );
-  }
-
-  // ── Data loading ──
   if (isLoading) return <LoadingScreen {...navProps} />;
-
-  // ── Error ──
-  if (error) {
+  if (error)
     return (
       <StateScreen
         icon={<XCircle size={22} />}
@@ -1222,10 +1208,7 @@ const Timetables = () => {
         {...navProps}
       />
     );
-  }
-
-  // ── No data ──
-  if (!gottenTable) {
+  if (!gottenTable)
     return (
       <StateScreen
         icon={<Calendar size={22} />}
@@ -1238,9 +1221,6 @@ const Timetables = () => {
         {...navProps}
       />
     );
-  }
-
-  // ── Empty timetable list ──
   if (
     !gottenTable.timetables ||
     !Array.isArray(gottenTable.timetables) ||
@@ -1259,9 +1239,7 @@ const Timetables = () => {
       />
     );
   }
-
-  // ── Waiting for class selection ──
-  if (!selectedClass) {
+  if (!selectedClass)
     return (
       <StateScreen
         icon={<RefreshCw size={22} />}
@@ -1270,7 +1248,6 @@ const Timetables = () => {
         {...navProps}
       />
     );
-  }
 
   const {timetables} = gottenTable;
   const selectedTimetable =
@@ -1278,7 +1255,6 @@ const Timetables = () => {
   const schedule = selectedTimetable.schedule || [];
   const config = selectedTimetable.config || {};
 
-  // Compute KPIs
   const allPeriods = schedule.flatMap((d) => d.periods || []);
   const lessons = allPeriods.filter((p) => !p.isBreak && p.subject).length;
   const breaks = allPeriods.filter((p) => p.isBreak).length;
@@ -1299,7 +1275,7 @@ const Timetables = () => {
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 3px; height: 3px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(79,110,247,0.25); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
 
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
@@ -1333,7 +1309,7 @@ const Timetables = () => {
           fontFamily: "'Inter', 'SF Pro Text', system-ui, sans-serif",
         }}
       >
-        {/* Ambient */}
+        {/* Ambient glows removed */}
         <div
           style={{
             position: "fixed",
@@ -1341,8 +1317,7 @@ const Timetables = () => {
             left: -100,
             width: 600,
             height: 600,
-            background:
-              "radial-gradient(circle, rgba(79,110,247,0.05) 0%, transparent 65%)",
+            background: "transparent",
             pointerEvents: "none",
             zIndex: 0,
           }}

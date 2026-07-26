@@ -1,10 +1,46 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, {useState, useEffect, useRef, useMemo} from "react";
 import {useAuthStore} from "../store/authStore";
 import {Link} from "react-router-dom";
 
 import HoverDevCards from "./components/gridOPtions";
 import {Navigation} from "./components/navigation";
 import {useTimetable} from "../hooks/useTimetable";
+
+// ─── Subject color palette ────────────────────────────────────────────────────
+const SUBJECT_COLORS = [
+  "#EA580C",
+  "#DC2626",
+  "#2563EB",
+  "#16A34A",
+  "#0D9488",
+  "#7C3AED",
+  "#D97706",
+  "#059669",
+  "#4F46E5",
+  "#DB2777",
+  "#9333EA",
+  "#0891B2",
+  "#B45309",
+  "#B91C1C",
+  "#E11D48",
+  "#6D28D9",
+  "#0369A1",
+  "#0F766E",
+  "#B45309",
+  "#92400E",
+  "#78350F",
+  "#44403C",
+];
+
+function getSubjectColor(name) {
+  if (!name) return "#2B2B2B";
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % SUBJECT_COLORS.length;
+  return SUBJECT_COLORS[index];
+}
 
 // ─── Animation hook ───────────────────────────────────────────────────────────
 function useStaggeredReveal(count, delay = 60) {
@@ -196,7 +232,8 @@ function ActionCard({
   );
 }
 
-function TimetableCell({period, isDouble}) {
+// ─── Timetable cell (colored) ──────────────────────────────────────────────
+function TimetableCell({period, isDouble, color}) {
   const [hovered, setHovered] = useState(false);
   if (!period) return <div style={{height: 34}} />;
 
@@ -204,22 +241,35 @@ function TimetableCell({period, isDouble}) {
   const hasSubject = !isBreak && period.subject;
   const isFree = !isBreak && !period.subject;
 
-  const bg = isBreak
-    ? hovered
-      ? "#E8E8E8"
-      : "#F0F0F0"
-    : hasSubject
-      ? hovered
-        ? "#E8E8E8"
-        : "#FFFFFF"
-      : hovered
-        ? "#F0F0F0"
-        : "#F8F8F8";
+  // Determine styles based on cell type
+  let bg, borderColor, textColor;
 
-  const color = isBreak ? "#2B2B2B" : hasSubject ? "#2B2B2B" : "#898989";
+  if (isBreak) {
+    bg = hovered ? "#E8E8E8" : "#F0F0F0";
+    textColor = "#2B2B2B";
+    borderColor = "#E8E8E8";
+  } else if (isFree) {
+    bg = hovered ? "#F0F0F0" : "#F8F8F8";
+    textColor = "#898989";
+    borderColor = "#E8E8E8";
+  } else if (hasSubject && color) {
+    // Subject cell with a color
+    bg = hovered ? `${color}30` : `${color}20`;
+    textColor = color;
+    borderColor = hovered ? `${color}60` : `${color}40`;
+  } else {
+    // Fallback for subject without color (should not happen)
+    bg = hovered ? "#E8E8E8" : "#FFFFFF";
+    textColor = "#2B2B2B";
+    borderColor = "#E8E8E8";
+  }
 
   const label =
     period.subject?.name?.substring(0, 4) || (isBreak ? "Break" : "");
+
+  // Double period: override left border color
+  const leftBorderColor =
+    isDouble && hasSubject && color ? color : isDouble ? "#2B2B2B" : "none";
 
   return (
     <div
@@ -230,15 +280,15 @@ function TimetableCell({period, isDouble}) {
         justifyContent: "center",
         fontSize: 11,
         fontWeight: 500,
-        color,
+        color: textColor,
         background: bg,
         cursor: "default",
-        transition: "background 0.15s, transform 0.15s",
+        transition: "background 0.15s, transform 0.15s, border-color 0.15s",
         transform: hovered ? "scale(1.05)" : "scale(1)",
-        borderLeft: isDouble ? "2px solid #2B2B2B" : "none",
+        borderLeft: isDouble ? `2px solid ${leftBorderColor}` : "none",
         borderRadius: isDouble ? "0 6px 6px 0" : 6,
-        border: isDouble ? "1px solid #E8E8E8" : "1px solid #E8E8E8",
-        borderLeftColor: isDouble ? "#2B2B2B" : undefined,
+        border: `1px solid ${borderColor}`,
+        borderLeftColor: isDouble ? leftBorderColor : undefined,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -453,6 +503,22 @@ const MainPg = () => {
   const selectedTimetable =
     timetableData?.timetables?.find((t) => t.name === selectedClass) ||
     timetableData?.timetables?.[0];
+
+  // ─── Build color map for subjects ────────────────────────────────────────
+  const subjectColorMap = useMemo(() => {
+    if (!selectedTimetable) return {};
+    const map = {};
+    selectedTimetable.schedule?.forEach((day) => {
+      day.periods?.forEach((period) => {
+        if (period?.subject?.name) {
+          if (!map[period.subject.name]) {
+            map[period.subject.name] = getSubjectColor(period.subject.name);
+          }
+        }
+      });
+    });
+    return map;
+  }, [selectedTimetable]);
 
   const timetableCount = timetableData?.timetables?.length || 0;
 
@@ -987,15 +1053,20 @@ const MainPg = () => {
                             )}
                           </div>
                           {(selectedTimetable?.schedule?.slice(0, 5) || []).map(
-                            (day) => (
-                              <TimetableCell
-                                key={`${day.day}-${periodIdx}`}
-                                period={day.periods?.[periodIdx]}
-                                isDouble={isDoublePeriod(
-                                  day.periods?.[periodIdx],
-                                )}
-                              />
-                            ),
+                            (day) => {
+                              const period = day.periods?.[periodIdx];
+                              const color = period?.subject?.name
+                                ? subjectColorMap[period.subject.name]
+                                : undefined;
+                              return (
+                                <TimetableCell
+                                  key={`${day.day}-${periodIdx}`}
+                                  period={period}
+                                  isDouble={isDoublePeriod(period)}
+                                  color={color}
+                                />
+                              );
+                            },
                           )}
                           {Array.from({
                             length: Math.max(

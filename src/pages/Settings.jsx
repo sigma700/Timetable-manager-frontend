@@ -46,40 +46,41 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-// ─── Tokens ───────────────────────────────────────────────────────────────────
-
+// ─── Tokens – light, premium palette (brand colours preserved) ────────────────
 const tk = {
-  bg0: "#09090C",
-  bg1: "#0F1015",
-  bg2: "#14151C",
-  bg3: "#1A1B25",
-  bg4: "#1F2130",
-  border: "rgba(255,255,255,0.06)",
-  borderHov: "rgba(255,255,255,0.11)",
-  borderAccent: "rgba(79,110,247,0.36)",
-  text1: "#EDEEF5",
-  text2: "#8B90AA",
-  text3: "#52566A",
+  bg0: "#F8F8F8",
+  bg1: "#FFFFFF",
+  bg2: "#F0F0F0",
+  bg3: "#E8E8E8",
+  bg4: "#DCDCDC",
+  border: "rgba(0,0,0,0.06)",
+  borderHov: "rgba(0,0,0,0.11)",
+  borderAccent: "rgba(79,110,247,0.28)",
+  text1: "#2B2B2B",
+  text2: "#898989",
+  text3: "#A0A0A0",
   accent: "#4F6EF7",
   accentHov: "#3D5CE8",
-  accentSubtle: "rgba(79,110,247,0.09)",
-  accentBorder: "rgba(79,110,247,0.26)",
+  accentSubtle: "rgba(79,110,247,0.08)",
+  accentBorder: "rgba(79,110,247,0.2)",
   success: "#22C55E",
   successSubtle: "rgba(34,197,94,0.08)",
   successBorder: "rgba(34,197,94,0.2)",
   amber: "#F59E0B",
   amberSubtle: "rgba(245,158,11,0.08)",
-  amberBorder: "rgba(245,158,11,0.24)",
+  amberBorder: "rgba(245,158,11,0.2)",
   danger: "#F87171",
   dangerSubtle: "rgba(248,113,113,0.08)",
-  dangerBorder: "rgba(248,113,113,0.22)",
+  dangerBorder: "rgba(248,113,113,0.2)",
   violet: "#8B5CF6",
-  violetSubtle: "rgba(139,92,246,0.09)",
-  violetBorder: "rgba(139,92,246,0.26)",
+  violetSubtle: "rgba(139,92,246,0.08)",
+  violetBorder: "rgba(139,92,246,0.2)",
+  teal: "#2DD4BF",
+  tealSubtle: "rgba(45,212,191,0.08)",
+  tealBorder: "rgba(45,212,191,0.2)",
 };
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
-
 const NAV_ITEMS = [
   {
     id: "institution",
@@ -140,7 +141,6 @@ const NAV_ITEMS = [
 ];
 
 // ─── Hooks ────────────────────────────────────────────────────────────────────
-
 function useInView(threshold = 0.08) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
@@ -157,8 +157,7 @@ function useInView(threshold = 0.08) {
   return [ref, inView];
 }
 
-// ─── Primitive components ─────────────────────────────────────────────────────
-
+// ─── Primitives ───────────────────────────────────────────────────────────────
 function Toggle({value, onChange}) {
   return (
     <button
@@ -223,7 +222,7 @@ function SegmentedControl({options, value, onChange}) {
               fontWeight: active ? 600 : 400,
               cursor: "pointer",
               fontFamily: "inherit",
-              boxShadow: active ? "0 1px 4px rgba(0,0,0,0.25)" : "none",
+              boxShadow: active ? "0 1px 4px rgba(0,0,0,0.06)" : "none",
               transition: "all 0.18s",
               whiteSpace: "nowrap",
             }}
@@ -261,7 +260,11 @@ function SelectInput({value, onChange, options, style = {}}) {
         }}
       >
         {options.map((o) => (
-          <option key={o.value} value={o.value} style={{background: tk.bg2}}>
+          <option
+            key={o.value}
+            value={o.value}
+            style={{background: "#fff", color: tk.text1}}
+          >
             {o.label}
           </option>
         ))}
@@ -345,27 +348,6 @@ function SliderInput({
 }
 
 // ─── Setting row ──────────────────────────────────────────────────────────────
-
-function SettingRow({
-  label,
-  description,
-  helper,
-  children,
-  tags = [],
-  border = true,
-}) {
-  const matchesTags = (search) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      label.toLowerCase().includes(q) ||
-      (description || "").toLowerCase().includes(q) ||
-      tags.some((t) => t.toLowerCase().includes(q))
-    );
-  };
-  return {label, description, helper, children, tags, border, matchesTags};
-}
-
 function SettingRowUI({
   label,
   description,
@@ -433,7 +415,6 @@ function SettingRowUI({
 }
 
 // ─── Settings card ────────────────────────────────────────────────────────────
-
 function SettingsCard({
   title,
   description,
@@ -455,9 +436,9 @@ function SettingsCard({
         transform: inView ? "translateY(0)" : "translateY(18px)",
         transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms`,
         marginBottom: 16,
+        boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
       }}
     >
-      {/* Card header */}
       <div
         style={{
           display: "flex",
@@ -497,14 +478,12 @@ function SettingsCard({
           )}
         </div>
       </div>
-      {/* Card body */}
       <div style={{padding: "0 24px"}}>{children}</div>
     </div>
   );
 }
 
 // ─── Section header ───────────────────────────────────────────────────────────
-
 function SectionHeader({label, title, description}) {
   const [ref, inView] = useInView(0.1);
   return (
@@ -557,7 +536,6 @@ function SectionHeader({label, title, description}) {
 }
 
 // ─── Search bar ───────────────────────────────────────────────────────────────
-
 function SearchBar({value, onChange}) {
   const [focused, setFocused] = useState(false);
   return (
@@ -612,7 +590,6 @@ function SearchBar({value, onChange}) {
 }
 
 // ─── Save bar ─────────────────────────────────────────────────────────────────
-
 function SaveBar({dirty, onSave, onDiscard, saving, lastSaved}) {
   if (!dirty && !saving) return null;
   return (
@@ -623,7 +600,7 @@ function SaveBar({dirty, onSave, onDiscard, saving, lastSaved}) {
         left: 0,
         right: 0,
         zIndex: 200,
-        background: "rgba(9,9,12,0.92)",
+        background: "rgba(255,255,255,0.92)",
         backdropFilter: "blur(20px)",
         borderTop: `1px solid ${tk.border}`,
         padding: "14px clamp(16px,4vw,48px)",
@@ -715,20 +692,18 @@ function SaveBar({dirty, onSave, onDiscard, saving, lastSaved}) {
   );
 }
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
-
-function Sidebar({active, onChange, mobileOpen, onClose}) {
+// ─── Sidebar – fully responsive with overlay on mobile ────────────────────────
+function Sidebar({active, onChange, isMobile, mobileOpen, onClose}) {
   return (
     <>
-      {/* Mobile overlay */}
-      {mobileOpen && (
+      {isMobile && mobileOpen && (
         <div
           onClick={onClose}
           style={{
             position: "fixed",
             inset: 0,
             zIndex: 149,
-            background: "rgba(0,0,0,0.6)",
+            background: "rgba(0,0,0,0.3)",
             backdropFilter: "blur(4px)",
           }}
         />
@@ -740,48 +715,42 @@ function Sidebar({active, onChange, mobileOpen, onClose}) {
           flexShrink: 0,
           background: tk.bg1,
           borderRight: `1px solid ${tk.border}`,
-          position: "sticky",
-          top: 64,
-          height: "calc(100vh - 64px)",
+          height: isMobile ? "100vh" : "calc(100vh - 64px)",
+          position: isMobile ? "fixed" : "sticky",
+          top: isMobile ? 0 : 64,
+          left: isMobile ? (mobileOpen ? 0 : -260) : "auto",
+          zIndex: isMobile ? 150 : "auto",
           overflowY: "auto",
-          padding: "20px 12px",
+          padding: isMobile ? "80px 12px 20px" : "20px 12px",
           display: "flex",
           flexDirection: "column",
           gap: 2,
-          zIndex: 150,
-          // Mobile
-          ...(typeof window !== "undefined" && window.innerWidth < 900
-            ? {
-                position: "fixed",
-                left: mobileOpen ? 0 : -260,
-                top: 0,
-                height: "100vh",
-                paddingTop: 80,
-                transition: "left 0.28s cubic-bezier(0.22,1,0.36,1)",
-                boxShadow: mobileOpen ? "4px 0 40px rgba(0,0,0,0.4)" : "none",
-              }
-            : {}),
+          transition: isMobile
+            ? "left 0.28s cubic-bezier(0.22,1,0.36,1)"
+            : "none",
+          boxShadow:
+            isMobile && mobileOpen ? "4px 0 40px rgba(0,0,0,0.1)" : "none",
         }}
       >
-        {/* Mobile close */}
-        <button
-          onClick={onClose}
-          style={{
-            display: "none",
-            position: "absolute",
-            top: 16,
-            right: 16,
-            background: tk.bg3,
-            border: `1px solid ${tk.border}`,
-            borderRadius: 8,
-            padding: 6,
-            cursor: "pointer",
-            color: tk.text2,
-          }}
-          className="sidebar-close"
-        >
-          <X size={16} />
-        </button>
+        {isMobile && (
+          <button
+            onClick={onClose}
+            style={{
+              position: "absolute",
+              top: 16,
+              right: 16,
+              background: tk.bg3,
+              border: `1px solid ${tk.border}`,
+              borderRadius: 8,
+              padding: 6,
+              cursor: "pointer",
+              color: tk.text2,
+              display: "flex",
+            }}
+          >
+            <X size={16} />
+          </button>
+        )}
 
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
@@ -791,7 +760,7 @@ function Sidebar({active, onChange, mobileOpen, onClose}) {
               key={item.id}
               onClick={() => {
                 onChange(item.id);
-                onClose();
+                if (isMobile) onClose();
               }}
               style={{
                 display: "flex",
@@ -861,7 +830,6 @@ function Sidebar({active, onChange, mobileOpen, onClose}) {
 }
 
 // ─── Institution section ──────────────────────────────────────────────────────
-
 function InstitutionSection({settings, onChange, search}) {
   const visible = (label, tags = []) => {
     if (!search) return true;
@@ -879,8 +847,6 @@ function InstitutionSection({settings, onChange, search}) {
         title="Institution Profile"
         description="Configure your institution's identity, location, and operating details. This information is used across all generated timetables and reports."
       />
-
-      {/* Overview card */}
       <SettingsCard
         title="Institution Overview"
         description="Executive summary of your academic infrastructure"
@@ -1008,7 +974,6 @@ function InstitutionSection({settings, onChange, search}) {
 }
 
 // ─── Academic Configuration section ──────────────────────────────────────────
-
 function AcademicSection({settings, onChange, search}) {
   const visible = (label, tags = []) => {
     if (!search) return true;
@@ -1027,7 +992,6 @@ function AcademicSection({settings, onChange, search}) {
         description="Define your institution's academic structure. These settings directly influence how Protiba's scheduling intelligence generates and optimizes your timetables."
       />
 
-      {/* Academic Calendar */}
       <SettingsCard
         title="Academic Calendar"
         icon={CalendarDays}
@@ -1113,7 +1077,6 @@ function AcademicSection({settings, onChange, search}) {
         )}
       </SettingsCard>
 
-      {/* School Schedule */}
       <SettingsCard
         title="School Schedule"
         icon={Clock3}
@@ -1239,7 +1202,6 @@ function AcademicSection({settings, onChange, search}) {
         )}
       </SettingsCard>
 
-      {/* Generation Defaults */}
       <SettingsCard
         title="Timetable Generation Defaults"
         icon={Settings2}
@@ -1327,7 +1289,6 @@ function AcademicSection({settings, onChange, search}) {
 }
 
 // ─── Timetable Preferences section ───────────────────────────────────────────
-
 function TimetableSection({settings, onChange, search}) {
   const visible = (label, tags = []) => {
     if (!search) return true;
@@ -1346,7 +1307,6 @@ function TimetableSection({settings, onChange, search}) {
         description="Fine-tune how Protiba's AI engine schedules teachers, subjects, and classes. These preferences are applied every time a timetable is generated or regenerated."
       />
 
-      {/* Teacher Preferences */}
       <SettingsCard
         title="Teacher Preferences"
         icon={Users}
@@ -1425,7 +1385,6 @@ function TimetableSection({settings, onChange, search}) {
         )}
       </SettingsCard>
 
-      {/* Subject Rules */}
       <SettingsCard
         title="Subject Rules"
         icon={BookOpen}
@@ -1494,7 +1453,6 @@ function TimetableSection({settings, onChange, search}) {
         )}
       </SettingsCard>
 
-      {/* AI Scheduling */}
       <SettingsCard
         title="AI Scheduling Engine"
         icon={Brain}
@@ -1604,7 +1562,6 @@ function TimetableSection({settings, onChange, search}) {
         )}
       </SettingsCard>
 
-      {/* Regeneration Behaviour */}
       <SettingsCard
         title="Regeneration Behaviour"
         icon={RefreshCw}
@@ -1678,7 +1635,6 @@ function TimetableSection({settings, onChange, search}) {
 }
 
 // ─── Notifications section ────────────────────────────────────────────────────
-
 function NotificationsSection({settings, onChange, search}) {
   const visible = (label, tags = []) => {
     if (!search) return true;
@@ -1752,7 +1708,6 @@ function NotificationsSection({settings, onChange, search}) {
 }
 
 // ─── Appearance section ───────────────────────────────────────────────────────
-
 function AppearanceSection({settings, onChange, search}) {
   const visible = (label, tags = []) => {
     if (!search) return true;
@@ -1850,7 +1805,6 @@ function AppearanceSection({settings, onChange, search}) {
 }
 
 // ─── Security section ─────────────────────────────────────────────────────────
-
 function SecuritySection({settings, onChange, search}) {
   const visible = (label, tags = []) => {
     if (!search) return true;
@@ -1930,7 +1884,6 @@ function SecuritySection({settings, onChange, search}) {
 }
 
 // ─── Data section ─────────────────────────────────────────────────────────────
-
 function DataSection({settings, onChange, search}) {
   return (
     <div>
@@ -1943,7 +1896,7 @@ function DataSection({settings, onChange, search}) {
         title="Data Management"
         icon={Database}
         delay={0}
-        iconColor={{bg: tk.tealSubtle, border: tk.tealBorder, text: "#2DD4BF"}}
+        iconColor={{bg: tk.tealSubtle, border: tk.tealBorder, text: tk.teal}}
       >
         <SettingRowUI
           label="Auto Backup"
@@ -1991,7 +1944,6 @@ function DataSection({settings, onChange, search}) {
 }
 
 // ─── About section ────────────────────────────────────────────────────────────
-
 function AboutSection() {
   const [ref, inView] = useInView(0.1);
   return (
@@ -2071,7 +2023,6 @@ function AboutSection() {
 }
 
 // ─── Placeholder sections ─────────────────────────────────────────────────────
-
 function PlaceholderSection({id}) {
   const item = NAV_ITEMS.find((n) => n.id === id);
   const Icon = item?.icon || Settings2;
@@ -2138,15 +2089,12 @@ function PlaceholderSection({id}) {
   );
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
-
-const tealSubtle = "rgba(45,212,191,0.08)";
-const tealBorder = "rgba(45,212,191,0.22)";
-
+// ─── Main Settings component ──────────────────────────────────────────────────
 const Settings = () => {
   const {user, isLoading: authLoading} = useAuthStore();
   const [activeSection, setActiveSection] = useState("institution");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 900);
   const [search, setSearch] = useState("");
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -2154,12 +2102,10 @@ const Settings = () => {
   const [mounted, setMounted] = useState(false);
 
   const [settings, setSettings] = useState({
-    // Institution
     name: "Nyeri High School",
     schoolType: "secondary",
     location: "Nyeri, Kenya",
     website: "",
-    // Academic
     academicYear: "2024/2025",
     currentTerm: "term2",
     numTerms: "3",
@@ -2177,7 +2123,6 @@ const Settings = () => {
     optimizationMode: "balanced",
     autoRegenerate: false,
     conflictResolution: "skip",
-    // Timetable
     maxTeacherDaily: 6,
     maxTeacherWeekly: 28,
     minTeacherBreak: "none",
@@ -2196,19 +2141,15 @@ const Settings = () => {
     allowRearrangement: true,
     versionHistory: true,
     rollbackSupport: true,
-    // Notifications
     emailNotifs: true,
     conflictAlerts: true,
     generationNotif: true,
     weeklySummary: false,
-    // Appearance
     theme: "dark",
     compactMode: false,
-    // Security
     twoFactor: false,
     sessionTimeout: "24h",
     loginNotifs: true,
-    // Data
     autoBackup: true,
     dataRetention: "1year",
     exportFormat: "pdf",
@@ -2222,10 +2163,7 @@ const Settings = () => {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
-        {
-          method: "POST",
-          credentials: "include",
-        },
+        {method: "POST", credentials: "include"},
       );
       if (res.ok) window.location.href = "/login";
     } catch (err) {
@@ -2234,9 +2172,19 @@ const Settings = () => {
   };
 
   useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 900);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [activeSection, isMobile]);
 
   const handleChange = useCallback((key, value) => {
     setSettings((prev) => ({...prev, [key]: value}));
@@ -2254,9 +2202,7 @@ const Settings = () => {
     );
   };
 
-  const handleDiscard = () => {
-    setDirty(false);
-  };
+  const handleDiscard = () => setDirty(false);
 
   const renderSection = () => {
     const props = {settings, onChange: handleChange, search};
@@ -2326,22 +2272,12 @@ const Settings = () => {
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(79,110,247,0.25); border-radius: 2px; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
 
         input[type="date"], input[type="time"] {
-          color-scheme: dark;
+          color-scheme: light;
         }
-        select option { background: #14151C; color: #EDEEF5; }
-
-        @media (max-width: 900px) {
-          .settings-sidebar { display: none !important; }
-          .settings-mobile-bar { display: flex !important; }
-          .sidebar-close { display: flex !important; }
-        }
-        @media (min-width: 901px) {
-          .settings-sidebar { display: flex !important; }
-          .settings-mobile-bar { display: none !important; }
-        }
+        select option { background: #fff; color: #2B2B2B; }
 
         @media (max-width: 600px) {
           .settings-hero { padding: 32px 16px 24px !important; }
@@ -2373,7 +2309,6 @@ const Settings = () => {
           fontFamily: "'Inter', 'SF Pro Text', system-ui, sans-serif",
         }}
       >
-        {/* Ambient glow */}
         <div
           style={{
             position: "fixed",
@@ -2381,14 +2316,12 @@ const Settings = () => {
             left: -100,
             width: 600,
             height: 600,
-            background:
-              "radial-gradient(circle, rgba(79,110,247,0.05) 0%, transparent 65%)",
+            background: "transparent",
             pointerEvents: "none",
             zIndex: 0,
           }}
         />
 
-        {/* ── Hero ────────────────────────────────────────────────────────── */}
         <div
           className="settings-hero"
           style={{
@@ -2429,8 +2362,7 @@ const Settings = () => {
                   marginBottom: 14,
                 }}
               >
-                <Settings2 size={11} />
-                Control Center
+                <Settings2 size={11} /> Control Center
               </div>
               <h1
                 style={{
@@ -2457,7 +2389,6 @@ const Settings = () => {
               </p>
             </div>
 
-            {/* Status strip */}
             <div style={{display: "flex", flexWrap: "wrap", gap: 10}}>
               {[
                 {
@@ -2512,7 +2443,6 @@ const Settings = () => {
           </div>
         </div>
 
-        {/* ── Search ──────────────────────────────────────────────────────── */}
         <div
           className="settings-search-wrap"
           style={{
@@ -2526,7 +2456,6 @@ const Settings = () => {
           <SearchBar value={search} onChange={setSearch} />
         </div>
 
-        {/* Divider */}
         <div
           style={{
             height: 1,
@@ -2536,65 +2465,65 @@ const Settings = () => {
           }}
         />
 
-        {/* ── Mobile nav bar ───────────────────────────────────────────────── */}
-        <div
-          className="settings-mobile-bar"
-          style={{
-            display: "none",
-            padding: "12px 20px",
-            alignItems: "center",
-            gap: 12,
-            borderBottom: `1px solid ${tk.border}`,
-            background: tk.bg1,
-            position: "sticky",
-            top: 64,
-            zIndex: 100,
-          }}
-        >
-          <button
-            onClick={() => setMobileNavOpen(true)}
+        {isMobile && (
+          <div
             style={{
               display: "flex",
+              padding: "12px 20px",
               alignItems: "center",
-              gap: 8,
-              padding: "8px 14px",
-              background: tk.bg2,
-              border: `1px solid ${tk.border}`,
-              borderRadius: 9,
-              color: tk.text2,
-              fontSize: 13,
-              cursor: "pointer",
-              fontFamily: "inherit",
+              gap: 12,
+              borderBottom: `1px solid ${tk.border}`,
+              background: tk.bg1,
+              position: "sticky",
+              top: 64,
+              zIndex: 100,
             }}
           >
-            <Menu size={15} />
-            {NAV_ITEMS.find((n) => n.id === activeSection)?.label || "Settings"}
-          </button>
-          {dirty && (
-            <span
+            <button
+              onClick={() => setMobileNavOpen(true)}
               style={{
-                fontSize: 11,
-                color: tk.amber,
                 display: "flex",
                 alignItems: "center",
-                gap: 5,
+                gap: 8,
+                padding: "8px 14px",
+                background: tk.bg2,
+                border: `1px solid ${tk.border}`,
+                borderRadius: 9,
+                color: tk.text2,
+                fontSize: 13,
+                cursor: "pointer",
+                fontFamily: "inherit",
               }}
             >
+              <Menu size={15} />
+              {NAV_ITEMS.find((n) => n.id === activeSection)?.label ||
+                "Settings"}
+            </button>
+            {dirty && (
               <span
                 style={{
-                  width: 5,
-                  height: 5,
-                  borderRadius: "50%",
-                  background: tk.amber,
-                  display: "inline-block",
+                  fontSize: 11,
+                  color: tk.amber,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 5,
                 }}
-              />
-              Unsaved changes
-            </span>
-          )}
-        </div>
+              >
+                <span
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: "50%",
+                    background: tk.amber,
+                    display: "inline-block",
+                  }}
+                />
+                Unsaved changes
+              </span>
+            )}
+          </div>
+        )}
 
-        {/* ── Layout ──────────────────────────────────────────────────────── */}
         <div
           style={{
             maxWidth: 1400,
@@ -2605,39 +2534,23 @@ const Settings = () => {
             zIndex: 1,
           }}
         >
-          {/* Sidebar */}
-          <div className="settings-sidebar">
-            <Sidebar
-              active={activeSection}
-              onChange={(id) => {
-                setActiveSection(id);
-                setSearch("");
-              }}
-              mobileOpen={mobileNavOpen}
-              onClose={() => setMobileNavOpen(false)}
-            />
-          </div>
+          <Sidebar
+            active={activeSection}
+            onChange={(id) => {
+              setActiveSection(id);
+              setSearch("");
+            }}
+            isMobile={isMobile}
+            mobileOpen={mobileNavOpen}
+            onClose={() => setMobileNavOpen(false)}
+          />
 
-          {/* Mobile sidebar (portal-like) */}
-          {mobileNavOpen && (
-            <Sidebar
-              active={activeSection}
-              onChange={(id) => {
-                setActiveSection(id);
-                setSearch("");
-              }}
-              mobileOpen={mobileNavOpen}
-              onClose={() => setMobileNavOpen(false)}
-            />
-          )}
-
-          {/* Main content */}
           <main
             className="settings-content"
             style={{
               flex: 1,
               minWidth: 0,
-              padding: "36px 48px 120px",
+              padding: isMobile ? "24px 16px 100px" : "36px 48px 120px",
             }}
           >
             {search && (
@@ -2669,12 +2582,10 @@ const Settings = () => {
                 </button>
               </div>
             )}
-
             {renderSection()}
           </main>
         </div>
 
-        {/* Save bar */}
         <SaveBar
           dirty={dirty}
           onSave={handleSave}

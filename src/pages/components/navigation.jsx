@@ -1,12 +1,37 @@
 import React, {useState, useEffect, useRef, useCallback} from "react";
 import {motion, AnimatePresence, MotionConfig} from "framer-motion";
 import {Link, useLocation} from "react-router-dom";
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Sparkles,
+  BarChart3,
+  DollarSign,
+  BookOpen,
+  Search,
+  ChevronDown,
+  ChevronRight,
+  Bell,
+  User as UserIcon,
+  Menu,
+  X,
+  Layers,
+  BookMarked,
+  Grid2x2,
+  Users,
+  History as HistoryIcon,
+  Download,
+  UserCircle2,
+  SlidersHorizontal,
+  BellRing,
+  ShieldCheck,
+  LogOut,
+} from "lucide-react";
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  ICONS — Premium SVG iconography (self-contained, no external deps)
+//  ICONS — lucide-react, mapped to the same keys used throughout this file
 // ═══════════════════════════════════════════════════════════════════════════════
 const Icons = {
-  // Updated brand logo
   Logo: () => (
     <img
       src="/logo.png"
@@ -20,403 +45,61 @@ const Icons = {
       }}
     />
   ),
-  Dashboard: () => (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="2" y="2" width="6" height="6" rx="2" />
-      <rect x="10" y="2" width="6" height="6" rx="2" />
-      <rect x="2" y="10" width="6" height="6" rx="2" />
-      <rect x="10" y="10" width="6" height="6" rx="2" />
-    </svg>
+  Dashboard: (props) => (
+    <LayoutDashboard size={18} strokeWidth={1.8} {...props} />
   ),
-  Timetable: () => (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="2" y="3" width="14" height="12" rx="2" />
-      <path d="M6 1v3M12 1v3M2 7h14" />
-      <path d="M5 11h2M5 13h2M9 11h2M9 13h2" strokeWidth="1.2" />
-    </svg>
+  Timetable: (props) => <CalendarDays size={18} strokeWidth={1.8} {...props} />,
+  Generate: (props) => <Sparkles size={18} strokeWidth={1.8} {...props} />,
+  Institution: (props) => <BookMarked size={18} strokeWidth={1.8} {...props} />,
+  Analytics: (props) => <BarChart3 size={18} strokeWidth={1.8} {...props} />,
+  Pricing: (props) => <DollarSign size={18} strokeWidth={1.8} {...props} />,
+  Story: (props) => <BookOpen size={18} strokeWidth={1.8} {...props} />,
+  Search: (props) => <Search size={16} strokeWidth={1.8} {...props} />,
+  ChevronDown: (props) => (
+    <ChevronDown size={12} strokeWidth={2.2} {...props} />
   ),
-  Generate: () => (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M9 2v4M9 12v4M2 9h4M12 9h4" />
-      <circle cx="9" cy="9" r="2.5" />
-    </svg>
+  Bell: (props) => <Bell size={18} strokeWidth={1.8} {...props} />,
+  User: (props) => <UserIcon size={18} strokeWidth={1.8} {...props} />,
+  Menu: (props) => <Menu size={20} strokeWidth={1.8} {...props} />,
+  X: (props) => <X size={20} strokeWidth={1.8} {...props} />,
+  Classes: (props) => <Layers size={16} strokeWidth={1.7} {...props} />,
+  Subjects: (props) => <BookMarked size={16} strokeWidth={1.7} {...props} />,
+  Departments: (props) => <Grid2x2 size={16} strokeWidth={1.7} {...props} />,
+  Teachers: (props) => <Users size={16} strokeWidth={1.7} {...props} />,
+  History: (props) => <HistoryIcon size={16} strokeWidth={1.7} {...props} />,
+  Export: (props) => <Download size={16} strokeWidth={1.7} {...props} />,
+  Account: (props) => <UserCircle2 size={16} strokeWidth={1.7} {...props} />,
+  Preferences: (props) => (
+    <SlidersHorizontal size={16} strokeWidth={1.7} {...props} />
   ),
-  Institution: () => (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M2 16V8l7-5 7 5v8" />
-      <path d="M6 16V10h6v6" />
-      <path d="M9 3v3" strokeWidth="1.2" />
-    </svg>
-  ),
-  Analytics: () => (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M2 14l4-5 3 2.5L14 6l2 3" />
-      <path d="M2 16h14" />
-    </svg>
-  ),
-  // NEW – Pricing (dollar sign in a circle)
-  Pricing: () => (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="9" cy="9" r="7" />
-      <path d="M9 4v2M9 12v2M6 9h6" />
-    </svg>
-  ),
-  // NEW – Our Story (folder/book)
-  Story: () => (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 3h6l2 2h4v9H3V3z" />
-      <path d="M3 7h12" />
-    </svg>
-  ),
-  Settings: () => (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="9" cy="9" r="2.5" />
-      <path d="M14.5 9a5.5 5.5 0 00-.45-2.2l1.8-1.8-1.4-1.4-1.8 1.8A5.5 5.5 0 009 3.5V1.5H7v2a5.5 5.5 0 00-2.2.45l-1.8-1.8-1.4 1.4 1.8 1.8A5.5 5.5 0 003.5 9H1.5v2h2a5.5 5.5 0 00.45 2.2l-1.8 1.8 1.4 1.4 1.8-1.8A5.5 5.5 0 007 14.5v2h2v-2a5.5 5.5 0 002.2-.45l1.8 1.8 1.4-1.4-1.8-1.8A5.5 5.5 0 0014.5 9h2V9z" />
-    </svg>
-  ),
-  Search: () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="7" cy="7" r="5.5" />
-      <path d="M11 11l3.5 3.5" />
-    </svg>
-  ),
-  ChevronDown: () => (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M2 4.5l4 4 4-4" />
-    </svg>
-  ),
-  Bell: () => (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M7 3a2 2 0 114 0 2 2 0 01-4 0z" strokeWidth="1.2" />
-      <path d="M3 13.5V9a6 6 0 0112 0v4.5" />
-      <path d="M6 13.5v.5a3 3 0 006 0v-.5" />
-    </svg>
-  ),
-  User: () => (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="9" cy="5.5" r="3.5" />
-      <path d="M2.5 15.5c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5" />
-    </svg>
-  ),
-  Menu: () => (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    >
-      <path d="M3 6h14M3 10h14M3 14h10" />
-    </svg>
-  ),
-  X: () => (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-    >
-      <path d="M5 5l10 10M15 5L5 15" />
-    </svg>
-  ),
-  Classes: () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="2" y="3" width="12" height="10" rx="2" />
-      <path d="M6 7h4M6 10h4" strokeWidth="1.2" />
-    </svg>
-  ),
-  Subjects: () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3 3h10v10H3z" />
-      <path d="M3 6h10M6 3v10" strokeWidth="1.2" />
-    </svg>
-  ),
-  Departments: () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="2" y="2" width="5" height="5" rx="1" />
-      <rect x="9" y="2" width="5" height="5" rx="1" />
-      <rect x="2" y="9" width="5" height="5" rx="1" />
-      <rect x="9" y="9" width="5" height="5" rx="1" />
-    </svg>
-  ),
-  Teachers: () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="8" cy="5" r="3" />
-      <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" />
-    </svg>
-  ),
-  History: () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="8" cy="8" r="6" />
-      <path d="M8 4.5v4l2.5 1.5" />
-    </svg>
-  ),
-  Export: () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 2v8M5 7l3 3 3-3" />
-      <path d="M3 12v1a2 2 0 002 2h6a2 2 0 002-2v-1" />
-    </svg>
-  ),
-  Account: () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="8" cy="5" r="3" />
-      <path d="M2 14c0-3 2.5-5 6-5s6 2 6 5" />
-    </svg>
-  ),
-  Preferences: () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="8" cy="8" r="2" />
-      <path d="M8 2v2M8 12v2M2 8h2M12 8h2M4.2 4.2l1.4 1.4M10.4 10.4l1.4 1.4M4.2 11.8l1.4-1.4M10.4 5.6l1.4-1.4" />
-    </svg>
-  ),
-  Notifications: () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 6a4 4 0 118 0c0 3 1.5 4 1.5 4H2.5S4 9 4 6z" />
-      <path d="M7 13.5a1.5 1.5 0 002 0" />
-    </svg>
-  ),
-  Security: () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3" y="7" width="10" height="8" rx="2" />
-      <path d="M5 7V5a3 3 0 016 0v2" />
-    </svg>
-  ),
-  Logout: () => (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M6 3H3v10h3" />
-      <path d="M6 8h6M10 5l3 3-3 3" />
-    </svg>
-  ),
-  ArrowRight: () => (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M2.5 7h9M8 3.5l3.5 3.5L8 10.5" />
-    </svg>
-  ),
+  Notifications: (props) => <BellRing size={16} strokeWidth={1.7} {...props} />,
+  Security: (props) => <ShieldCheck size={16} strokeWidth={1.7} {...props} />,
+  Logout: (props) => <LogOut size={16} strokeWidth={1.7} {...props} />,
+  ArrowRight: (props) => <ChevronRight size={14} strokeWidth={2} {...props} />,
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  NAVIGATION DATA — Hierarchical route structure (updated with Pricing & Story)
+//  COLOR HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+const hexToRgba = (hex, alpha = 1) => {
+  const h = hex.replace("#", "");
+  const bigint = parseInt(
+    h.length === 3
+      ? h
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : h,
+    16,
+  );
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r},${g},${b},${alpha})`;
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  NAVIGATION DATA — Hierarchical route structure, each item carries its own accent
 // ═══════════════════════════════════════════════════════════════════════════════
 const navStructure = [
   {
@@ -425,12 +108,14 @@ const navStructure = [
     path: "/home",
     icon: Icons.Dashboard,
     children: null,
+    color: "#2563EB",
   },
   {
     id: "timetables",
     label: "Timetables",
     path: "/timetables",
     icon: Icons.Timetable,
+    color: "#7C3AED",
     children: [
       {
         label: "All Timetables",
@@ -449,6 +134,7 @@ const navStructure = [
     icon: Icons.Generate,
     children: null,
     highlight: true,
+    color: "#EA580C",
   },
   {
     id: "analytics",
@@ -456,38 +142,51 @@ const navStructure = [
     path: "/analytics",
     icon: Icons.Analytics,
     children: null,
+    color: "#0D9488",
   },
-  // ── NEW: Pricing ──
   {
     id: "pricing",
     label: "Pricing",
     path: "/home/pricing",
     icon: Icons.Pricing,
     children: null,
+    color: "#DB2777",
   },
-  // ── NEW: Our Story ──
   {
     id: "story",
     label: "Our Story",
     path: "/home/story",
     icon: Icons.Story,
     children: null,
+    color: "#16A34A",
   },
 ];
 
 const settingsStructure = [
-  {label: "Account", path: "/settings/account", icon: Icons.Account},
+  {
+    label: "Account",
+    path: "/settings/account",
+    icon: Icons.Account,
+    color: "#2563EB",
+  },
   {
     label: "Preferences",
     path: "/settings/preferences",
     icon: Icons.Preferences,
+    color: "#7C3AED",
   },
   {
     label: "Notifications",
     path: "/settings/notifications",
     icon: Icons.Notifications,
+    color: "#EA580C",
   },
-  {label: "Security", path: "/settings/security", icon: Icons.Security},
+  {
+    label: "Security",
+    path: "/settings/security",
+    icon: Icons.Security,
+    color: "#0D9488",
+  },
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -516,7 +215,7 @@ const getInitials = (name) => {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  MOBILE NAV ITEM — Expandable with children (unchanged)
+//  MOBILE NAV ITEM — Expandable with children
 // ═══════════════════════════════════════════════════════════════════════════════
 const MobileNavItem = ({item, currentPath, index, onNavigate}) => {
   const [expanded, setExpanded] = useState(
@@ -525,6 +224,7 @@ const MobileNavItem = ({item, currentPath, index, onNavigate}) => {
 
   const hasChildren = item.children && item.children.length > 0;
   const isActive = isRouteActive(currentPath, item.path, item.children);
+  const accent = item.color || "#2B2B2B";
 
   return (
     <motion.div
@@ -535,7 +235,12 @@ const MobileNavItem = ({item, currentPath, index, onNavigate}) => {
       {hasChildren ? (
         <div className="nav-mobile-group">
           <button
-            className={`nav-mobile-group__trigger ${isActive ? "nav-mobile-group__trigger--active" : ""}`}
+            className="nav-mobile-group__trigger"
+            style={
+              isActive
+                ? {background: hexToRgba(accent, 0.1), color: accent}
+                : undefined
+            }
             onClick={() => setExpanded(!expanded)}
           >
             <item.icon />
@@ -561,7 +266,12 @@ const MobileNavItem = ({item, currentPath, index, onNavigate}) => {
                   <Link
                     key={child.path}
                     to={child.path}
-                    className={`nav-mobile-sublink ${currentPath === child.path ? "nav-mobile-sublink--active" : ""}`}
+                    className="nav-mobile-sublink"
+                    style={
+                      currentPath === child.path
+                        ? {background: hexToRgba(accent, 0.08), color: accent}
+                        : undefined
+                    }
                     onClick={onNavigate}
                   >
                     <child.icon />
@@ -575,7 +285,18 @@ const MobileNavItem = ({item, currentPath, index, onNavigate}) => {
       ) : (
         <Link
           to={item.path}
-          className={`nav-mobile-link ${isActive ? "nav-mobile-link--active" : ""} ${item.highlight ? "nav-mobile-link--highlight" : ""}`}
+          className={`nav-mobile-link ${item.highlight ? "nav-mobile-link--highlight" : ""}`}
+          style={
+            isActive
+              ? {background: hexToRgba(accent, 0.1), color: accent}
+              : item.highlight
+                ? {
+                    background: hexToRgba(accent, 0.08),
+                    border: `0.5px solid ${hexToRgba(accent, 0.3)}`,
+                    color: accent,
+                  }
+                : undefined
+          }
           onClick={onNavigate}
         >
           <item.icon />
@@ -587,7 +308,7 @@ const MobileNavItem = ({item, currentPath, index, onNavigate}) => {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  MAIN NAVIGATION COMPONENT — Top bar + mobile panel (unchanged logic)
+//  MAIN NAVIGATION COMPONENT — Top bar + mobile panel
 // ═══════════════════════════════════════════════════════════════════════════════
 export const Navigation = ({
   userName = "Admin User",
@@ -674,76 +395,112 @@ export const Navigation = ({
 
           {/* Desktop Nav */}
           <nav className="nav-desktop" ref={dropdownRef}>
-            {navStructure.map((item) => (
-              <div key={item.id} className="nav-item-wrapper">
-                {item.children ? (
-                  <div className="nav-dropdown-container">
-                    <button
-                      className={`nav-link ${isRouteActive(currentPath, item.path, item.children) ? "nav-link--active" : ""} ${isParentActive(currentPath, item.path) ? "nav-link--parent-active" : ""}`}
-                      onClick={() => toggleDropdown(item.id)}
-                      aria-expanded={activeDropdown === item.id}
-                    >
+            {navStructure.map((item) => {
+              const active = isRouteActive(
+                currentPath,
+                item.path,
+                item.children,
+              );
+              const parentActive = isParentActive(currentPath, item.path);
+              const accent = item.color || "#2B2B2B";
+              const linkStyle = active
+                ? {background: hexToRgba(accent, 0.12), color: accent}
+                : item.highlight
+                  ? {
+                      background: hexToRgba(accent, 0.08),
+                      border: `0.5px solid ${hexToRgba(accent, 0.3)}`,
+                      color: accent,
+                    }
+                  : parentActive
+                    ? {color: "#2B2B2B"}
+                    : undefined;
+
+              return (
+                <div key={item.id} className="nav-item-wrapper">
+                  {item.children ? (
+                    <div className="nav-dropdown-container">
+                      <button
+                        className="nav-link"
+                        style={linkStyle}
+                        onClick={() => toggleDropdown(item.id)}
+                        aria-expanded={activeDropdown === item.id}
+                      >
+                        <item.icon />
+                        <span>{item.label}</span>
+                        <motion.span
+                          className="nav-link__chevron"
+                          animate={{
+                            rotate: activeDropdown === item.id ? 180 : 0,
+                          }}
+                          transition={{duration: 0.2}}
+                        >
+                          <Icons.ChevronDown />
+                        </motion.span>
+                      </button>
+
+                      <AnimatePresence>
+                        {activeDropdown === item.id && (
+                          <motion.div
+                            className="nav-dropdown"
+                            initial={{opacity: 0, y: 8, scale: 0.96}}
+                            animate={{opacity: 1, y: 0, scale: 1}}
+                            exit={{opacity: 0, y: 8, scale: 0.96}}
+                            transition={{
+                              duration: 0.2,
+                              ease: [0.16, 1, 0.3, 1],
+                            }}
+                          >
+                            <div className="nav-dropdown__header">
+                              <span className="nav-dropdown__label">
+                                {item.label}
+                              </span>
+                            </div>
+                            {item.children.map((child) => {
+                              const childActive = currentPath === child.path;
+                              return (
+                                <Link
+                                  key={child.path}
+                                  to={child.path}
+                                  className="nav-dropdown__item"
+                                  style={
+                                    childActive
+                                      ? {
+                                          background: hexToRgba(accent, 0.08),
+                                          color: accent,
+                                        }
+                                      : undefined
+                                  }
+                                >
+                                  <span className="nav-dropdown__icon">
+                                    <child.icon />
+                                  </span>
+                                  <span className="nav-dropdown__text">
+                                    {child.label}
+                                  </span>
+                                  {childActive && (
+                                    <motion.span
+                                      className="nav-dropdown__indicator"
+                                      style={{background: accent}}
+                                      layoutId="dropdownIndicator"
+                                      transition={{duration: 0.2}}
+                                    />
+                                  )}
+                                </Link>
+                              );
+                            })}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    <Link to={item.path} className="nav-link" style={linkStyle}>
                       <item.icon />
                       <span>{item.label}</span>
-                      <motion.span
-                        className="nav-link__chevron"
-                        animate={{rotate: activeDropdown === item.id ? 180 : 0}}
-                        transition={{duration: 0.2}}
-                      >
-                        <Icons.ChevronDown />
-                      </motion.span>
-                    </button>
-
-                    <AnimatePresence>
-                      {activeDropdown === item.id && (
-                        <motion.div
-                          className="nav-dropdown"
-                          initial={{opacity: 0, y: 8, scale: 0.96}}
-                          animate={{opacity: 1, y: 0, scale: 1}}
-                          exit={{opacity: 0, y: 8, scale: 0.96}}
-                          transition={{duration: 0.2, ease: [0.16, 1, 0.3, 1]}}
-                        >
-                          <div className="nav-dropdown__header">
-                            <span className="nav-dropdown__label">
-                              {item.label}
-                            </span>
-                          </div>
-                          {item.children.map((child) => (
-                            <Link
-                              key={child.path}
-                              to={child.path}
-                              className={`nav-dropdown__item ${currentPath === child.path ? "nav-dropdown__item--active" : ""}`}
-                            >
-                              <span className="nav-dropdown__icon">
-                                <child.icon />
-                              </span>
-                              <span className="nav-dropdown__text">
-                                {child.label}
-                              </span>
-                              {currentPath === child.path && (
-                                <motion.span
-                                  className="nav-dropdown__indicator"
-                                  layoutId="dropdownIndicator"
-                                  transition={{duration: 0.2}}
-                                />
-                              )}
-                            </Link>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                ) : (
-                  <Link
-                    to={item.path}
-                    className={`nav-link ${isRouteActive(currentPath, item.path) ? "nav-link--active" : ""} ${item.highlight ? "nav-link--highlight" : ""}`}
-                  >
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </Link>
-                )}
-              </div>
-            ))}
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
           </nav>
 
           {/* Right actions */}
@@ -851,27 +608,18 @@ export const Navigation = ({
                       </div>
                     </div>
                     <div className="nav-user-dropdown__divider" />
-                    <Link
-                      to="/settings/account"
-                      className="nav-user-dropdown__item"
-                    >
-                      <Icons.Account />
-                      <span>Account Settings</span>
-                    </Link>
-                    <Link
-                      to="/settings/preferences"
-                      className="nav-user-dropdown__item"
-                    >
-                      <Icons.Preferences />
-                      <span>Preferences</span>
-                    </Link>
-                    <Link
-                      to="/settings/notifications"
-                      className="nav-user-dropdown__item"
-                    >
-                      <Icons.Notifications />
-                      <span>Notifications</span>
-                    </Link>
+                    {settingsStructure.map((item) => (
+                      <Link
+                        key={item.path}
+                        to={item.path}
+                        className="nav-user-dropdown__item"
+                      >
+                        <span style={{color: item.color}}>
+                          <item.icon />
+                        </span>
+                        <span>{item.label}</span>
+                      </Link>
+                    ))}
                     <div className="nav-user-dropdown__divider" />
                     <button
                       className="nav-user-dropdown__item nav-user-dropdown__item--danger"
@@ -986,7 +734,15 @@ export const Navigation = ({
                   >
                     <Link
                       to={item.path}
-                      className={`nav-mobile-link ${currentPath === item.path ? "nav-mobile-link--active" : ""}`}
+                      className="nav-mobile-link"
+                      style={
+                        currentPath === item.path
+                          ? {
+                              background: hexToRgba(item.color, 0.1),
+                              color: item.color,
+                            }
+                          : undefined
+                      }
                       onClick={() => setMobileOpen(false)}
                     >
                       <item.icon />
@@ -1010,20 +766,20 @@ export const Navigation = ({
   );
 };
 
-// ─── Styles (unchanged) ───────────────────────────────────────────────────────
+// ─── Styles ───────────────────────────────────────────────────────────────────
 const navStyles = `
   :root {
-    --nav-bg: rgba(3,3,5,0.7);
-    --nav-bg-solid: #0a0a0f;
-    --nav-border: rgba(255,255,255,0.08);
-    --nav-border-2: rgba(255,255,255,0.12);
-    --nav-text: #f0f0f5;
-    --nav-text-2: #9ca3af;
-    --nav-text-3: #6b7280;
-    --nav-accent: #7c3aed;
-    --nav-accent-light: #a78bfa;
-    --nav-accent-glow: rgba(124,58,237,0.12);
-    --nav-red: #f43f5e;
+    --nav-bg: rgba(248,248,248,0.75);
+    --nav-bg-solid: #FFFFFF;
+    --nav-border: rgba(43,43,43,0.08);
+    --nav-border-2: rgba(43,43,43,0.14);
+    --nav-text: #2B2B2B;
+    --nav-text-2: #898989;
+    --nav-text-3: #A8A8A8;
+    --nav-accent: #2B2B2B;
+    --nav-accent-light: #5C5C5C;
+    --nav-accent-glow: rgba(43,43,43,0.06);
+    --nav-red: #DC2626;
     --nav-radius: 10px;
     --nav-transition: 180ms cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -1034,16 +790,16 @@ const navStyles = `
     left: 0;
     right: 0;
     z-index: 100;
-    background: rgba(3,3,5,0.7);
+    background: rgba(248,248,248,0.75);
     backdrop-filter: blur(18px) saturate(1.4);
     -webkit-backdrop-filter: blur(18px) saturate(1.4);
     border-bottom: 1px solid transparent;
     transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
   }
   .nav-header--scrolled {
-    background: rgba(3,3,5,0.85);
+    background: rgba(255,255,255,0.9);
     border-bottom-color: var(--nav-border);
-    box-shadow: 0 4px 30px rgba(0,0,0,0.35);
+    box-shadow: 0 4px 30px rgba(43,43,43,0.06);
   }
   .nav-header__inner {
     max-width: 1440px;
@@ -1069,7 +825,7 @@ const navStyles = `
   }
   .nav-logo:hover { opacity: 0.85; }
   .nav-logo__text {
-    background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+    background: linear-gradient(135deg, #2B2B2B 0%, #2563EB 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
@@ -1097,16 +853,8 @@ const navStyles = `
     transition: all var(--nav-transition);
   }
   .nav-link:hover {
-    background: rgba(255,255,255,0.05);
+    background: rgba(43,43,43,0.05);
     color: var(--nav-text);
-  }
-  .nav-link--active {
-    background: rgba(124,58,237,0.12);
-    color: var(--nav-text);
-  }
-  .nav-link--highlight {
-    background: rgba(124,58,237,0.08);
-    border: 0.5px solid rgba(124,58,237,0.3);
   }
   .nav-link__chevron {
     display: inline-flex;
@@ -1121,7 +869,7 @@ const navStyles = `
     background: var(--nav-bg-solid);
     border: 0.5px solid var(--nav-border);
     border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    box-shadow: 0 20px 40px rgba(43,43,43,0.10);
     backdrop-filter: blur(12px);
     overflow: hidden;
     z-index: 101;
@@ -1150,12 +898,8 @@ const navStyles = `
     position: relative;
   }
   .nav-dropdown__item:hover {
-    background: rgba(255,255,255,0.04);
+    background: rgba(43,43,43,0.04);
     color: var(--nav-text);
-  }
-  .nav-dropdown__item--active {
-    background: rgba(124,58,237,0.08);
-    color: var(--nav-accent-light);
   }
   .nav-dropdown__indicator {
     position: absolute;
@@ -1163,7 +907,6 @@ const navStyles = `
     top: 8px;
     bottom: 8px;
     width: 2px;
-    background: var(--nav-accent);
     border-radius: 2px;
   }
   .nav-actions {
@@ -1186,13 +929,13 @@ const navStyles = `
     position: relative;
   }
   .nav-action-btn:hover {
-    background: rgba(255,255,255,0.04);
+    background: rgba(43,43,43,0.05);
     color: var(--nav-text);
   }
   .nav-search-shortcut {
     font-size: 11px;
     color: var(--nav-text-3);
-    background: rgba(255,255,255,0.05);
+    background: rgba(43,43,43,0.05);
     padding: 2px 6px;
     border-radius: 6px;
     border: 0.5px solid var(--nav-border);
@@ -1201,7 +944,7 @@ const navStyles = `
     position: absolute;
     top: 2px;
     right: 2px;
-    background: #ef4444;
+    background: #DC2626;
     color: white;
     font-size: 9px;
     font-weight: 700;
@@ -1212,7 +955,7 @@ const navStyles = `
   .nav-search-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
+    background: rgba(43,43,43,0.25);
     backdrop-filter: blur(8px);
     z-index: 200;
     display: flex;
@@ -1223,11 +966,11 @@ const navStyles = `
   .nav-search-modal {
     width: 90%;
     max-width: 560px;
-    background: #0f0f14;
+    background: #FFFFFF;
     border: 0.5px solid var(--nav-border);
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 32px 64px rgba(0,0,0,0.5);
+    box-shadow: 0 32px 64px rgba(43,43,43,0.18);
   }
   .nav-search-input-wrapper {
     display: flex;
@@ -1235,7 +978,7 @@ const navStyles = `
     gap: 12px;
     padding: 16px 20px;
     border-bottom: 0.5px solid var(--nav-border);
-    background: rgba(255,255,255,0.02);
+    background: rgba(43,43,43,0.02);
   }
   .nav-search-input {
     flex: 1;
@@ -1248,7 +991,7 @@ const navStyles = `
   .nav-search-esc {
     font-size: 11px;
     color: var(--nav-text-3);
-    background: rgba(255,255,255,0.05);
+    background: rgba(43,43,43,0.05);
     padding: 3px 8px;
     border-radius: 8px;
   }
@@ -1271,13 +1014,13 @@ const navStyles = `
     transition: all var(--nav-transition);
   }
   .nav-user-trigger:hover {
-    background: rgba(255,255,255,0.04);
+    background: rgba(43,43,43,0.05);
   }
   .nav-user-avatar {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed, #6366f1);
+    background: linear-gradient(135deg, #2563EB, #7C3AED);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1316,7 +1059,7 @@ const navStyles = `
     background: var(--nav-bg-solid);
     border: 0.5px solid var(--nav-border);
     border-radius: 14px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    box-shadow: 0 20px 40px rgba(43,43,43,0.12);
     backdrop-filter: blur(12px);
     overflow: hidden;
     z-index: 101;
@@ -1359,15 +1102,15 @@ const navStyles = `
     transition: all var(--nav-transition);
   }
   .nav-user-dropdown__item:hover {
-    background: rgba(255,255,255,0.04);
+    background: rgba(43,43,43,0.04);
     color: var(--nav-text);
   }
   .nav-user-dropdown__item--danger {
-    color: #f87171;
+    color: #DC2626;
   }
   .nav-user-dropdown__item--danger:hover {
-    background: rgba(248,113,113,0.08);
-    color: #f87171;
+    background: rgba(220,38,38,0.08);
+    color: #DC2626;
   }
   .nav-mobile-toggle {
     display: none;
@@ -1376,6 +1119,7 @@ const navStyles = `
     cursor: pointer;
     padding: 8px;
     margin-left: 4px;
+    color: var(--nav-text);
   }
   .nav-mobile-bar {
     display: block;
@@ -1388,7 +1132,7 @@ const navStyles = `
   .nav-mobile-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(43,43,43,0.2);
     backdrop-filter: blur(4px);
     z-index: 150;
   }
@@ -1441,13 +1185,6 @@ const navStyles = `
     text-decoration: none;
     transition: all var(--nav-transition);
   }
-  .nav-mobile-link--active {
-    background: rgba(124,58,237,0.1);
-    color: var(--nav-text);
-  }
-  .nav-mobile-link--highlight {
-    background: rgba(124,58,237,0.08);
-  }
   .nav-mobile-group { margin-bottom: 4px; }
   .nav-mobile-group__trigger {
     display: flex;
@@ -1463,10 +1200,6 @@ const navStyles = `
     border: none;
     cursor: pointer;
     transition: all var(--nav-transition);
-  }
-  .nav-mobile-group__trigger--active {
-    background: rgba(124,58,237,0.1);
-    color: var(--nav-text);
   }
   .nav-mobile-group__chevron {
     margin-left: auto;
@@ -1488,10 +1221,6 @@ const navStyles = `
     color: var(--nav-text-3);
     text-decoration: none;
     transition: all var(--nav-transition);
-  }
-  .nav-mobile-sublink--active {
-    background: rgba(124,58,237,0.08);
-    color: var(--nav-accent-light);
   }
   .nav-mobile-section {
     padding: 12px;
@@ -1520,14 +1249,14 @@ const navStyles = `
     border-radius: 10px;
     font-size: 14px;
     font-weight: 500;
-    color: #f87171;
+    color: #DC2626;
     background: transparent;
     border: none;
     cursor: pointer;
     transition: all var(--nav-transition);
   }
   .nav-mobile-logout:hover {
-    background: rgba(248,113,113,0.08);
+    background: rgba(220,38,38,0.08);
   }
   @media (max-width: 860px) {
     .nav-desktop { display: none; }

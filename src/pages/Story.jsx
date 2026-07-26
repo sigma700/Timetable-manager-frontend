@@ -2,7 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import {Link} from "react-router-dom";
 import Navigation from "./components/navigation";
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
+// ─── Icons (unchanged) ───────────────────────────────────────────────────────
 const Icon = {
   Arrow: () => (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -110,7 +110,7 @@ const Icon = {
   ),
 };
 
-// ─── useInView hook ───────────────────────────────────────────────────────────
+// ─── useInView hook ──────────────────────────────────────────────────────────
 const useInView = (threshold = 0.15) => {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
@@ -130,7 +130,7 @@ const useInView = (threshold = 0.15) => {
   return [ref, inView];
 };
 
-// ─── Reveal wrapper ───────────────────────────────────────────────────────────
+// ─── Reveal wrapper ──────────────────────────────────────────────────────────
 const Reveal = ({children, delay = 0, className = ""}) => {
   const [ref, inView] = useInView();
   return (
@@ -148,7 +148,7 @@ const Reveal = ({children, delay = 0, className = ""}) => {
   );
 };
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+// ─── Data (unchanged) ────────────────────────────────────────────────────────
 const currentDate = new Date();
 const currentMonth = currentDate.toLocaleString("default", {month: "long"});
 const currentYear = currentDate.getFullYear();
@@ -257,7 +257,7 @@ const credits = [
   },
 ];
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Main Component ─────────────────────────────────────────────────────────
 const Story = () => {
   const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
@@ -272,7 +272,7 @@ const Story = () => {
       <div className="story-root">
         <Navigation />
 
-        {/* ── Hero ── */}
+        {/* Hero */}
         <section className="story-hero">
           <div
             className="story-hero__bg"
@@ -315,7 +315,7 @@ const Story = () => {
           </div>
         </section>
 
-        {/* ── Problem ── */}
+        {/* Problem */}
         <section className="story-section">
           <div className="story-container story-container--split">
             <Reveal className="story-split__text">
@@ -380,7 +380,7 @@ const Story = () => {
           </div>
         </section>
 
-        {/* ── Solution ── */}
+        {/* Solution */}
         <section className="story-section story-section--tinted">
           <div className="story-container">
             <Reveal className="section-centered">
@@ -411,7 +411,7 @@ const Story = () => {
           </div>
         </section>
 
-        {/* ── Timeline ── */}
+        {/* Timeline */}
         <section className="story-section">
           <div className="story-container">
             <Reveal className="section-centered" style={{marginBottom: 56}}>
@@ -432,7 +432,7 @@ const Story = () => {
           </div>
         </section>
 
-        {/* ── Credits ── */}
+        {/* Credits */}
         <section className="story-section story-section--tinted">
           <div className="story-container">
             <Reveal className="section-centered">
@@ -459,7 +459,7 @@ const Story = () => {
           </div>
         </section>
 
-        {/* ── CTA ── */}
+        {/* CTA */}
         <section className="story-cta">
           <div className="story-cta__inner">
             <Reveal>
@@ -475,8 +475,7 @@ const Story = () => {
               </p>
               <div className="story-cta__actions">
                 <Link to="/signup" className="btn-primary">
-                  Get Started
-                  <Icon.Arrow />
+                  Get Started <Icon.Arrow />
                 </Link>
                 <Link to="/" className="btn-ghost">
                   View Demo
@@ -491,7 +490,7 @@ const Story = () => {
   );
 };
 
-// ─── Timeline Item ─────────────────────────────────────────────────────────────
+// ─── Timeline Item (unchanged) ───────────────────────────────────────────────
 const TimelineItem = ({milestone, index}) => {
   const [ref, inView] = useInView(0.2);
   const isRight = index % 2 === 0;
@@ -521,23 +520,23 @@ const TimelineItem = ({milestone, index}) => {
   );
 };
 
-// ─── Styles ────────────────────────────────────────────────────────────────────
+// ─── Styles (light theme, brand accent preserved) ────────────────────────────
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0d0d10;
-    --surface: #131316;
-    --surface-2: #1a1a1f;
-    --surface-3: #212128;
-    --border: rgba(255,255,255,0.07);
-    --text: #f0f0f5;
-    --text-2: #9898a8;
-    --text-3: #55556a;
+    --bg: #F8F8F8;
+    --surface: #FFFFFF;
+    --surface-2: #F0F0F0;
+    --surface-3: #E8E8E8;
+    --border: rgba(0,0,0,0.06);
+    --text: #2B2B2B;
+    --text-2: #898989;
+    --text-3: #A0A0A0;
     --accent: #7c3aed;
     --accent-light: #a78bfa;
-    --accent-glow: rgba(124,58,237,0.14);
+    --accent-glow: rgba(124,58,237,0.06);
     --amber: #f59e0b;
     --amber-dim: rgba(245,158,11,0.12);
     --green: #10b981;
@@ -558,12 +557,12 @@ const css = `
     overflow-x: hidden;
   }
 
-  /* ── Nav ── */
+  /* ── Nav (light glassmorphism) ── */
   .story-nav {
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 100;
-    background: rgba(13,13,16,0.85);
+    background: rgba(255,255,255,0.85);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border);
   }
@@ -613,7 +612,7 @@ const css = `
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,58,237,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,58,237,0.08) 0%, transparent 70%),
       radial-gradient(ellipse 40% 40% at 80% 60%, rgba(245,158,11,0.04) 0%, transparent 70%);
     pointer-events: none;
   }
@@ -646,8 +645,8 @@ const css = `
   .story-hero__dot {
     width: 6px; height: 6px;
     border-radius: 50%;
-    background: var(--accent-light);
-    box-shadow: 0 0 8px var(--accent-light);
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(124,58,237,0.4);
     animation: pulse 2s ease-in-out infinite;
   }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
@@ -660,7 +659,7 @@ const css = `
     margin-bottom: 20px;
   }
   .story-hero__title-accent {
-    background: linear-gradient(135deg, var(--accent-light) 0%, #c4b5fd 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -673,7 +672,7 @@ const css = `
     margin: 0 auto 48px;
   }
   .story-hero__stats {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0;
@@ -682,7 +681,6 @@ const css = `
     background: var(--surface);
     overflow: hidden;
     animation: heroFadeIn 0.9s ease 0.2s both;
-    display: inline-flex;
   }
   .hero-stat {
     display: flex;
@@ -716,7 +714,7 @@ const css = `
 
   /* ── Sections ── */
   .story-section { padding: 96px 32px; }
-  .story-section--tinted { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .story-section--tinted { background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
   .story-container { max-width: var(--max-w); margin: 0 auto; }
   .story-container--split { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
   @media (max-width: 760px) { .story-container--split { grid-template-columns: 1fr; gap: 40px; } }
@@ -727,7 +725,7 @@ const css = `
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: var(--accent-light);
+    color: var(--accent);
     margin-bottom: 14px;
   }
   .section-eyebrow--center { display: block; text-align: center; }
@@ -774,7 +772,7 @@ const css = `
   /* ── Problem Visual ── */
   .problem-visual { position: relative; }
   .problem-visual__card {
-    background: var(--surface-2);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 18px;
@@ -786,15 +784,15 @@ const css = `
   .problem-visual__card--2:hover { transform: translateX(16px) translateY(-3px); }
   .pvc__header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
   .pvc__dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .pvc__dot--red { background: var(--red); box-shadow: 0 0 6px var(--red); }
-  .pvc__dot--green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .pvc__dot--red { background: var(--red); box-shadow: 0 0 6px rgba(244,63,94,0.4); }
+  .pvc__dot--green { background: var(--green); box-shadow: 0 0 6px rgba(16,185,129,0.4); }
   .pvc__title { font-size: 12px; font-weight: 500; color: var(--text-2); }
   .pvc__grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 10px; }
   .pvc__cell { height: 22px; border-radius: 4px; }
-  .pvc__cell--filled { background: rgba(124,58,237,0.2); border: 1px solid rgba(124,58,237,0.2); }
-  .pvc__cell--conflict { background: rgba(244,63,94,0.15); border: 1px solid rgba(244,63,94,0.35); animation: conflictPulse 2s ease infinite; }
+  .pvc__cell--filled { background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.15); }
+  .pvc__cell--conflict { background: rgba(244,63,94,0.08); border: 1px solid rgba(244,63,94,0.25); animation: conflictPulse 2s ease infinite; }
   @keyframes conflictPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-  .pvc__cell--ok { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.25); }
+  .pvc__cell--ok { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.15); }
   .pvc__label { font-size: 11px; color: var(--text-3); }
   .pvc__label--green { color: var(--green); }
 
@@ -802,13 +800,13 @@ const css = `
   .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   @media (max-width: 720px) { .feature-grid { grid-template-columns: 1fr; } }
   .feature-card {
-    background: var(--surface-2);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 28px 24px;
     transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
   }
-  .feature-card:hover { border-color: rgba(124,58,237,0.3); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+  .feature-card:hover { border-color: rgba(124,58,237,0.25); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.06); }
   .feature-card__icon {
     width: 40px; height: 40px;
     border-radius: 10px;
@@ -817,7 +815,7 @@ const css = `
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--accent-light);
+    color: var(--accent);
     margin-bottom: 16px;
   }
   .feature-card__title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
@@ -851,36 +849,31 @@ const css = `
   .timeline__item--left .timeline__spacer { grid-column: 1; grid-row: 1; }
   .timeline__item--left .timeline__node { grid-column: 2; grid-row: 1; }
   .timeline__item--left .timeline__content { grid-column: 3; grid-row: 1; text-align: left; padding-left: 32px; }
-  .timeline__node {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
-  }
+  .timeline__node { display: flex; align-items: center; justify-content: center; z-index: 2; }
   .timeline__node-inner {
     width: 32px; height: 32px;
     border-radius: 50%;
-    background: var(--surface-2);
+    background: var(--surface);
     border: 2px solid var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 12px;
     font-weight: 700;
-    color: var(--accent-light);
-    box-shadow: 0 0 16px var(--accent-glow);
+    color: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
   }
-  .timeline__month { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-light); margin-bottom: 6px; }
+  .timeline__month { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 6px; }
   .timeline__title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: -0.01em; }
   .timeline__desc { font-size: 13px; color: var(--text-2); line-height: 1.65; }
   .timeline__content {
-    background: var(--surface-2);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 20px;
     transition: border-color var(--transition);
   }
-  .timeline__content:hover { border-color: rgba(124,58,237,0.25); }
+  .timeline__content:hover { border-color: rgba(124,58,237,0.2); }
   @media (max-width: 640px) {
     .timeline__line { left: 16px; }
     .timeline__item { grid-template-columns: 32px 1fr; gap: 16px; }
@@ -896,13 +889,13 @@ const css = `
   .credits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   @media (max-width: 720px) { .credits-grid { grid-template-columns: 1fr; } }
   .credit-card {
-    background: var(--surface-2);
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 28px 24px;
     transition: border-color var(--transition), transform var(--transition);
   }
-  .credit-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-3px); }
+  .credit-card:hover { border-color: rgba(0,0,0,0.1); transform: translateY(-3px); }
   .credit-card__avatar {
     width: 48px; height: 48px;
     border-radius: 12px;
@@ -913,12 +906,12 @@ const css = `
     justify-content: center;
     font-size: 18px;
     font-weight: 800;
-    color: var(--accent-light);
+    color: var(--accent);
     margin-bottom: 16px;
     letter-spacing: -0.03em;
   }
   .credit-card__name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-  .credit-card__role { font-size: 12px; font-weight: 500; color: var(--accent-light); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .credit-card__role { font-size: 12px; font-weight: 500; color: var(--accent); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
   .credit-card__desc { font-size: 13px; color: var(--text-2); line-height: 1.65; }
 
   /* ── CTA ── */
@@ -934,7 +927,7 @@ const css = `
     transform: translate(-50%, -50%);
     width: 600px; height: 400px;
     border-radius: 50%;
-    background: radial-gradient(ellipse, rgba(124,58,237,0.1) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(124,58,237,0.04) 0%, transparent 70%);
     pointer-events: none;
   }
   .story-cta__inner { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
@@ -981,7 +974,7 @@ const css = `
     transition: all var(--transition);
     font-family: var(--font);
   }
-  .btn-ghost:hover { border-color: rgba(255,255,255,0.14); color: var(--text); }
+  .btn-ghost:hover { border-color: rgba(0,0,0,0.14); color: var(--text); }
 
   /* ── Footer ── */
   .story-footer {
@@ -999,7 +992,7 @@ const css = `
   }
   .story-footer__copy { font-size: 13px; color: var(--text-3); }
   .story-footer__link { font-size: 13px; color: var(--text-2); text-decoration: none; transition: color var(--transition); }
-  .story-footer__link:hover { color: var(--accent-light); }
+  .story-footer__link:hover { color: var(--accent); }
 
   @media (max-width: 480px) {
     .story-hero__stats { flex-wrap: wrap; }

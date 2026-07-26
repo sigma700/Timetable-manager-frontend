@@ -3,35 +3,36 @@ import {useAuthStore} from "../store/authStore";
 import Navigation from "./components/navigation";
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
-
+// Updated to light palette while preserving brand accent colours
 const tk = {
-  bg0: "#09090C",
-  bg1: "#0F1015",
-  bg2: "#14151C",
-  bg3: "#1A1B25",
-  bg4: "#1F2130",
-  border: "rgba(255,255,255,0.06)",
-  borderHov: "rgba(255,255,255,0.12)",
-  borderAccent: "rgba(79,110,247,0.36)",
+  // background hierarchy (light)
+  bg0: "#F8F8F8",
+  bg1: "#FFFFFF",
+  bg2: "#F0F0F0",
+  bg3: "#E8E8E8",
+  bg4: "#DCDCDC",
+  border: "rgba(0,0,0,0.06)",
+  borderHov: "rgba(0,0,0,0.12)",
+  borderAccent: "rgba(79,110,247,0.28)",
   borderAmber: "rgba(245,158,11,0.28)",
-  text1: "#EDEEF5",
-  text2: "#8B90AA",
-  text3: "#52566A",
+  text1: "#2B2B2B",
+  text2: "#898989",
+  text3: "#A0A0A0",
   accent: "#4F6EF7",
   accentHov: "#3D5CE8",
-  accentSubtle: "rgba(79,110,247,0.09)",
+  accentSubtle: "rgba(79,110,247,0.06)",
   amber: "#F59E0B",
   amberHov: "#D97706",
-  amberSubtle: "rgba(245,158,11,0.08)",
+  amberSubtle: "rgba(245,158,11,0.06)",
   success: "#22C55E",
-  successSubtle: "rgba(34,197,94,0.08)",
-  successBorder: "rgba(34,197,94,0.22)",
+  successSubtle: "rgba(34,197,94,0.06)",
+  successBorder: "rgba(34,197,94,0.18)",
   violet: "#8B5CF6",
-  violetSubtle: "rgba(139,92,246,0.09)",
-  violetBorder: "rgba(139,92,246,0.26)",
+  violetSubtle: "rgba(139,92,246,0.06)",
+  violetBorder: "rgba(139,92,246,0.2)",
   danger: "#E24B4A",
-  dangerSubtle: "rgba(226,75,74,0.08)",
-  dangerBorder: "rgba(226,75,74,0.2)",
+  dangerSubtle: "rgba(226,75,74,0.06)",
+  dangerBorder: "rgba(226,75,74,0.18)",
 };
 
 const REFERRAL_LINK = "https://protiba.onrender.com/home";
@@ -72,7 +73,6 @@ const TIERS = [
 ];
 
 // ─── useInView ────────────────────────────────────────────────────────────────
-
 function useInView(threshold = 0.12) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
@@ -90,7 +90,6 @@ function useInView(threshold = 0.12) {
 }
 
 // ─── Countdown ────────────────────────────────────────────────────────────────
-
 function useCountdown(initialSeconds) {
   const [secs, setSecs] = useState(initialSeconds);
   useEffect(() => {
@@ -104,7 +103,6 @@ function useCountdown(initialSeconds) {
 }
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
-
 const Svg = ({
   size = 15,
   strokeWidth = 1.8,
@@ -130,34 +128,29 @@ const CheckIcon = ({size = 11, color = tk.success}) => (
     <polyline points="20 6 9 17 4 12" />
   </Svg>
 );
-
 const ArrowRight = ({size = 13}) => (
   <Svg size={size} strokeWidth={2.2}>
     <line x1="5" y1="12" x2="19" y2="12" />
     <polyline points="12 5 19 12 12 19" />
   </Svg>
 );
-
 const SendIcon = ({size = 13}) => (
   <Svg size={size} strokeWidth={2.2}>
     <line x1="22" y1="2" x2="11" y2="13" />
     <polygon points="22 2 15 22 11 13 2 9 22 2" />
   </Svg>
 );
-
 const CopyIcon = ({size = 14, color = tk.text3}) => (
   <Svg size={size} strokeWidth={1.8} color={color}>
     <rect x="9" y="9" width="13" height="13" rx="2" />
     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
   </Svg>
 );
-
 const StarIcon = ({size = 15}) => (
   <Svg size={size}>
     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
   </Svg>
 );
-
 const GlobeIcon = ({size = 15}) => (
   <Svg size={size}>
     <circle cx="12" cy="12" r="10" />
@@ -165,7 +158,6 @@ const GlobeIcon = ({size = 15}) => (
     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
   </Svg>
 );
-
 const UsersIcon = ({size = 15}) => (
   <Svg size={size}>
     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
@@ -174,48 +166,41 @@ const UsersIcon = ({size = 15}) => (
     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
   </Svg>
 );
-
 const CodeIcon = ({size = 15}) => (
   <Svg size={size}>
     <polyline points="16 18 22 12 16 6" />
     <polyline points="8 6 2 12 8 18" />
   </Svg>
 );
-
 const PlusIcon = ({size = 12}) => (
   <Svg size={size} strokeWidth={2.5}>
     <line x1="12" y1="5" x2="12" y2="19" />
     <line x1="5" y1="12" x2="19" y2="12" />
   </Svg>
 );
-
 const XIcon = ({size = 12}) => (
   <Svg size={size} strokeWidth={2.5}>
     <line x1="18" y1="6" x2="6" y2="18" />
     <line x1="6" y1="6" x2="18" y2="18" />
   </Svg>
 );
-
 const ClockIcon = ({size = 14}) => (
   <Svg size={size} strokeWidth={1.6}>
     <circle cx="12" cy="12" r="10" />
     <polyline points="12 6 12 12 16 14" />
   </Svg>
 );
-
 const MailIcon = ({size = 14}) => (
   <Svg size={size} strokeWidth={1.8}>
     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
     <polyline points="22,6 12,13 2,6" />
   </Svg>
 );
-
 const WhatsAppIcon = ({size = 14}) => (
   <Svg size={size} strokeWidth={1.7}>
     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
   </Svg>
 );
-
 const LinkIcon = ({size = 14}) => (
   <Svg size={size} strokeWidth={1.8}>
     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
@@ -226,7 +211,6 @@ const LinkIcon = ({size = 14}) => (
 const tierIcons = [<StarIcon />, <GlobeIcon />, <UsersIcon />, <CodeIcon />];
 
 // ─── Panel ────────────────────────────────────────────────────────────────────
-
 function Panel({title, right, children, style = {}}) {
   return (
     <div
@@ -270,7 +254,6 @@ function Panel({title, right, children, style = {}}) {
 }
 
 // ─── FocusInput ───────────────────────────────────────────────────────────────
-
 function FocusInput({
   value,
   onChange,
@@ -336,7 +319,6 @@ function FocusTextarea({value, onChange, placeholder, rows = 3}) {
 }
 
 // ─── ShareButton ──────────────────────────────────────────────────────────────
-
 function ShareBtn({icon, label, onClick}) {
   const [hov, setHov] = useState(false);
   return (
@@ -370,11 +352,8 @@ function ShareBtn({icon, label, onClick}) {
 }
 
 // ─── TierCard ─────────────────────────────────────────────────────────────────
-
 function TierCard({tier, icon, index, isActive, totalReferrals}) {
   const unlocked = totalReferrals >= tier.ref;
-  const isCurrent = index === 0;
-
   return (
     <div
       style={{
@@ -454,7 +433,6 @@ function TierCard({tier, icon, index, isActive, totalReferrals}) {
 }
 
 // ─── HowItWorks ───────────────────────────────────────────────────────────────
-
 function HowItWorks() {
   return (
     <div
@@ -545,7 +523,6 @@ function HowItWorks() {
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
-
 export default function Invite() {
   const {user, isLoading: authLoading} = useAuthStore();
   const [emails, setEmails] = useState([""]);
@@ -568,10 +545,7 @@ export default function Invite() {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
-        {
-          method: "POST",
-          credentials: "include",
-        },
+        {method: "POST", credentials: "include"},
       );
       if (res.ok) window.location.href = "/login";
     } catch (err) {
@@ -639,20 +613,14 @@ export default function Invite() {
 
         * { box-sizing: border-box; }
 
-        .invite-select option { background: #14151C; color: #EDEEF5; }
+        .invite-select option { background: #FFFFFF; color: #2B2B2B; }
 
         @media (max-width: 860px) {
           .invite-main-grid { grid-template-columns: 1fr !important; }
           .invite-hero { padding: 52px 20px 44px !important; }
           .invite-stats-row { gap: 12px !important; }
-          .invite-stat-chip {
-            flex: 1 1 0 !important;
-            min-width: 100px !important;
-          }
-          .invite-stat-chip.countdown-chip {
-            flex-basis: 100% !important;
-            min-width: 100% !important;
-          }
+          .invite-stat-chip { flex: 1 1 0 !important; min-width: 100px !important; }
+          .invite-stat-chip.countdown-chip { flex-basis: 100% !important; min-width: 100% !important; }
           .invite-main-wrap { padding: 32px 20px 64px !important; }
           .invite-footer { flex-direction: column !important; gap: 6px !important; text-align: center; }
         }
@@ -664,10 +632,7 @@ export default function Invite() {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          *, *::before, *::after {
-            animation-duration: 0.01ms !important;
-            transition-duration: 0.01ms !important;
-          }
+          *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
       `}</style>
 
@@ -687,7 +652,7 @@ export default function Invite() {
           paddingTop: 64,
         }}
       >
-        {/* Ambient glows */}
+        {/* Ambient glows replaced with light empty space */}
         <div
           style={{
             position: "fixed",
@@ -695,8 +660,7 @@ export default function Invite() {
             left: -100,
             width: 600,
             height: 600,
-            background:
-              "radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 65%)",
+            background: "transparent",
             pointerEvents: "none",
             zIndex: 0,
           }}
@@ -708,14 +672,13 @@ export default function Invite() {
             right: -100,
             width: 500,
             height: 500,
-            background:
-              "radial-gradient(circle, rgba(79,110,247,0.04) 0%, transparent 65%)",
+            background: "transparent",
             pointerEvents: "none",
             zIndex: 0,
           }}
         />
 
-        {/* ── Hero ──────────────────────────────────────────────────────────── */}
+        {/* Hero */}
         <div
           ref={heroRef}
           className="invite-hero"
@@ -727,7 +690,6 @@ export default function Invite() {
             zIndex: 1,
           }}
         >
-          {/* Eyebrow */}
           <div
             style={{
               display: "inline-flex",
@@ -752,7 +714,6 @@ export default function Invite() {
             Limited-time referral rewards
           </div>
 
-          {/* Title */}
           <h1
             style={{
               fontSize: "clamp(28px, 4.2vw, 46px)",
@@ -769,11 +730,9 @@ export default function Invite() {
             }}
           >
             Every colleague you bring in
-            <br />
-            earns you real value.
+            <br /> earns you real value.
           </h1>
 
-          {/* Subtitle */}
           <p
             style={{
               fontSize: 16,
@@ -863,7 +822,7 @@ export default function Invite() {
           }}
         />
 
-        {/* ── Main grid ─────────────────────────────────────────────────────── */}
+        {/* Main grid */}
         <div
           className="invite-main-wrap"
           style={{
@@ -883,7 +842,7 @@ export default function Invite() {
               alignItems: "start",
             }}
           >
-            {/* ── Left column ───────────────────────────────────────────────── */}
+            {/* Left column */}
             <div
               ref={leftRef}
               style={{
@@ -895,7 +854,6 @@ export default function Invite() {
                 transition: "opacity 0.6s ease, transform 0.6s ease",
               }}
             >
-              {/* Referral link */}
               <Panel
                 title="Your referral link"
                 right={
@@ -911,7 +869,6 @@ export default function Invite() {
                   </span>
                 }
               >
-                {/* Link box */}
                 <div
                   onClick={copyLink}
                   style={{
@@ -951,7 +908,6 @@ export default function Invite() {
                   <CopyIcon color={copied ? tk.success : tk.text3} />
                 </div>
 
-                {/* Share buttons */}
                 <div
                   className="invite-share-grid"
                   style={{
@@ -986,7 +942,6 @@ export default function Invite() {
                 </div>
               </Panel>
 
-              {/* Reward tiers */}
               <Panel
                 title="Reward tiers"
                 right={
@@ -1007,8 +962,6 @@ export default function Invite() {
                     totalReferrals={0}
                   />
                 ))}
-
-                {/* Bonus deal — no emoji, icon instead */}
                 <div
                   style={{
                     marginTop: 16,
@@ -1042,20 +995,20 @@ export default function Invite() {
                   <p
                     style={{
                       fontSize: 13,
-                      color: "#D4A820",
+                      color: "#B45309",
                       lineHeight: 1.6,
                       margin: 0,
                     }}
                   >
                     Refer your first school before the timer runs out and get{" "}
-                    <strong style={{color: "#FBBF24"}}>3 months free</strong>{" "}
+                    <strong style={{color: "#92400E"}}>3 months free</strong>{" "}
                     instead of 1. No minimum after that.
                   </p>
                 </div>
               </Panel>
             </div>
 
-            {/* ── Right column — form ───────────────────────────────────────── */}
+            {/* Right column — form */}
             <div
               ref={formRef}
               style={{
@@ -1070,7 +1023,6 @@ export default function Invite() {
                 transition: "opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s",
               }}
             >
-              {/* Top accent line */}
               <div
                 style={{
                   position: "absolute",
@@ -1083,7 +1035,6 @@ export default function Invite() {
               />
 
               {sent ? (
-                /* ── Success ─────────────────────────────────────────────── */
                 <div
                   style={{
                     display: "flex",
@@ -1108,7 +1059,6 @@ export default function Invite() {
                   >
                     <CheckIcon size={24} />
                   </div>
-
                   <h2
                     style={{
                       fontSize: 19,
@@ -1132,8 +1082,6 @@ export default function Invite() {
                     Each recipient got your personal link. Once they run their
                     first timetable, your reward unlocks automatically.
                   </p>
-
-                  {/* Bonus reminder */}
                   <div
                     style={{
                       background: tk.amberSubtle,
@@ -1169,17 +1117,16 @@ export default function Invite() {
                     <p
                       style={{
                         fontSize: 13,
-                        color: "#D4A820",
+                        color: "#B45309",
                         lineHeight: 1.6,
                         margin: 0,
                       }}
                     >
                       Your first successful referral earns{" "}
-                      <strong style={{color: "#FBBF24"}}>3 months free</strong>{" "}
+                      <strong style={{color: "#92400E"}}>3 months free</strong>{" "}
                       instead of 1 — if it converts before the timer hits zero.
                     </p>
                   </div>
-
                   <button
                     onClick={() => {
                       setSent(false);
@@ -1209,7 +1156,6 @@ export default function Invite() {
                   </button>
                 </div>
               ) : (
-                /* ── Form ─────────────────────────────────────────────────── */
                 <>
                   <h2
                     style={{
@@ -1248,7 +1194,6 @@ export default function Invite() {
                       >
                         Email addresses
                       </label>
-
                       {emails.map((email, i) => (
                         <div
                           key={i}
@@ -1297,7 +1242,6 @@ export default function Invite() {
                           )}
                         </div>
                       ))}
-
                       <button
                         type="button"
                         onClick={addEmail}
@@ -1322,8 +1266,7 @@ export default function Invite() {
                           (e.currentTarget.style.color = tk.accent)
                         }
                       >
-                        <PlusIcon />
-                        Add another address
+                        <PlusIcon /> Add another address
                       </button>
                     </div>
 
@@ -1379,8 +1322,7 @@ export default function Invite() {
                           "background 0.18s, transform 0.18s, box-shadow 0.18s",
                       }}
                     >
-                      Send invitations
-                      <SendIcon />
+                      Send invitations <SendIcon />
                     </button>
                   </form>
 

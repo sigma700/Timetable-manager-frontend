@@ -161,12 +161,12 @@ const Visual1 = () => (
         <span style={{fontSize: 12, color: i === 0 ? "#2B2B2B" : "#898989"}}>
           {i === 0 ? f.value : f.label}
         </span>
-        {f.done && <CheckCircle2 size={13} color="#2B2B2B" />}
+        {f.done && <CheckCircle2 size={13} color="#2563EB" />}
       </div>
     ))}
     <div
       style={{
-        background: "#2B2B2B",
+        background: "#2563EB",
         borderRadius: 7,
         padding: "9px",
         textAlign: "center",
@@ -174,7 +174,7 @@ const Visual1 = () => (
         fontWeight: 500,
         color: "#FFFFFF",
         marginTop: 8,
-        boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+        boxShadow: "0 4px 12px rgba(37,99,235,0.18)",
       }}
     >
       Create account →
@@ -183,9 +183,9 @@ const Visual1 = () => (
       <span
         style={{
           fontSize: 10,
-          background: "#E8E8E8",
-          color: "#2B2B2B",
-          border: "1px solid #D0D0D0",
+          background: "rgba(37,99,235,0.10)",
+          color: "#2563EB",
+          border: "1px solid rgba(37,99,235,0.30)",
           padding: "3px 10px",
           borderRadius: 20,
           display: "inline-flex",
@@ -220,16 +220,16 @@ const Visual2 = () => (
         <div
           key={i}
           style={{
-            background: card.active ? "#E8E8E8" : "#F8F8F8",
-            border: `1px solid ${card.active ? "#D0D0D0" : "#E8E8E8"}`,
+            background: card.active ? "rgba(124,58,237,0.10)" : "#F8F8F8",
+            border: `1px solid ${card.active ? "rgba(124,58,237,0.30)" : "#E8E8E8"}`,
             borderRadius: 8,
             padding: "12px 10px",
-            boxShadow: card.active ? "0 2px 8px rgba(0,0,0,0.04)" : "none",
+            boxShadow: card.active ? "0 2px 8px rgba(124,58,237,0.10)" : "none",
           }}
         >
           <div
             style={{
-              color: card.active ? "#2B2B2B" : "#898989",
+              color: card.active ? "#7C3AED" : "#898989",
               marginBottom: 6,
             }}
           >
@@ -271,7 +271,7 @@ const Visual3 = () => (
         <span style={{fontSize: 11, color: "#898989"}}>{row.label}</span>
         <div style={{display: "flex", alignItems: "center", gap: 6}}>
           <span style={{fontSize: 11, color: "#2B2B2B"}}>{row.value}</span>
-          <CheckCircle2 size={12} color="#2B2B2B" />
+          <CheckCircle2 size={12} color="#EA580C" />
         </div>
       </div>
     ))}
@@ -281,9 +281,9 @@ const Visual3 = () => (
           key={c}
           style={{
             fontSize: 10,
-            background: "#E8E8E8",
-            border: "1px solid #D0D0D0",
-            color: "#2B2B2B",
+            background: "rgba(234,88,12,0.10)",
+            border: "1px solid rgba(234,88,12,0.30)",
+            color: "#EA580C",
             padding: "2px 8px",
             borderRadius: 20,
           }}
@@ -321,14 +321,14 @@ const Visual4 = () => (
             width: 26,
             height: 26,
             borderRadius: "50%",
-            background: "#E8E8E8",
-            border: "1px solid #D0D0D0",
+            background: "rgba(13,148,136,0.10)",
+            border: "1px solid rgba(13,148,136,0.30)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontSize: 10,
             fontWeight: 600,
-            color: "#2B2B2B",
+            color: "#0D9488",
             flexShrink: 0,
           }}
         >
@@ -342,11 +342,20 @@ const Visual4 = () => (
             {t.subjects} · {t.classes}
           </div>
         </div>
-        <CheckCircle2 size={12} color="#2B2B2B" />
+        <CheckCircle2 size={12} color="#0D9488" />
       </div>
     ))}
   </GlassCard>
 );
+
+const SUBJECT_STYLES = {
+  Math: {bg: "rgba(234,88,12,0.14)", color: "#EA580C"},
+  Eng: {bg: "rgba(37,99,235,0.14)", color: "#2563EB"},
+  Phy: {bg: "rgba(220,38,38,0.14)", color: "#DC2626"},
+  Bio: {bg: "rgba(13,148,136,0.14)", color: "#0D9488"},
+  Chem: {bg: "rgba(22,163,74,0.14)", color: "#16A34A"},
+  Brk: {bg: "#F0F0F0", color: "#898989"},
+};
 
 const Visual5 = () => (
   <GlassCard style={{width: "100%"}}>
@@ -399,25 +408,28 @@ const Visual5 = () => (
         >
           {row[0]}
         </div>
-        {row.slice(1).map((cell, ci) => (
-          <div
-            key={ci}
-            style={{
-              height: 22,
-              borderRadius: 4,
-              fontSize: 9,
-              fontWeight: 500,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: cell === "Brk" ? "#F0F0F0" : "#E8E8E8",
-              color: cell === "Brk" ? "#2B2B2B" : "#2B2B2B",
-              border: `1px solid ${cell === "Brk" ? "#D0D0D0" : "#D0D0D0"}`,
-            }}
-          >
-            {cell}
-          </div>
-        ))}
+        {row.slice(1).map((cell, ci) => {
+          const s = SUBJECT_STYLES[cell] || SUBJECT_STYLES.Brk;
+          return (
+            <div
+              key={ci}
+              style={{
+                height: 22,
+                borderRadius: 4,
+                fontSize: 9,
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: s.bg,
+                color: s.color,
+                border: `1px solid ${s.color}30`,
+              }}
+            >
+              {cell}
+            </div>
+          );
+        })}
       </div>
     ))}
     <div
@@ -473,14 +485,14 @@ function StepCard({step, index, total, isActive}) {
         <span
           style={{
             fontSize: 10,
-            color: "#2B2B2B",
+            color: step.accentColor,
             textTransform: "uppercase",
             letterSpacing: "1px",
             fontWeight: 500,
-            background: "#E8E8E8",
+            background: step.iconBg,
             padding: "3px 12px",
             borderRadius: 20,
-            border: "1px solid #D0D0D0",
+            border: `1px solid ${step.borderColor}`,
           }}
         >
           Chapter {step.number}
@@ -510,13 +522,13 @@ function StepCard({step, index, total, isActive}) {
             onMouseLeave={() => setHovered(false)}
             style={{
               background: hovered ? "#F8F8F8" : "#FFFFFF",
-              border: `1px solid ${hovered ? "#D0D0D0" : "#E8E8E8"}`,
+              border: `1px solid ${hovered ? step.borderColor : "#E8E8E8"}`,
               borderRadius: 16,
               padding: "28px",
               transition: "all 0.3s cubic-bezier(0.22,1,0.36,1)",
               transform: hovered ? "translateY(-5px)" : "translateY(0)",
               boxShadow: hovered
-                ? "0 20px 48px rgba(0,0,0,0.05), 0 0 0 1px #D0D0D0"
+                ? `0 20px 48px rgba(0,0,0,0.05), 0 0 0 1px ${step.borderColor}`
                 : "0 4px 16px rgba(0,0,0,0.02)",
               cursor: "default",
             }}
@@ -535,12 +547,12 @@ function StepCard({step, index, total, isActive}) {
                   width: 34,
                   height: 34,
                   borderRadius: 10,
-                  background: "#E8E8E8",
-                  border: "1px solid #D0D0D0",
+                  background: step.iconBg,
+                  border: `1px solid ${step.borderColor}`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#2B2B2B",
+                  color: step.accentColor,
                   flexShrink: 0,
                   transition: "transform 0.25s cubic-bezier(0.22,1,0.36,1)",
                   transform: hovered ? "scale(1.12) rotate(-5deg)" : "scale(1)",
@@ -553,7 +565,7 @@ function StepCard({step, index, total, isActive}) {
                 style={{
                   fontSize: 10,
                   fontWeight: 500,
-                  color: "#2B2B2B",
+                  color: step.accentColor,
                   textTransform: "uppercase",
                   letterSpacing: "0.6px",
                 }}
@@ -605,14 +617,18 @@ function StepCard({step, index, total, isActive}) {
                       borderRadius: 5,
                       flexShrink: 0,
                       marginTop: 1,
-                      background: "#E8E8E8",
-                      border: "1px solid #D0D0D0",
+                      background: step.iconBg,
+                      border: `1px solid ${step.borderColor}`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
-                    <CheckCheck size={10} color="#2B2B2B" strokeWidth={2} />
+                    <CheckCheck
+                      size={10}
+                      color={step.accentColor}
+                      strokeWidth={2}
+                    />
                   </div>
                   <span
                     style={{fontSize: 13, color: "#898989", lineHeight: 1.6}}
@@ -642,14 +658,14 @@ function StepCard({step, index, total, isActive}) {
               width: 46,
               height: 46,
               borderRadius: "50%",
-              background: "#E8E8E8",
-              border: "2px solid #2B2B2B",
+              background: step.iconBg,
+              border: `2px solid ${step.accentColor}`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               fontSize: 14,
               fontWeight: 600,
-              color: "#2B2B2B",
+              color: step.accentColor,
               boxShadow:
                 "0 0 0 4px rgba(0,0,0,0.02), 0 0 24px rgba(0,0,0,0.04)",
               transition: "all 0.3s",
@@ -829,10 +845,10 @@ function CTASection({user}) {
           }}
         >
           {[
-            {Icon: ShieldCheck, label: "No credit card"},
-            {Icon: Clock3, label: "10-min setup"},
-            {Icon: Sparkles, label: "Conflict-free"},
-          ].map(({Icon, label}) => (
+            {Icon: ShieldCheck, label: "No credit card", color: "#2563EB"},
+            {Icon: Clock3, label: "10-min setup", color: "#EA580C"},
+            {Icon: Sparkles, label: "Conflict-free", color: "#DB2777"},
+          ].map(({Icon, label, color}) => (
             <div
               key={label}
               style={{
@@ -847,7 +863,7 @@ function CTASection({user}) {
                 padding: "5px 12px",
               }}
             >
-              <Icon size={12} color="#2B2B2B" strokeWidth={1.5} />
+              <Icon size={12} color={color} strokeWidth={1.5} />
               {label}
             </div>
           ))}
@@ -877,7 +893,7 @@ function CTASection({user}) {
           }}
         >
           Your first timetable is{" "}
-          <span style={{color: "#2B2B2B"}}>10 minutes away</span>
+          <span style={{color: "#2563EB"}}>10 minutes away</span>
         </h2>
 
         <p
@@ -911,22 +927,24 @@ function CTASection({user}) {
               borderRadius: 10,
               fontSize: 14,
               fontWeight: 500,
-              background: "#2B2B2B",
+              background: "#2563EB",
               color: "#FFFFFF",
               textDecoration: "none",
-              border: "1px solid #2B2B2B",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+              border: "1px solid #2563EB",
+              boxShadow: "0 1px 3px rgba(37,99,235,0.15)",
               transition: "all 0.25s cubic-bezier(0.22,1,0.36,1)",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.06)";
-              e.currentTarget.style.background = "#1F1F1F";
+              e.currentTarget.style.boxShadow =
+                "0 4px 14px rgba(37,99,235,0.30)";
+              e.currentTarget.style.background = "#1D4ED8";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.02)";
-              e.currentTarget.style.background = "#2B2B2B";
+              e.currentTarget.style.boxShadow =
+                "0 1px 3px rgba(37,99,235,0.15)";
+              e.currentTarget.style.background = "#2563EB";
             }}
           >
             {user ? "Go to dashboard" : "Create free account"}
@@ -985,9 +1003,9 @@ const UserManual = () => {
         "Verify your email through the link sent to your inbox",
         "You're in — no credit card, no onboarding call required",
       ],
-      accentColor: "#2B2B2B",
-      iconBg: "#E8E8E8",
-      borderColor: "#D0D0D0",
+      accentColor: "#2563EB",
+      iconBg: "rgba(37,99,235,0.10)",
+      borderColor: "rgba(37,99,235,0.30)",
       visual: <Visual1 />,
     },
     {
@@ -1001,9 +1019,9 @@ const UserManual = () => {
         'Click "Create Timetable" from the quick actions panel',
         "Choose AI-assisted generation for an optimized result",
       ],
-      accentColor: "#2B2B2B",
-      iconBg: "#E8E8E8",
-      borderColor: "#D0D0D0",
+      accentColor: "#7C3AED",
+      iconBg: "rgba(124,58,237,0.10)",
+      borderColor: "rgba(124,58,237,0.30)",
       visual: <Visual2 />,
     },
     {
@@ -1017,9 +1035,9 @@ const UserManual = () => {
         "Set the class type (Form, Grade, or Class) and level range",
         "Add section labels (A, B, C…) and watch classes generate live",
       ],
-      accentColor: "#2B2B2B",
-      iconBg: "#E8E8E8",
-      borderColor: "#D0D0D0",
+      accentColor: "#EA580C",
+      iconBg: "rgba(234,88,12,0.10)",
+      borderColor: "rgba(234,88,12,0.30)",
       visual: <Visual3 />,
     },
     {
@@ -1033,9 +1051,9 @@ const UserManual = () => {
         "Use the multi-select dropdowns to assign subjects and classes",
         "Add as many teachers as needed — no limit",
       ],
-      accentColor: "#2B2B2B",
-      iconBg: "#E8E8E8",
-      borderColor: "#D0D0D0",
+      accentColor: "#0D9488",
+      iconBg: "rgba(13,148,136,0.10)",
+      borderColor: "rgba(13,148,136,0.30)",
       visual: <Visual4 />,
     },
     {
@@ -1049,9 +1067,9 @@ const UserManual = () => {
         "Export as PDF or share a live link with staff and students",
         "Make adjustments at any time — regenerate instantly",
       ],
-      accentColor: "#2B2B2B",
-      iconBg: "#E8E8E8",
-      borderColor: "#D0D0D0",
+      accentColor: "#DB2777",
+      iconBg: "rgba(219,39,119,0.10)",
+      borderColor: "rgba(219,39,119,0.30)",
       visual: <Visual5 />,
     },
   ];
@@ -1188,7 +1206,7 @@ const UserManual = () => {
               width: 6,
               height: 6,
               borderRadius: "50%",
-              background: "#2B2B2B",
+              background: "#2563EB",
               animation: "pulse-glow 2s infinite",
               display: "inline-block",
             }}
@@ -1219,7 +1237,7 @@ const UserManual = () => {
           }}
         >
           From setup to schedule{" "}
-          <span style={{color: "#2B2B2B"}}>in 5 steps</span>
+          <span style={{color: "#2563EB"}}>in 5 steps</span>
         </h1>
 
         <p
@@ -1250,9 +1268,14 @@ const UserManual = () => {
           }}
         >
           {[
-            {value: 500, suffix: "+", label: "Institutions"},
-            {value: 10, suffix: " min", label: "Avg. setup time"},
-            {value: 100, suffix: "%", label: "Conflict-free"},
+            {value: 500, suffix: "+", label: "Institutions", color: "#2563EB"},
+            {
+              value: 10,
+              suffix: " min",
+              label: "Avg. setup time",
+              color: "#EA580C",
+            },
+            {value: 100, suffix: "%", label: "Conflict-free", color: "#16A34A"},
           ].map((stat, i) => (
             <div
               key={i}
@@ -1269,7 +1292,7 @@ const UserManual = () => {
                 style={{
                   fontSize: 24,
                   fontWeight: 500,
-                  color: "#2B2B2B",
+                  color: stat.color,
                   lineHeight: 1,
                 }}
               >
@@ -1426,10 +1449,14 @@ const UserManual = () => {
         }}
       >
         {[
-          {Icon: CheckCircle2, label: "Conflict-free scheduling"},
-          {Icon: Sparkles, label: "Automated generation"},
-          {Icon: Users, label: "Multi-institution support"},
-        ].map(({Icon, label}) => (
+          {
+            Icon: CheckCircle2,
+            label: "Conflict-free scheduling",
+            color: "#16A34A",
+          },
+          {Icon: Sparkles, label: "Automated generation", color: "#DB2777"},
+          {Icon: Users, label: "Multi-institution support", color: "#2563EB"},
+        ].map(({Icon, label, color}) => (
           <div
             key={label}
             style={{
@@ -1440,7 +1467,7 @@ const UserManual = () => {
               color: "#898989",
             }}
           >
-            <Icon size={13} color="#2B2B2B" strokeWidth={1.5} />
+            <Icon size={13} color={color} strokeWidth={1.5} />
             {label}
           </div>
         ))}

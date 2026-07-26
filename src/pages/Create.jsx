@@ -7,18 +7,19 @@ import {motion, AnimatePresence} from "framer-motion";
 import Notification from "./components/notification";
 import {Navigation} from "./components/navigation";
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
+// ─── Design tokens (light theme) ─────────────────────────────────────────────
 const t = {
-  surface: "rgba(255,255,255,0.03)",
-  surfaceHov: "rgba(255,255,255,0.055)",
-  border: "rgba(255,255,255,0.07)",
-  borderHov: "rgba(99,102,241,0.35)",
+  bg: "#F8F8F8",
+  surface: "#FFFFFF",
+  surfaceHov: "#F0F0F0",
+  border: "rgba(0,0,0,0.06)",
+  borderHov: "rgba(0,0,0,0.12)",
   accent: "#6366f1",
   accentMid: "#818cf8",
-  muted: "#64748b",
-  dimmed: "#334155",
-  text: "#e2e8f0",
-  textSub: "#94a3b8",
+  muted: "#898989",
+  dimmed: "#A0A0A0",
+  text: "#2B2B2B",
+  textSub: "#555555",
 };
 
 // ─── Step indicator ───────────────────────────────────────────────────────────
@@ -57,7 +58,7 @@ function StepIndicator({current}) {
                     : active
                       ? "rgba(99,102,241,0.2)"
                       : t.surface,
-                  border: `0.5px solid ${done || active ? t.accent : t.border}`,
+                  border: `1px solid ${done || active ? t.accent : t.border}`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -88,7 +89,7 @@ function StepIndicator({current}) {
               <div
                 style={{
                   flex: 1,
-                  height: "0.5px",
+                  height: "1px",
                   margin: "0 4px",
                   marginBottom: 20,
                   background: done ? t.accent : t.border,
@@ -132,8 +133,8 @@ const Input = ({label, hint, type = "text", ...props}) => {
           props.onBlur?.(e);
         }}
         style={{
-          background: focused ? "rgba(255,255,255,0.05)" : t.surface,
-          border: `0.5px solid ${focused ? t.accent : t.border}`,
+          background: focused ? "rgba(0,0,0,0.02)" : t.surface,
+          border: `1px solid ${focused ? t.accent : t.border}`,
           borderRadius: 8,
           padding: "10px 13px",
           fontSize: 13,
@@ -192,8 +193,8 @@ function Select({
       <div
         onClick={onToggle}
         style={{
-          background: isOpen ? "rgba(255,255,255,0.05)" : t.surface,
-          border: `0.5px solid ${isOpen ? t.accent : t.border}`,
+          background: isOpen ? "rgba(0,0,0,0.02)" : t.surface,
+          border: `1px solid ${isOpen ? t.accent : t.border}`,
           borderRadius: 8,
           padding: "10px 13px",
           display: "flex",
@@ -239,11 +240,11 @@ function Select({
               top: "calc(100% + 4px)",
               left: 0,
               right: 0,
-              background: "#0f172a",
-              border: `0.5px solid ${t.border}`,
+              background: "#fff",
+              border: `1px solid ${t.border}`,
               borderRadius: 10,
               overflow: "hidden",
-              boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
+              boxShadow: "0 16px 40px rgba(0,0,0,0.15)",
               maxHeight: 220,
               overflowY: "auto",
             }}
@@ -265,19 +266,18 @@ function Select({
                       alignItems: "center",
                       justifyContent: "space-between",
                       background: isSelected
-                        ? "rgba(99,102,241,0.15)"
+                        ? "rgba(99,102,241,0.1)"
                         : "transparent",
-                      color: isSelected ? t.accentMid : t.text,
+                      color: isSelected ? t.accent : t.text,
                       transition: "background 0.12s",
                       borderBottom:
                         i < options.length - 1
-                          ? `0.5px solid ${t.border}`
+                          ? `1px solid ${t.border}`
                           : "none",
                     }}
                     onMouseEnter={(e) => {
                       if (!isSelected)
-                        e.currentTarget.style.background =
-                          "rgba(255,255,255,0.04)";
+                        e.currentTarget.style.background = "rgba(0,0,0,0.04)";
                     }}
                     onMouseLeave={(e) => {
                       if (!isSelected)
@@ -303,7 +303,7 @@ function Select({
   );
 }
 
-// ─── Section card (FIXED: overflow visible) ───────────────────────────────────
+// ─── Section card (overflow visible for dropdowns) ────────────────────────────
 function SectionCard({step, title, subtitle, children, active}) {
   return (
     <motion.div
@@ -312,21 +312,21 @@ function SectionCard({step, title, subtitle, children, active}) {
       transition={{duration: 0.35, ease: "easeOut"}}
       style={{
         background: t.surface,
-        border: `0.5px solid ${active ? "rgba(99,102,241,0.25)" : t.border}`,
+        border: `1px solid ${active ? "rgba(99,102,241,0.25)" : t.border}`,
         borderRadius: 14,
-        overflow: "visible", // ✅ allow dropdowns to expand outside
+        overflow: "visible",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
         transition: "border-color 0.3s",
       }}
     >
-      {/* Section header */}
       <div
         style={{
           padding: "16px 20px",
-          borderBottom: `0.5px solid ${t.border}`,
+          borderBottom: `1px solid ${t.border}`,
           display: "flex",
           alignItems: "center",
           gap: 12,
-          background: "rgba(255,255,255,0.015)",
+          background: "rgba(0,0,0,0.01)",
         }}
       >
         <div
@@ -334,8 +334,8 @@ function SectionCard({step, title, subtitle, children, active}) {
             width: 24,
             height: 24,
             borderRadius: "50%",
-            background: "rgba(99,102,241,0.15)",
-            border: `0.5px solid rgba(99,102,241,0.3)`,
+            background: "rgba(99,102,241,0.12)",
+            border: `1px solid rgba(99,102,241,0.25)`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -397,11 +397,11 @@ function TeacherRow({
       exit={{opacity: 0, y: -8, scale: 0.98}}
       transition={{duration: 0.25}}
       style={{
-        background: "rgba(255,255,255,0.025)",
-        border: `0.5px solid ${t.border}`,
+        background: "rgba(0,0,0,0.02)",
+        border: `1px solid ${t.border}`,
         borderRadius: 10,
         padding: "16px",
-        overflow: "visible", // ensure dropdown not clipped inside row
+        overflow: "visible",
       }}
     >
       <div
@@ -418,14 +418,14 @@ function TeacherRow({
               width: 26,
               height: 26,
               borderRadius: "50%",
-              background: "rgba(139,92,246,0.15)",
-              border: "0.5px solid rgba(139,92,246,0.3)",
+              background: "rgba(139,92,246,0.12)",
+              border: "1px solid rgba(139,92,246,0.2)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               fontSize: 11,
               fontWeight: 500,
-              color: "#a78bfa",
+              color: "#7c3aed",
             }}
           >
             {index + 1}
@@ -515,11 +515,9 @@ function SubmitButton({isLoading}) {
         background: isLoading
           ? "rgba(99,102,241,0.3)"
           : hovered
-            ? "rgba(99,102,241,0.95)"
-            : "rgba(99,102,241,0.85)",
-        border: `0.5px solid ${
-          isLoading ? "rgba(99,102,241,0.2)" : "rgba(99,102,241,0.6)"
-        }`,
+            ? "#4f46e5"
+            : "#6366f1",
+        border: `1px solid ${isLoading ? "rgba(99,102,241,0.2)" : "rgba(99,102,241,0.6)"}`,
         borderRadius: 10,
         fontSize: 14,
         fontWeight: 500,
@@ -602,9 +600,7 @@ const Create = () => {
           credentials: "include",
         },
       );
-      if (res.ok) {
-        window.location.href = "/login";
-      }
+      if (res.ok) window.location.href = "/login";
     } catch (err) {
       console.error("Logout error", err);
     }
@@ -618,7 +614,6 @@ const Create = () => {
     }
   }, [error]);
 
-  // Derive current step for progress bar
   const currentStep = (() => {
     if (formData.teachers.some((t) => t.name)) return 4;
     if (formData.classTypes && formData.minLevel) return 3;
@@ -800,7 +795,7 @@ const Create = () => {
     return (
       <div
         style={{
-          background: "#0d1420",
+          background: t.bg,
           height: "100vh",
           display: "flex",
           alignItems: "center",
@@ -814,19 +809,16 @@ const Create = () => {
 
   return (
     <>
-      <style>
-        {`
-          @keyframes spin { to { transform: rotate(360deg); } }
-          .create-loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(99,102,241,0.2);
-            border-top-color: #6366f1;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-          }
-        `}
-      </style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .create-loading-spinner {
+          width: 40px; height: 40px;
+          border: 3px solid rgba(99,102,241,0.2);
+          border-top-color: #6366f1;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+      `}</style>
 
       <Navigation
         userName={userName}
@@ -838,14 +830,15 @@ const Create = () => {
       <main
         style={{
           minHeight: "100vh",
-          background:
-            "linear-gradient(160deg, #0d1420 0%, #0f172a 50%, #0d1420 100%)",
-          color: "#fff",
+          background: t.bg,
+          color: t.text,
           overflowX: "hidden",
           position: "relative",
-          paddingTop: "68px",
+          paddingTop: "80px", // extra top margin for separation
+          paddingBottom: "80px",
         }}
       >
+        {/* Ambient glows removed */}
         <div
           style={{
             position: "fixed",
@@ -853,8 +846,7 @@ const Create = () => {
             left: -200,
             width: 600,
             height: 600,
-            background:
-              "radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 65%)",
+            background: "transparent",
             pointerEvents: "none",
             zIndex: 0,
           }}
@@ -866,8 +858,7 @@ const Create = () => {
             right: -100,
             width: 400,
             height: 400,
-            background:
-              "radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 65%)",
+            background: "transparent",
             pointerEvents: "none",
             zIndex: 0,
           }}
@@ -879,7 +870,7 @@ const Create = () => {
             zIndex: 1,
             maxWidth: 680,
             margin: "0 auto",
-            padding: "0 24px 64px",
+            padding: "0 24px",
           }}
         >
           <motion.div
@@ -904,7 +895,7 @@ const Create = () => {
               style={{
                 fontSize: 24,
                 fontWeight: 500,
-                color: "#f1f5f9",
+                color: t.text,
                 letterSpacing: "-0.3px",
                 marginBottom: 6,
               }}
@@ -1056,8 +1047,8 @@ const Create = () => {
                           fontSize: 11,
                           fontWeight: 500,
                           background: "rgba(99,102,241,0.1)",
-                          border: "0.5px solid rgba(99,102,241,0.25)",
-                          color: "#a5b4fc",
+                          border: "1px solid rgba(99,102,241,0.25)",
+                          color: "#4338ca",
                           padding: "3px 10px",
                           borderRadius: 20,
                         }}
@@ -1113,7 +1104,7 @@ const Create = () => {
                   onClick={addTeacher}
                   style={{
                     background: "transparent",
-                    border: `0.5px dashed ${t.border}`,
+                    border: `1px dashed ${t.border}`,
                     borderRadius: 10,
                     padding: "11px",
                     fontSize: 12,

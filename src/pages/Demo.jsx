@@ -3,34 +3,32 @@ import {useAuthStore} from "../store/authStore";
 import {useSubStore} from "../store/subsidiary";
 import Navigation from "./components/navigation";
 
-// ─── Tokens ───────────────────────────────────────────────────────────────────
-
+// ─── Tokens (light theme, semantic colors preserved) ──────────────────────────
 const tk = {
-  bg0: "#09090C",
-  bg1: "#0F1015",
-  bg2: "#14151C",
-  bg3: "#1A1B25",
-  bg4: "#1F2130",
-  border: "rgba(255,255,255,0.06)",
-  borderHov: "rgba(255,255,255,0.12)",
-  borderAccent: "rgba(79,110,247,0.38)",
-  text1: "#EDEEF5",
-  text2: "#8B90AA",
-  text3: "#52566A",
+  bg0: "#F8F8F8",
+  bg1: "#FFFFFF",
+  bg2: "#F0F0F0",
+  bg3: "#E8E8E8",
+  bg4: "#DCDCDC",
+  border: "rgba(0,0,0,0.06)",
+  borderHov: "rgba(0,0,0,0.12)",
+  borderAccent: "rgba(79,110,247,0.28)",
+  text1: "#2B2B2B",
+  text2: "#898989",
+  text3: "#A0A0A0",
   accent: "#4F6EF7",
   accentHov: "#3D5CE8",
-  accentGlow: "rgba(79,110,247,0.18)",
-  accentSubtle: "rgba(79,110,247,0.09)",
+  accentGlow: "rgba(79,110,247,0.06)",
+  accentSubtle: "rgba(79,110,247,0.06)",
   success: "#22C55E",
-  successSubtle: "rgba(34,197,94,0.08)",
-  successBorder: "rgba(34,197,94,0.22)",
+  successSubtle: "rgba(34,197,94,0.06)",
+  successBorder: "rgba(34,197,94,0.18)",
   error: "#F87171",
-  errorSubtle: "rgba(248,113,113,0.07)",
-  errorBorder: "rgba(248,113,113,0.2)",
+  errorSubtle: "rgba(248,113,113,0.06)",
+  errorBorder: "rgba(248,113,113,0.18)",
 };
 
 // ─── useInView ────────────────────────────────────────────────────────────────
-
 function useInView(threshold = 0.12) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
@@ -48,7 +46,6 @@ function useInView(threshold = 0.12) {
 }
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
-
 const Icon = ({
   d,
   size = 18,
@@ -141,7 +138,6 @@ const UsersIcon = ({size = 13}) => (
 );
 
 // ─── Field ────────────────────────────────────────────────────────────────────
-
 function Field({label, error, children}) {
   return (
     <div style={{marginBottom: 18}}>
@@ -205,7 +201,6 @@ function TextInput({
 }
 
 // ─── Stat chip ────────────────────────────────────────────────────────────────
-
 function StatChip({num, label, delay}) {
   const [ref, inView] = useInView(0.3);
   return (
@@ -255,7 +250,6 @@ function StatChip({num, label, delay}) {
 }
 
 // ─── Contact card ─────────────────────────────────────────────────────────────
-
 function ContactCard({icon, iconBg, iconColor, label, value, href}) {
   const [hov, setHov] = useState(false);
   return (
@@ -314,7 +308,6 @@ function ContactCard({icon, iconBg, iconColor, label, value, href}) {
 }
 
 // ─── Benefit row ──────────────────────────────────────────────────────────────
-
 function BenefitRow({title, desc, isLast, delay}) {
   const [ref, inView] = useInView(0.1);
   return (
@@ -361,7 +354,6 @@ function BenefitRow({title, desc, isLast, delay}) {
 }
 
 // ─── Panel wrapper ────────────────────────────────────────────────────────────
-
 function Panel({title, children, style = {}}) {
   return (
     <div
@@ -393,7 +385,6 @@ function Panel({title, children, style = {}}) {
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
-
 const Demo = () => {
   const {user, isLoading: authLoading} = useAuthStore();
   const {bookSess, isLoading, error} = useSubStore();
@@ -419,10 +410,7 @@ const Demo = () => {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
-        {
-          method: "POST",
-          credentials: "include",
-        },
+        {method: "POST", credentials: "include"},
       );
       if (res.ok) window.location.href = "/login";
     } catch (err) {
@@ -516,63 +504,29 @@ const Demo = () => {
 
         * { box-sizing: border-box; }
 
-        input[type="date"]::-webkit-calendar-picker-indicator {
-          filter: invert(0.5);
-          cursor: pointer;
-        }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
 
-        .demo-select option {
-          background: #14151C;
-          color: #EDEEF5;
-        }
+        .demo-select option { background: #FFFFFF; color: #2B2B2B; }
 
         @media (max-width: 860px) {
-          .demo-main-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .demo-hero {
-            padding: 56px 20px 48px !important;
-          }
-          /* Stats row: 2x2 grid on mobile, no squeezing */
-          .demo-stats-row {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 12px !important;
-          }
-          .demo-stat-chip {
-            min-width: 0 !important;
-            flex: none !important;
-            width: 100% !important;
-          }
-          .demo-footer-strip {
-            flex-direction: column !important;
-            gap: 6px !important;
-            text-align: center;
-          }
-          .demo-main-wrap {
-            padding: 36px 20px 64px !important;
-          }
-          .demo-grid-two {
-            grid-template-columns: 1fr !important;
-          }
+          .demo-main-grid { grid-template-columns: 1fr !important; }
+          .demo-hero { padding: 56px 20px 48px !important; }
+          .demo-stats-row { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+          .demo-stat-chip { min-width: 0 !important; flex: none !important; width: 100% !important; }
+          .demo-footer-strip { flex-direction: column !important; gap: 6px !important; text-align: center; }
+          .demo-main-wrap { padding: 36px 20px 64px !important; }
+          .demo-grid-two { grid-template-columns: 1fr !important; }
         }
 
         @media (max-width: 480px) {
-          .demo-hero {
-            padding: 48px 16px 40px !important;
-          }
-          .demo-main-wrap {
-            padding: 28px 16px 56px !important;
-          }
+          .demo-hero { padding: 48px 16px 40px !important; }
+          .demo-main-wrap { padding: 28px 16px 56px !important; }
           .demo-eyebrow { font-size: 11px !important; }
           .demo-hero-title { font-size: clamp(26px, 7vw, 40px) !important; }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          *, *::before, *::after {
-            animation-duration: 0.01ms !important;
-            transition-duration: 0.01ms !important;
-          }
+          *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
       `}</style>
 
@@ -592,7 +546,7 @@ const Demo = () => {
           paddingTop: 64,
         }}
       >
-        {/* Ambient glows */}
+        {/* Ambient glows removed */}
         <div
           style={{
             position: "fixed",
@@ -600,8 +554,7 @@ const Demo = () => {
             left: -100,
             width: 600,
             height: 600,
-            background:
-              "radial-gradient(circle, rgba(79,110,247,0.055) 0%, transparent 65%)",
+            background: "transparent",
             pointerEvents: "none",
             zIndex: 0,
           }}
@@ -613,14 +566,13 @@ const Demo = () => {
             right: -100,
             width: 500,
             height: 500,
-            background:
-              "radial-gradient(circle, rgba(139,92,246,0.04) 0%, transparent 65%)",
+            background: "transparent",
             pointerEvents: "none",
             zIndex: 0,
           }}
         />
 
-        {/* ── Hero ──────────────────────────────────────────────────────────── */}
+        {/* Hero */}
         <div
           ref={heroRef}
           className="demo-hero"
@@ -632,7 +584,6 @@ const Demo = () => {
             zIndex: 1,
           }}
         >
-          {/* Eyebrow */}
           <div
             className="demo-eyebrow"
             style={{
@@ -667,7 +618,6 @@ const Demo = () => {
             30-minute live session
           </div>
 
-          {/* Title */}
           <h1
             className="demo-hero-title"
             style={{
@@ -699,7 +649,6 @@ const Demo = () => {
             )}
           </h1>
 
-          {/* Subtitle */}
           <p
             style={{
               fontSize: 16,
@@ -714,7 +663,7 @@ const Demo = () => {
             }}
           >
             Book a session and watch Protiba process your institution's
-            constraints — subjects, rooms, teachers, periods — and produce a
+            constraints (subjects, rooms, teachers, periods) and produce a
             conflict-free schedule in under a minute.
           </p>
 
@@ -774,7 +723,6 @@ const Demo = () => {
           </div>
         </div>
 
-        {/* Divider */}
         <div
           style={{
             height: 1,
@@ -784,7 +732,7 @@ const Demo = () => {
           }}
         />
 
-        {/* ── Main grid ─────────────────────────────────────────────────────── */}
+        {/* Main grid */}
         <div
           className="demo-main-wrap"
           style={{
@@ -804,7 +752,7 @@ const Demo = () => {
               alignItems: "start",
             }}
           >
-            {/* ── Left column ───────────────────────────────────────────────── */}
+            {/* Left column */}
             <div
               ref={leftRef}
               style={{
@@ -816,7 +764,6 @@ const Demo = () => {
                 transition: "opacity 0.6s ease, transform 0.6s ease",
               }}
             >
-              {/* Contact */}
               <Panel title="Contact us directly">
                 <ContactCard
                   icon={<PhoneIcon />}
@@ -836,7 +783,6 @@ const Demo = () => {
                 />
               </Panel>
 
-              {/* Benefits */}
               <Panel title="What happens in the demo">
                 {benefits.map((b, i) => (
                   <BenefitRow
@@ -849,7 +795,6 @@ const Demo = () => {
                 ))}
               </Panel>
 
-              {/* Trust strip */}
               <div
                 style={{
                   display: "flex",
@@ -877,14 +822,13 @@ const Demo = () => {
                       padding: "5px 12px",
                     }}
                   >
-                    <Icon />
-                    {label}
+                    <Icon /> {label}
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* ── Right column — form ───────────────────────────────────────── */}
+            {/* Right column – form */}
             <div
               ref={formRef}
               style={{
@@ -899,7 +843,6 @@ const Demo = () => {
                 transition: "opacity 0.6s ease 0.1s, transform 0.6s ease 0.1s",
               }}
             >
-              {/* Top accent line */}
               <div
                 style={{
                   position: "absolute",
@@ -912,7 +855,6 @@ const Demo = () => {
               />
 
               {isSubmitted ? (
-                /* ── Success state ─────────────────────────────────────────── */
                 <div
                   style={{
                     display: "flex",
@@ -937,7 +879,6 @@ const Demo = () => {
                   >
                     <Check size={24} />
                   </div>
-
                   <h2
                     style={{
                       fontSize: 20,
@@ -964,8 +905,6 @@ const Demo = () => {
                     </strong>
                     . We will see you there.
                   </p>
-
-                  {/* Booking summary */}
                   <div
                     style={{
                       background: tk.bg2,
@@ -1017,7 +956,6 @@ const Demo = () => {
                       </div>
                     ))}
                   </div>
-
                   <button
                     onClick={() => {
                       setIsSubmitted(false);
@@ -1050,7 +988,6 @@ const Demo = () => {
                   </button>
                 </div>
               ) : (
-                /* ── Form ──────────────────────────────────────────────────── */
                 <>
                   <h2
                     style={{
@@ -1101,7 +1038,6 @@ const Demo = () => {
                         placeholder="Your full name"
                       />
                     </Field>
-
                     <Field label="Work email">
                       <TextInput
                         required
@@ -1111,7 +1047,6 @@ const Demo = () => {
                         placeholder="you@institution.edu"
                       />
                     </Field>
-
                     <Field label="Institution name">
                       <TextInput
                         required
@@ -1137,7 +1072,6 @@ const Demo = () => {
                           onChange={(e) => setDate(e.target.value)}
                         />
                       </Field>
-
                       <Field label="Time">
                         <div style={{position: "relative"}}>
                           <select
@@ -1231,7 +1165,6 @@ const Demo = () => {
                     </button>
                   </form>
 
-                  {/* Meet note */}
                   <div
                     style={{
                       display: "flex",
@@ -1276,7 +1209,6 @@ const Demo = () => {
           </div>
         </div>
 
-        {/* Divider */}
         <div
           style={{
             height: 1,
@@ -1285,28 +1217,6 @@ const Demo = () => {
             margin: "0 auto",
           }}
         />
-
-        {/* ── Footer strip ──────────────────────────────────────────────────── */}
-        <div
-          className="demo-footer-strip"
-          style={{
-            maxWidth: 1120,
-            margin: "0 auto",
-            padding: "22px 48px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 8,
-          }}
-        >
-          <span style={{fontSize: 12, color: tk.text3}}>
-            2025 Protiba. Academic scheduling infrastructure.
-          </span>
-          <span style={{fontSize: 12, color: tk.text3}}>
-            Kenya · protiba.com
-          </span>
-        </div>
       </div>
     </>
   );

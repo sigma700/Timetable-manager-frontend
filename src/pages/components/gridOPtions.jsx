@@ -28,16 +28,17 @@ const Card = ({
           position: "relative",
           padding: "20px 18px",
           borderRadius: 12,
-          background: hovered
-            ? "rgba(255,255,255,0.06)"
-            : "rgba(255,255,255,0.03)",
-          border: `0.5px solid ${hovered ? `${accent}55` : "rgba(255,255,255,0.08)"}`,
+          background: hovered ? "#F8F8F8" : "#FFFFFF",
+          border: `1px solid ${hovered ? "#D0D0D0" : "#E8E8E8"}`,
           transition: "all 0.2s ease",
           transform: hovered ? "translateY(-3px)" : "translateY(0)",
           cursor: "pointer",
           overflow: "hidden",
           height: "100%",
           minHeight: 110,
+          boxShadow: hovered
+            ? "0 2px 8px rgba(0,0,0,0.04)"
+            : "0 1px 2px rgba(0,0,0,0.02)",
         }}
       >
         {/* Ambient glow on hover */}
@@ -49,7 +50,7 @@ const Card = ({
             width: 80,
             height: 80,
             borderRadius: "50%",
-            background: `radial-gradient(circle, ${accent}22 0%, transparent 70%)`,
+            background: `radial-gradient(circle, ${accent}18 0%, transparent 70%)`,
             opacity: hovered ? 1 : 0,
             transition: "opacity 0.25s",
             pointerEvents: "none",
@@ -63,7 +64,7 @@ const Card = ({
             top: -10,
             right: -8,
             fontSize: 72,
-            color: hovered ? `${accent}30` : "rgba(255,255,255,0.04)",
+            color: hovered ? `${accent}22` : "#F0F0F0",
             transition: "all 0.25s ease",
             transform: hovered
               ? "rotate(10deg) scale(1.05)"
@@ -81,9 +82,9 @@ const Card = ({
               right: 12,
               fontSize: 10,
               fontWeight: 500,
-              background: "rgba(251,191,36,0.12)",
-              color: "#fbbf24",
-              border: "0.5px solid rgba(251,191,36,0.3)",
+              background: "rgba(245,158,11,0.08)",
+              color: "#d97706",
+              border: "1px solid rgba(245,158,11,0.2)",
               padding: "2px 7px",
               borderRadius: 20,
               letterSpacing: "0.3px",
@@ -100,13 +101,13 @@ const Card = ({
             width: 34,
             height: 34,
             borderRadius: 9,
-            background: hovered ? accentBg : "rgba(255,255,255,0.06)",
+            background: hovered ? accentBg : "#F0F0F0",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             marginBottom: 14,
             transition: "all 0.2s",
-            border: `0.5px solid ${hovered ? `${accent}40` : "rgba(255,255,255,0.06)"}`,
+            border: `1px solid ${hovered ? `${accent}40` : "#E8E8E8"}`,
             position: "relative",
             zIndex: 1,
           }}
@@ -114,7 +115,7 @@ const Card = ({
           <Icon
             style={{
               fontSize: 16,
-              color: hovered ? accent : "#64748b",
+              color: hovered ? accent : "#898989",
               transition: "color 0.2s",
             }}
           />
@@ -126,7 +127,7 @@ const Card = ({
             style={{
               fontSize: 13,
               fontWeight: 500,
-              color: hovered ? "#e2e8f0" : "#94a3b8",
+              color: hovered ? "#2B2B2B" : "#898989",
               marginBottom: 3,
               lineHeight: 1.3,
               transition: "color 0.2s",
@@ -137,7 +138,7 @@ const Card = ({
           <p
             style={{
               fontSize: 11,
-              color: hovered ? "#64748b" : "#334155",
+              color: hovered ? "#898989" : "#A0A0A0",
               lineHeight: 1.5,
               transition: "color 0.2s",
               margin: 0,
@@ -168,7 +169,7 @@ const HoverDevCards = () => {
           path="create-table"
           Icon={FiPlus}
           accent="#6366f1"
-          accentBg="rgba(99,102,241,0.15)"
+          accentBg="rgba(99,102,241,0.12)"
         />
         <Card
           title="User manual"
@@ -176,7 +177,7 @@ const HoverDevCards = () => {
           path="manual"
           Icon={FiBookOpen}
           accent="#8b5cf6"
-          accentBg="rgba(139,92,246,0.15)"
+          accentBg="rgba(139,92,246,0.12)"
         />
         <Card
           title="Schedule demo"
