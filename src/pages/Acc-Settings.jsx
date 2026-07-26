@@ -1,46 +1,49 @@
 import React, {useState, useRef, useEffect} from "react";
 import {useAuthStore} from "../store/authStore";
-import {useNavigate} from "react-router-dom";
 import Navigation from "./components/navigation";
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
-const tk = {
-  surface: "rgba(255,255,255,0.03)",
-  border: "rgba(255,255,255,0.07)",
-  accent: "#6366f1",
-  accentMid: "#818cf8",
-  danger: "#f87171",
-  dangerBg: "rgba(248,113,113,0.08)",
-  dangerBord: "rgba(248,113,113,0.25)",
-  success: "#10b981",
-  successBg: "rgba(16,185,129,0.08)",
-  successBord: "rgba(16,185,129,0.25)",
-  text: "#f1f5f9",
-  textSub: "#94a3b8",
-  muted: "#64748b",
-  dimmed: "#334155",
+// ─── Brand tokens (light, premium) ────────────────────────────────────────────
+const C = {
+  bg: "#F8F8F8",
+  bg1: "#FFFFFF",
+  bg2: "#F1F1F1",
+  bg3: "#ECECEC",
+  bg4: "#E8E8E8",
+  border: "rgba(43,43,43,0.06)",
+  border2: "rgba(43,43,43,0.10)",
+  border3: "rgba(43,43,43,0.14)",
+  text: "#2B2B2B",
+  text2: "#6E6E6E",
+  text3: "#858585",
+  text4: "#9A9A9A",
+  accent: "#2B2B2B",
+  accentL: "#5C5C5C",
+  green: "#22C55E",
+  greenG: "rgba(34,197,94,0.08)",
+  greenB: "rgba(34,197,94,0.18)",
+  red: "#F87171",
+  redG: "rgba(248,113,113,0.08)",
+  redB: "rgba(248,113,113,0.18)",
+  purple: "#8B5CF6",
+  purpleG: "rgba(139,92,246,0.08)",
+  purpleB: "rgba(139,92,246,0.18)",
+  amber: "#F59E0B",
+  amberG: "rgba(245,158,11,0.08)",
+  amberB: "rgba(245,158,11,0.18)",
 };
 
-// ─── Global CSS ───────────────────────────────────────────────────────────────
+// ─── CSS (light theme, same structure) ────────────────────────────────────────
 const CSS = `
   *, *::before, *::after { box-sizing: border-box; }
 
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  @keyframes slideInToast {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes panelIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes slideInToast { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes panelIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
   .acct-spinner {
     width: 36px; height: 36px;
-    border: 2.5px solid rgba(99,102,241,0.2);
-    border-top-color: #6366f1;
+    border: 2.5px solid ${C.border};
+    border-top-color: ${C.accent};
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
@@ -77,7 +80,6 @@ const CSS = `
 
   @media (max-width: 640px) {
     .acct-layout { grid-template-columns: 1fr; gap: 14px; }
-
     .acct-sidebar { position: static; top: unset; }
     .acct-nav {
       flex-direction: row !important;
@@ -94,13 +96,9 @@ const CSS = `
       white-space: nowrap;
     }
     .acct-nav-badge-hide { display: none !important; }
-
     .sec-body { padding: 14px !important; }
-
     .fg2, .fg4 { grid-template-columns: 1fr !important; }
-
     .toast-pos { bottom: 12px; right: 12px; left: 12px; }
-
     .av-row { flex-wrap: wrap; }
   }
 
@@ -141,20 +139,16 @@ function Toast({message, type, onDone}) {
         display: "flex",
         alignItems: "center",
         gap: 10,
-        background: "#0f172a",
-        border: `0.5px solid ${ok ? tk.successBord : tk.dangerBord}`,
+        background: C.bg1,
+        border: `1px solid ${ok ? C.greenB : C.redB}`,
         borderRadius: 12,
         padding: "13px 18px",
-        boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
+        boxShadow: "0 16px 40px rgba(0,0,0,0.08)",
       }}
     >
       <span style={{fontSize: 16}}>{ok ? "✓" : "✕"}</span>
       <span
-        style={{
-          fontSize: 13,
-          color: ok ? tk.success : tk.danger,
-          fontWeight: 500,
-        }}
+        style={{fontSize: 13, color: ok ? C.green : C.red, fontWeight: 500}}
       >
         {message}
       </span>
@@ -168,7 +162,7 @@ function Field({label, hint, type = "text", readOnly, ...p}) {
   return (
     <div style={{display: "flex", flexDirection: "column", gap: 6}}>
       {label && (
-        <label style={{fontSize: 12, fontWeight: 500, color: tk.textSub}}>
+        <label style={{fontSize: 12, fontWeight: 500, color: C.text2}}>
           {label}
         </label>
       )}
@@ -185,25 +179,20 @@ function Field({label, hint, type = "text", readOnly, ...p}) {
           p.onBlur?.(e);
         }}
         style={{
-          background: readOnly
-            ? "rgba(255,255,255,0.02)"
-            : f
-              ? "rgba(255,255,255,0.05)"
-              : tk.surface,
-          border: `0.5px solid ${f && !readOnly ? tk.accent : tk.border}`,
+          background: readOnly ? C.bg2 : f ? "rgba(43,43,43,0.02)" : C.bg1,
+          border: `1px solid ${f && !readOnly ? C.accent : C.border}`,
           borderRadius: 8,
           padding: "10px 13px",
           fontSize: 13,
-          color: readOnly ? tk.muted : tk.text,
+          color: readOnly ? C.text3 : C.text,
           outline: "none",
           width: "100%",
           transition: "all 0.18s",
-          boxShadow:
-            f && !readOnly ? "0 0 0 3px rgba(99,102,241,0.12)" : "none",
+          boxShadow: f && !readOnly ? `0 0 0 3px rgba(43,43,43,0.08)` : "none",
           cursor: readOnly ? "default" : "text",
         }}
       />
-      {hint && <p style={{fontSize: 11, color: tk.muted, margin: 0}}>{hint}</p>}
+      {hint && <p style={{fontSize: 11, color: C.text3, margin: 0}}>{hint}</p>}
     </div>
   );
 }
@@ -217,7 +206,7 @@ function Toggle({checked, onChange, label, description}) {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "13px 0",
-        borderBottom: `0.5px solid ${tk.border}`,
+        borderBottom: `1px solid ${C.border}`,
         gap: 14,
         flexWrap: "wrap",
       }}
@@ -227,14 +216,14 @@ function Toggle({checked, onChange, label, description}) {
           style={{
             fontSize: 13,
             fontWeight: 500,
-            color: tk.text,
+            color: C.text,
             marginBottom: 2,
           }}
         >
           {label}
         </div>
         {description && (
-          <div style={{fontSize: 12, color: tk.muted, lineHeight: 1.5}}>
+          <div style={{fontSize: 12, color: C.text3, lineHeight: 1.5}}>
             {description}
           </div>
         )}
@@ -246,8 +235,8 @@ function Toggle({checked, onChange, label, description}) {
           height: 22,
           borderRadius: 11,
           flexShrink: 0,
-          background: checked ? tk.accent : "rgba(255,255,255,0.08)",
-          border: `0.5px solid ${checked ? tk.accent : tk.border}`,
+          background: checked ? C.accent : C.bg4,
+          border: `1px solid ${checked ? C.accent : C.border}`,
           position: "relative",
           cursor: "pointer",
           transition: "all 0.2s",
@@ -276,8 +265,8 @@ function Section({
   title,
   subtitle,
   badge,
-  badgeColor = tk.accentMid,
-  badgeBg = "rgba(99,102,241,0.12)",
+  badgeColor = C.text,
+  badgeBg = "rgba(43,43,43,0.06)",
   children,
   delay = 0,
 }) {
@@ -293,17 +282,18 @@ function Section({
     >
       <div
         style={{
-          background: tk.surface,
-          border: `0.5px solid ${tk.border}`,
+          background: C.bg1,
+          border: `1px solid ${C.border}`,
           borderRadius: 16,
           overflow: "hidden",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
         }}
       >
         <div
           style={{
             padding: "15px 20px",
-            borderBottom: `0.5px solid ${tk.border}`,
-            background: "rgba(255,255,255,0.015)",
+            borderBottom: `1px solid ${C.border}`,
+            background: C.bg2,
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "space-between",
@@ -312,11 +302,11 @@ function Section({
           }}
         >
           <div style={{flex: 1, minWidth: 0}}>
-            <div style={{fontSize: 14, fontWeight: 500, color: tk.text}}>
+            <div style={{fontSize: 14, fontWeight: 500, color: C.text}}>
               {title}
             </div>
             {subtitle && (
-              <div style={{fontSize: 12, color: tk.muted, marginTop: 2}}>
+              <div style={{fontSize: 12, color: C.text3, marginTop: 2}}>
                 {subtitle}
               </div>
             )}
@@ -328,7 +318,7 @@ function Section({
                 fontWeight: 500,
                 color: badgeColor,
                 background: badgeBg,
-                border: `0.5px solid ${badgeColor}44`,
+                border: `1px solid ${badgeColor}44`,
                 padding: "3px 10px",
                 borderRadius: 20,
                 letterSpacing: "0.3px",
@@ -356,7 +346,7 @@ function DangerRow({title, description, actionLabel, onAction, loading}) {
         alignItems: "center",
         justifyContent: "space-between",
         padding: "14px 0",
-        borderBottom: "0.5px solid rgba(255,255,255,0.04)",
+        borderBottom: `1px solid ${C.border}`,
         gap: 12,
         flexWrap: "wrap",
       }}
@@ -366,13 +356,13 @@ function DangerRow({title, description, actionLabel, onAction, loading}) {
           style={{
             fontSize: 13,
             fontWeight: 500,
-            color: tk.text,
+            color: C.text,
             marginBottom: 2,
           }}
         >
           {title}
         </div>
-        <div style={{fontSize: 12, color: tk.muted}}>{description}</div>
+        <div style={{fontSize: 12, color: C.text3}}>{description}</div>
       </div>
       <button
         onClick={onAction}
@@ -384,9 +374,9 @@ function DangerRow({title, description, actionLabel, onAction, loading}) {
           borderRadius: 8,
           fontSize: 12,
           fontWeight: 500,
-          background: h ? tk.dangerBg : "transparent",
-          border: `0.5px solid ${h ? "rgba(248,113,113,0.45)" : tk.dangerBord}`,
-          color: tk.danger,
+          background: h ? C.redG : "transparent",
+          border: `1px solid ${h ? C.redB : C.redG}`,
+          color: C.red,
           cursor: "pointer",
           transition: "all 0.18s",
           flexShrink: 0,
@@ -424,7 +414,7 @@ function AvatarSection({name, email}) {
           height: 58,
           borderRadius: "50%",
           flexShrink: 0,
-          background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
+          background: "linear-gradient(135deg, #2563EB, #7C3AED)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -434,7 +424,7 @@ function AvatarSection({name, email}) {
           cursor: "pointer",
           position: "relative",
           overflow: "hidden",
-          border: `2px solid ${h ? "rgba(99,102,241,0.6)" : "rgba(99,102,241,0.25)"}`,
+          border: `2px solid ${h ? C.accent : C.border}`,
           transition: "border-color 0.2s",
         }}
       >
@@ -463,13 +453,13 @@ function AvatarSection({name, email}) {
           style={{
             fontSize: 15,
             fontWeight: 500,
-            color: tk.text,
+            color: C.text,
             marginBottom: 2,
           }}
         >
           {name || "Your Name"}
         </div>
-        <div style={{fontSize: 12, color: tk.muted}}>
+        <div style={{fontSize: 12, color: C.text3}}>
           {email || "your@email.com"}
         </div>
         <div
@@ -485,9 +475,9 @@ function AvatarSection({name, email}) {
             style={{
               fontSize: 10,
               fontWeight: 500,
-              background: tk.successBg,
-              color: tk.success,
-              border: `0.5px solid ${tk.successBord}`,
+              background: C.greenG,
+              color: C.green,
+              border: `1px solid ${C.greenB}`,
               padding: "2px 8px",
               borderRadius: 20,
             }}
@@ -497,9 +487,9 @@ function AvatarSection({name, email}) {
           <span
             style={{
               fontSize: 10,
-              color: tk.muted,
-              background: tk.surface,
-              border: `0.5px solid ${tk.border}`,
+              color: C.text3,
+              background: C.bg1,
+              border: `1px solid ${C.border}`,
               padding: "2px 8px",
               borderRadius: 20,
             }}
@@ -522,7 +512,7 @@ function SaveButton({loading, onClick, label = "Save changes"}) {
         justifyContent: "flex-end",
         marginTop: 18,
         paddingTop: 16,
-        borderTop: `0.5px solid ${tk.border}`,
+        borderTop: `1px solid ${C.border}`,
       }}
     >
       <button
@@ -535,14 +525,14 @@ function SaveButton({loading, onClick, label = "Save changes"}) {
           borderRadius: 9,
           fontSize: 13,
           fontWeight: 500,
-          background: h ? "rgba(99,102,241,0.95)" : "rgba(99,102,241,0.85)",
-          border: "0.5px solid rgba(99,102,241,0.5)",
+          background: h ? C.accent2 : C.accent,
+          border: `1px solid ${C.accent}`,
           color: "#fff",
           cursor: loading ? "not-allowed" : "pointer",
           opacity: loading ? 0.6 : 1,
           transition: "all 0.18s",
           transform: h && !loading ? "translateY(-1px)" : "translateY(0)",
-          boxShadow: h && !loading ? "0 4px 16px rgba(99,102,241,0.3)" : "none",
+          boxShadow: h && !loading ? "0 4px 16px rgba(43,43,43,0.2)" : "none",
           display: "flex",
           alignItems: "center",
           gap: 7,
@@ -572,7 +562,7 @@ function SaveButton({loading, onClick, label = "Save changes"}) {
   );
 }
 
-// ─── Nav items ────────────────────────────────────────────────────────────────
+// ─── Nav items (emojis kept for simplicity; consider replacing with icons later) ──
 const NAV = [
   {id: "profile", label: "Profile", icon: "👤"},
   {id: "security", label: "Security", icon: "🔒"},
@@ -606,9 +596,9 @@ function SidebarNav({active, onChange}) {
               padding: "9px 12px",
               borderRadius: 9,
               width: "100%",
-              background: on ? "rgba(99,102,241,0.12)" : "transparent",
-              border: `0.5px solid ${on ? "rgba(99,102,241,0.3)" : "transparent"}`,
-              color: on ? tk.accentMid : tk.muted,
+              background: on ? "rgba(43,43,43,0.08)" : "transparent",
+              border: `1px solid ${on ? C.border3 : "transparent"}`,
+              color: on ? C.text : C.text3,
               fontSize: 13,
               fontWeight: on ? 500 : 400,
               cursor: "pointer",
@@ -617,14 +607,14 @@ function SidebarNav({active, onChange}) {
             }}
             onMouseEnter={(e) => {
               if (!on) {
-                e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                e.currentTarget.style.color = tk.textSub;
+                e.currentTarget.style.background = C.bg2;
+                e.currentTarget.style.color = C.text2;
               }
             }}
             onMouseLeave={(e) => {
               if (!on) {
                 e.currentTarget.style.background = "transparent";
-                e.currentTarget.style.color = tk.muted;
+                e.currentTarget.style.color = C.text3;
               }
             }}
           >
@@ -637,9 +627,9 @@ function SidebarNav({active, onChange}) {
                 className="acct-nav-badge-hide"
                 style={{
                   fontSize: 10,
-                  color: tk.muted,
-                  background: tk.surface,
-                  border: `0.5px solid ${tk.border}`,
+                  color: C.text3,
+                  background: C.bg1,
+                  border: `1px solid ${C.border}`,
                   padding: "1px 7px",
                   borderRadius: 20,
                 }}
@@ -654,10 +644,9 @@ function SidebarNav({active, onChange}) {
   );
 }
 
-// ─── Panels ───────────────────────────────────────────────────────────────────
+// ─── Panels (unchanged logic, only style tokens replaced) ─────────────────────
 
 function ProfilePanel({user, onSave}) {
-  // ✅ FIXED: Build name string from user object
   const userName = user
     ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
     : "";
@@ -719,7 +708,7 @@ function ProfilePanel({user, onSave}) {
             style={{
               fontSize: 12,
               fontWeight: 500,
-              color: tk.textSub,
+              color: C.text2,
               display: "block",
               marginBottom: 6,
             }}
@@ -732,12 +721,12 @@ function ProfilePanel({user, onSave}) {
             placeholder="Brief description of your role…"
             rows={3}
             style={{
-              background: tk.surface,
-              border: `0.5px solid ${tk.border}`,
+              background: C.bg1,
+              border: `1px solid ${C.border}`,
               borderRadius: 8,
               padding: "10px 13px",
               fontSize: 13,
-              color: tk.text,
+              color: C.text,
               outline: "none",
               width: "100%",
               resize: "vertical",
@@ -746,11 +735,11 @@ function ProfilePanel({user, onSave}) {
               fontFamily: "inherit",
             }}
             onFocus={(e) => {
-              e.target.style.borderColor = tk.accent;
-              e.target.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.12)";
+              e.target.style.borderColor = C.accent;
+              e.target.style.boxShadow = `0 0 0 3px rgba(43,43,43,0.08)`;
             }}
             onBlur={(e) => {
-              e.target.style.borderColor = tk.border;
+              e.target.style.borderColor = C.border;
               e.target.style.boxShadow = "none";
             }}
           />
@@ -778,7 +767,7 @@ function SecurityPanel({onSave, onError}) {
   })();
   const strLabel = ["Weak", "Fair", "Good", "Strong"][str - 1] || "";
   const strColor =
-    ["#f87171", "#fbbf24", "#34d399", "#10b981"][str - 1] || tk.dimmed;
+    ["#F87171", "#F59E0B", "#22C55E", "#22C55E"][str - 1] || C.text3;
   const save = async () => {
     if (!f.current) return onError("Current password required");
     if (f.next !== f.confirm) return onError("Passwords do not match");
@@ -815,7 +804,7 @@ function SecurityPanel({onSave, onError}) {
                 top: 30,
                 background: "none",
                 border: "none",
-                color: tk.muted,
+                color: C.text3,
                 cursor: "pointer",
                 fontSize: 12,
               }}
@@ -839,7 +828,7 @@ function SecurityPanel({onSave, onError}) {
                 top: 30,
                 background: "none",
                 border: "none",
-                color: tk.muted,
+                color: C.text3,
                 cursor: "pointer",
                 fontSize: 12,
               }}
@@ -857,7 +846,7 @@ function SecurityPanel({onSave, onError}) {
                       flex: 1,
                       height: 3,
                       borderRadius: 2,
-                      background: i <= str ? strColor : tk.dimmed,
+                      background: i <= str ? strColor : C.bg4,
                       transition: "background 0.2s",
                     }}
                   />
@@ -894,7 +883,7 @@ function SecurityPanel({onSave, onError}) {
           <div
             style={{
               fontSize: 13,
-              color: tk.textSub,
+              color: C.text2,
               lineHeight: 1.7,
               flex: 1,
               minWidth: 200,
@@ -909,18 +898,18 @@ function SecurityPanel({onSave, onError}) {
               borderRadius: 8,
               fontSize: 12,
               fontWeight: 500,
-              background: "rgba(99,102,241,0.1)",
-              border: "0.5px solid rgba(99,102,241,0.3)",
-              color: tk.accentMid,
+              background: "rgba(43,43,43,0.06)",
+              border: `1px solid ${C.border3}`,
+              color: C.text,
               cursor: "pointer",
               transition: "all 0.18s",
               flexShrink: 0,
             }}
             onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "rgba(99,102,241,0.18)")
+              (e.currentTarget.style.background = "rgba(43,43,43,0.1)")
             }
             onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "rgba(99,102,241,0.1)")
+              (e.currentTarget.style.background = "rgba(43,43,43,0.06)")
             }
           >
             Enable 2FA →
@@ -953,7 +942,7 @@ function SecurityPanel({onSave, onError}) {
               alignItems: "center",
               justifyContent: "space-between",
               padding: "12px 0",
-              borderBottom: i === 0 ? `0.5px solid ${tk.border}` : "none",
+              borderBottom: i === 0 ? `1px solid ${C.border}` : "none",
               gap: 12,
               flexWrap: "wrap",
             }}
@@ -972,8 +961,8 @@ function SecurityPanel({onSave, onError}) {
                   width: 34,
                   height: 34,
                   borderRadius: 9,
-                  background: tk.surface,
-                  border: `0.5px solid ${tk.border}`,
+                  background: C.bg2,
+                  border: `1px solid ${C.border}`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -988,7 +977,7 @@ function SecurityPanel({onSave, onError}) {
                   style={{
                     fontSize: 13,
                     fontWeight: 500,
-                    color: tk.text,
+                    color: C.text,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -996,7 +985,7 @@ function SecurityPanel({onSave, onError}) {
                 >
                   {s.device}
                 </div>
-                <div style={{fontSize: 11, color: tk.muted, marginTop: 1}}>
+                <div style={{fontSize: 11, color: C.text3, marginTop: 1}}>
                   {s.location} · {s.time}
                 </div>
               </div>
@@ -1005,9 +994,9 @@ function SecurityPanel({onSave, onError}) {
               <span
                 style={{
                   fontSize: 10,
-                  color: tk.success,
-                  background: tk.successBg,
-                  border: `0.5px solid ${tk.successBord}`,
+                  color: C.green,
+                  background: C.greenG,
+                  border: `1px solid ${C.greenB}`,
                   padding: "2px 10px",
                   borderRadius: 20,
                   flexShrink: 0,
@@ -1019,7 +1008,7 @@ function SecurityPanel({onSave, onError}) {
               <button
                 style={{
                   fontSize: 12,
-                  color: tk.danger,
+                  color: C.red,
                   background: "none",
                   border: "none",
                   cursor: "pointer",
@@ -1190,13 +1179,13 @@ function BillingPanel() {
         title="Current plan"
         subtitle="Manage your subscription"
         badge="Free"
-        badgeColor="#10b981"
-        badgeBg="rgba(16,185,129,0.1)"
+        badgeColor={C.green}
+        badgeBg={C.greenG}
       >
         <div
           style={{
-            background: "rgba(99,102,241,0.06)",
-            border: "0.5px solid rgba(99,102,241,0.2)",
+            background: "rgba(43,43,43,0.04)",
+            border: `1px solid ${C.border2}`,
             borderRadius: 12,
             padding: "16px",
             marginBottom: 18,
@@ -1212,13 +1201,13 @@ function BillingPanel() {
               style={{
                 fontSize: 16,
                 fontWeight: 500,
-                color: tk.text,
+                color: C.text,
                 marginBottom: 4,
               }}
             >
               Free plan
             </div>
-            <div style={{fontSize: 13, color: tk.muted}}>
+            <div style={{fontSize: 13, color: C.text3}}>
               3 timetables · 1 institution · Community support
             </div>
           </div>
@@ -1228,9 +1217,9 @@ function BillingPanel() {
               borderRadius: 9,
               fontSize: 13,
               fontWeight: 500,
-              background: "rgba(99,102,241,0.85)",
+              background: C.accent,
               color: "#fff",
-              border: "0.5px solid rgba(99,102,241,0.5)",
+              border: "none",
               cursor: "pointer",
               transition: "all 0.18s",
               whiteSpace: "nowrap",
@@ -1253,7 +1242,7 @@ function BillingPanel() {
                 gridTemplateColumns: "2fr 1fr 1fr",
                 padding: "5px 0",
                 fontSize: 11,
-                color: tk.dimmed,
+                color: C.text3,
                 marginBottom: 4,
               }}
             >
@@ -1270,7 +1259,7 @@ function BillingPanel() {
               <span
                 style={{
                   textAlign: "center",
-                  color: tk.accentMid,
+                  color: C.text,
                   textTransform: "uppercase",
                   letterSpacing: "0.4px",
                 }}
@@ -1296,20 +1285,16 @@ function BillingPanel() {
                   display: "grid",
                   gridTemplateColumns: "2fr 1fr 1fr",
                   padding: "10px 0",
-                  borderBottom: `0.5px solid ${tk.border}`,
+                  borderBottom: `1px solid ${C.border}`,
                   fontSize: 13,
                 }}
               >
-                <span style={{color: tk.textSub}}>{r.feature}</span>
-                <span style={{color: tk.muted, textAlign: "center"}}>
+                <span style={{color: C.text2}}>{r.feature}</span>
+                <span style={{color: C.text3, textAlign: "center"}}>
                   {r.free}
                 </span>
                 <span
-                  style={{
-                    color: "#a5b4fc",
-                    textAlign: "center",
-                    fontWeight: 500,
-                  }}
+                  style={{color: C.text, textAlign: "center", fontWeight: 500}}
                 >
                   {r.pro}
                 </span>
@@ -1333,8 +1318,8 @@ function DangerPanel({onError}) {
         title="Danger zone"
         subtitle="Irreversible actions — proceed with caution"
         badge="Destructive"
-        badgeColor={tk.danger}
-        badgeBg={tk.dangerBg}
+        badgeColor={C.red}
+        badgeBg={C.redG}
       >
         <DangerRow
           title="Export all data"
@@ -1359,8 +1344,8 @@ function DangerPanel({onError}) {
           ) : (
             <div
               style={{
-                background: tk.dangerBg,
-                border: `0.5px solid ${tk.dangerBord}`,
+                background: C.redG,
+                border: `1px solid ${C.redB}`,
                 borderRadius: 12,
                 padding: "18px",
               }}
@@ -1369,7 +1354,7 @@ function DangerPanel({onError}) {
                 style={{
                   fontSize: 14,
                   fontWeight: 500,
-                  color: tk.danger,
+                  color: C.red,
                   marginBottom: 6,
                 }}
               >
@@ -1378,7 +1363,7 @@ function DangerPanel({onError}) {
               <p
                 style={{
                   fontSize: 13,
-                  color: tk.muted,
+                  color: C.text3,
                   lineHeight: 1.7,
                   marginBottom: 16,
                 }}
@@ -1394,7 +1379,7 @@ function DangerPanel({onError}) {
                     borderRadius: 8,
                     fontSize: 13,
                     fontWeight: 500,
-                    background: tk.danger,
+                    background: C.red,
                     color: "#fff",
                     border: "none",
                     cursor: "pointer",
@@ -1409,8 +1394,8 @@ function DangerPanel({onError}) {
                     borderRadius: 8,
                     fontSize: 13,
                     background: "transparent",
-                    color: tk.muted,
-                    border: `0.5px solid ${tk.border}`,
+                    color: C.text3,
+                    border: `1px solid ${C.border}`,
                     cursor: "pointer",
                   }}
                 >
@@ -1464,7 +1449,7 @@ const AccountSettings = () => {
     return (
       <div
         style={{
-          background: "#0d1420",
+          background: C.bg,
           height: "100vh",
           display: "flex",
           alignItems: "center",
@@ -1489,42 +1474,13 @@ const AccountSettings = () => {
       <main
         style={{
           minHeight: "100vh",
-          background:
-            "linear-gradient(160deg,#0d1420 0%,#0f172a 50%,#0d1420 100%)",
-          color: "#fff",
+          background: C.bg,
+          color: C.text,
           overflowX: "hidden",
           position: "relative",
           paddingTop: "68px",
         }}
       >
-        {/* Glows */}
-        <div
-          style={{
-            position: "fixed",
-            top: -300,
-            left: -200,
-            width: 600,
-            height: 600,
-            background:
-              "radial-gradient(circle,rgba(99,102,241,0.06) 0%,transparent 65%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-        <div
-          style={{
-            position: "fixed",
-            bottom: -100,
-            right: -100,
-            width: 400,
-            height: 400,
-            background:
-              "radial-gradient(circle,rgba(139,92,246,0.05) 0%,transparent 65%)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
         <div
           style={{
             position: "relative",
@@ -1549,7 +1505,7 @@ const AccountSettings = () => {
               style={{
                 fontSize: 11,
                 fontWeight: 500,
-                color: "#6366f1",
+                color: C.text,
                 textTransform: "uppercase",
                 letterSpacing: "0.6px",
                 marginBottom: 7,
@@ -1561,21 +1517,20 @@ const AccountSettings = () => {
               style={{
                 fontSize: "clamp(18px,5vw,24px)",
                 fontWeight: 500,
-                color: "#f1f5f9",
+                color: C.text,
                 letterSpacing: "-0.3px",
                 marginBottom: 4,
               }}
             >
               Settings
             </h1>
-            <p style={{fontSize: 13, color: tk.muted}}>
+            <p style={{fontSize: 13, color: C.text3}}>
               Manage your profile, security, and institution preferences.
             </p>
           </div>
 
           {/* Layout */}
           <div className="acct-layout">
-            {/* Sidebar */}
             <div
               className="acct-sidebar"
               style={{
@@ -1586,8 +1541,8 @@ const AccountSettings = () => {
             >
               <div
                 style={{
-                  background: tk.surface,
-                  border: `0.5px solid ${tk.border}`,
+                  background: C.bg1,
+                  border: `1px solid ${C.border}`,
                   borderRadius: 14,
                   padding: "10px",
                 }}
@@ -1596,7 +1551,6 @@ const AccountSettings = () => {
               </div>
             </div>
 
-            {/* Panel — key forces remount + animation on tab change */}
             <div style={{minWidth: 0}} key={tab}>
               {PANELS[tab]}
             </div>

@@ -1,14 +1,33 @@
 import React, {useState, useEffect} from "react";
 import {Link} from "react-router-dom";
 import {Helmet} from "react-helmet";
+import {Navigation} from "./components/navigation";
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+// ─── Brand tokens ─────────────────────────────────────────────────────────────
+const C = {
+  bg: "#F8F8F8",
+  bg1: "#FFFFFF",
+  bg2: "#F1F1F1",
+  bg3: "#ECECEC",
+  bg4: "#E8E8E8",
+  border: "rgba(43,43,43,0.06)",
+  border2: "rgba(43,43,43,0.10)",
+  border3: "rgba(43,43,43,0.14)",
+  text: "#2B2B2B",
+  text2: "#6E6E6E",
+  text3: "#858585",
+  text4: "#9A9A9A",
+  accent: "#2B2B2B",
+  accent2: "#454545",
+  accentL: "#5C5C5C",
+  green: "#16A34A",
+};
 
+// ─── Data (unchanged) ─────────────────────────────────────────────────────────
 const sections = [
   {
     id: "introduction",
     num: "01",
-    icon: "ti-info-circle",
     title: "Introduction",
     body: [
       {
@@ -26,7 +45,6 @@ const sections = [
   {
     id: "registration",
     num: "02",
-    icon: "ti-user-circle",
     title: "Account Registration",
     body: [
       {
@@ -44,7 +62,6 @@ const sections = [
   {
     id: "acceptable-use",
     num: "03",
-    icon: "ti-ban",
     title: "Acceptable Use",
     body: [
       {
@@ -68,7 +85,6 @@ const sections = [
   {
     id: "privacy",
     num: "04",
-    icon: "ti-lock",
     title: "Data Privacy & Security",
     body: [
       {
@@ -86,7 +102,6 @@ const sections = [
   {
     id: "ip",
     num: "05",
-    icon: "ti-shield",
     title: "Intellectual Property",
     body: [
       {
@@ -104,7 +119,6 @@ const sections = [
   {
     id: "liability",
     num: "06",
-    icon: "ti-scale",
     title: "Limitation of Liability",
     body: [
       {
@@ -122,7 +136,6 @@ const sections = [
   {
     id: "changes",
     num: "07",
-    icon: "ti-refresh",
     title: "Service Changes & Termination",
     body: [
       {
@@ -140,7 +153,6 @@ const sections = [
   {
     id: "governing-law",
     num: "08",
-    icon: "ti-building-bank",
     title: "Governing Law",
     body: [
       {
@@ -153,7 +165,6 @@ const sections = [
   {
     id: "updates",
     num: "09",
-    icon: "ti-edit",
     title: "Updates to These Terms",
     body: [
       {
@@ -166,7 +177,6 @@ const sections = [
   {
     id: "contact",
     num: "10",
-    icon: "ti-mail",
     title: "Contact Information",
     body: [
       {
@@ -183,8 +193,244 @@ const sections = [
   },
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Simple SVG icons (replaces Tabler icon font dependency) ──────────────────
+const Icons = {
+  shieldCheck: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  ),
+  lock: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  ),
+  certificate: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="8" r="7" />
+      <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+    </svg>
+  ),
+  mail: (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+      <polyline points="22,6 12,13 2,6" />
+    </svg>
+  ),
+  headset: (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
+    </svg>
+  ),
+  arrowRight: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 12h14" />
+      <path d="m12 5 7 7-7 7" />
+    </svg>
+  ),
+  arrowLeft: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M19 12H5" />
+      <path d="m12 19-7-7 7-7" />
+    </svg>
+  ),
+  calendar: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  ),
+};
 
+// ─── Section icon map ─────────────────────────────────────────────────────────
+const sectionIcons = {
+  introduction: Icons.shieldCheck,
+  registration: (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  ),
+  "acceptable-use": (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+    </svg>
+  ),
+  privacy: Icons.lock,
+  ip: (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  ),
+  liability: (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  ),
+  changes: (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="23 4 23 10 17 10" />
+      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+    </svg>
+  ),
+  "governing-law": (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    </svg>
+  ),
+  updates: (
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </svg>
+  ),
+  contact: Icons.mail,
+};
+
+// ─── Component ────────────────────────────────────────────────────────────────
 const Terms = () => {
   const [active, setActive] = useState("introduction");
   const [scrolled, setScrolled] = useState(false);
@@ -218,137 +464,375 @@ const Terms = () => {
           name="description"
           content="Protiba terms and conditions governing use of the academic scheduling platform."
         />
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
-        />
       </Helmet>
 
-      <div className="tc-root">
-        <div className="tc-ambient" aria-hidden="true">
-          <div className="tc-ambient__orb" />
-          <div className="tc-ambient__grid" />
-        </div>
-
-        {/* Nav */}
-        <nav className={`tc-nav ${scrolled ? "tc-nav--scrolled" : ""}`}>
-          <div className="tc-nav__inner">
-            <Link to="/" className="tc-nav__logo">
-              <div className="tc-logo-mark">
-                <i className="ti ti-calendar-event" aria-hidden="true" />
-              </div>
-              Protiba
-            </Link>
-            <div className="tc-nav__links">
-              <Link to="/login" className="tc-nav__link">
-                Sign in
-              </Link>
-              <Link to="/signup" className="tc-nav__cta">
-                Get started{" "}
-                <i className="ti ti-arrow-right" aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-        </nav>
+      <div style={{background: C.bg, minHeight: "100vh"}}>
+        <Navigation
+          userName="Guest"
+          institutionName="Protiba"
+          notificationCount={0}
+          onLogout={() => {}}
+        />
 
         {/* Header */}
-        <header className="tc-header">
-          <div className="tc-header__inner">
-            <Link to="/" className="tc-back">
-              <i className="ti ti-arrow-left" aria-hidden="true" /> Back to home
+        <header
+          style={{
+            padding: "120px 32px 56px",
+            borderBottom: `1px solid ${C.border}`,
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <div
+            style={{
+              maxWidth: 1080,
+              margin: "0 auto",
+            }}
+          >
+            <Link
+              to="/"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 13,
+                color: C.text3,
+                textDecoration: "none",
+                marginBottom: 28,
+                transition: "color 0.15s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = C.text2)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = C.text3)}
+            >
+              <span style={{display: "flex"}}>{Icons.arrowLeft}</span>
+              Back to home
             </Link>
-            <div className="tc-eyebrow">
-              <span className="tc-eyebrow__dot" />
+
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: 11,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                color: C.text,
+                background: C.bg2,
+                border: `1px solid ${C.border2}`,
+                padding: "5px 14px",
+                borderRadius: 20,
+                marginBottom: 20,
+              }}
+            >
+              <span
+                style={{
+                  width: 5,
+                  height: 5,
+                  borderRadius: "50%",
+                  background: C.text,
+                  display: "inline-block",
+                }}
+              />
               Legal
             </div>
-            <h1 className="tc-header__title">Terms &amp; Conditions</h1>
-            <p className="tc-header__sub">
+
+            <h1
+              style={{
+                fontSize: "clamp(32px, 4.5vw, 52px)",
+                fontWeight: 900,
+                letterSpacing: "-0.04em",
+                lineHeight: 1.05,
+                color: C.text,
+                marginBottom: 16,
+              }}
+            >
+              Terms &amp; Conditions
+            </h1>
+            <p
+              style={{
+                fontSize: 16,
+                color: C.text2,
+                lineHeight: 1.75,
+                maxWidth: 520,
+                marginBottom: 28,
+              }}
+            >
               These terms govern your use of the Protiba academic scheduling
               platform. Please read them carefully before using the service.
             </p>
-            <div className="tc-header__meta">
-              <span className="tc-meta__badge">
-                <i className="ti ti-shield-check" aria-hidden="true" />
-                Last updated:{" "}
-                {new Date().toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </span>
-              <span className="tc-meta__badge">
-                <i className="ti ti-lock" aria-hidden="true" /> GDPR compliant
-              </span>
-              <span className="tc-meta__badge">
-                <i className="ti ti-certificate" aria-hidden="true" /> SSL
-                encrypted
-              </span>
+            <div style={{display: "flex", gap: 8, flexWrap: "wrap"}}>
+              {[
+                {
+                  icon: Icons.shieldCheck,
+                  label: `Last updated: ${new Date().toLocaleDateString("en-GB", {day: "numeric", month: "long", year: "numeric"})}`,
+                },
+                {icon: Icons.lock, label: "GDPR compliant"},
+                {icon: Icons.certificate, label: "SSL encrypted"},
+              ].map((badge) => (
+                <span
+                  key={badge.label}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 7,
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: C.text3,
+                    background: C.bg1,
+                    border: `1px solid ${C.border}`,
+                    padding: "5px 12px",
+                    borderRadius: 20,
+                  }}
+                >
+                  <span style={{display: "flex", color: C.text}}>
+                    {badge.icon}
+                  </span>
+                  {badge.label}
+                </span>
+              ))}
             </div>
           </div>
         </header>
 
         {/* Body */}
-        <div className="tc-body">
-          <div className="tc-body__inner">
-            {/* TOC */}
-            <aside className="tc-toc">
-              <div className="tc-toc__sticky">
-                <p className="tc-toc__title">On this page</p>
-                <nav className="tc-toc__nav">
+        <div style={{padding: "0 32px", position: "relative", zIndex: 1}}>
+          <div
+            style={{
+              maxWidth: 1080,
+              margin: "0 auto",
+              display: "grid",
+              gridTemplateColumns: "200px 1fr",
+              gap: 56,
+              paddingTop: 52,
+              paddingBottom: 80,
+              alignItems: "start",
+            }}
+          >
+            {/* TOC sidebar */}
+            <aside
+              style={{display: window.innerWidth < 860 ? "none" : "block"}}
+            >
+              <div style={{position: "sticky", top: 76}}>
+                <p
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    color: C.text3,
+                    marginBottom: 10,
+                    paddingLeft: 10,
+                  }}
+                >
+                  On this page
+                </p>
+                <nav
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1,
+                    marginBottom: 20,
+                  }}
+                >
                   {sections.map((s) => (
                     <button
                       key={s.id}
-                      className={`tc-toc__item ${active === s.id ? "tc-toc__item--active" : ""}`}
                       onClick={() => scrollTo(s.id)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 9,
+                        background: active === s.id ? C.bg2 : "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "7px 10px",
+                        borderRadius: 8,
+                        textAlign: "left",
+                        width: "100%",
+                        fontFamily: "'Inter', -apple-system, sans-serif",
+                        transition: "background 0.15s",
+                        color: active === s.id ? C.text : C.text3,
+                      }}
+                      onMouseEnter={(e) => {
+                        if (active !== s.id)
+                          e.currentTarget.style.background = C.bg2;
+                      }}
+                      onMouseLeave={(e) => {
+                        if (active !== s.id)
+                          e.currentTarget.style.background = "none";
+                      }}
                     >
-                      <span className="tc-toc__num">{s.num}</span>
-                      <span className="tc-toc__label">{s.title}</span>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          minWidth: 18,
+                          letterSpacing: "0.05em",
+                          color: active === s.id ? C.text : C.text3,
+                        }}
+                      >
+                        {s.num}
+                      </span>
+                      <span
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 500,
+                          lineHeight: 1.3,
+                          color: active === s.id ? C.text : C.text3,
+                        }}
+                      >
+                        {s.title}
+                      </span>
                     </button>
                   ))}
                 </nav>
-                <div className="tc-toc__actions">
-                  <Link to="/signup" className="tc-toc__cta">
-                    Create account{" "}
-                    <i className="ti ti-arrow-right" aria-hidden="true" />
+                <div style={{paddingLeft: 10}}>
+                  <Link
+                    to="/signup"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 5,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: "#fff",
+                      textDecoration: "none",
+                      background: C.accent,
+                      border: `1px solid ${C.accent}`,
+                      padding: "8px 14px",
+                      borderRadius: 8,
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = C.accent2;
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = C.accent;
+                      e.currentTarget.style.transform = "translateY(0)";
+                    }}
+                  >
+                    Create account
+                    <span style={{display: "flex"}}>{Icons.arrowRight}</span>
                   </Link>
                 </div>
               </div>
             </aside>
 
             {/* Content */}
-            <main className="tc-content">
+            <main style={{minWidth: 0}}>
               {sections.map((sec, idx) => (
                 <section
                   key={sec.id}
                   id={sec.id}
-                  className="tc-section"
-                  style={{animationDelay: `${idx * 0.04}s`}}
+                  style={{
+                    padding: "36px 0",
+                    borderBottom: `1px solid ${C.border}`,
+                    scrollMarginTop: 84,
+                    paddingTop: idx === 0 ? 0 : 36,
+                    borderBottomWidth: idx === sections.length - 1 ? 0 : 1,
+                  }}
                 >
-                  <div className="tc-section__header">
-                    <div className="tc-section__icon">
-                      <i className={`ti ${sec.icon}`} aria-hidden="true" />
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 14,
+                      marginBottom: 18,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 32,
+                        height: 32,
+                        flexShrink: 0,
+                        borderRadius: 9,
+                        background: C.bg2,
+                        border: `1px solid ${C.border2}`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: C.text,
+                        marginTop: 2,
+                      }}
+                    >
+                      {sectionIcons[sec.id] || Icons.shieldCheck}
                     </div>
-                    <div className="tc-section__title-wrap">
-                      <span className="tc-section__num">{sec.num}</span>
-                      <h2 className="tc-section__title">{sec.title}</h2>
+                    <div
+                      style={{display: "flex", alignItems: "baseline", gap: 9}}
+                    >
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: C.text3,
+                          letterSpacing: "0.06em",
+                        }}
+                      >
+                        {sec.num}
+                      </span>
+                      <h2
+                        style={{
+                          fontSize: 17,
+                          fontWeight: 800,
+                          color: C.text,
+                          letterSpacing: "-0.025em",
+                        }}
+                      >
+                        {sec.title}
+                      </h2>
                     </div>
                   </div>
-                  <div className="tc-section__body">
+                  <div style={{paddingLeft: 46}}>
                     {sec.body.map((block, bi) => {
                       if (block.type === "p")
                         return (
-                          <p key={bi} className="tc-section__p">
+                          <p
+                            key={bi}
+                            style={{
+                              fontSize: 14,
+                              color: C.text2,
+                              lineHeight: 1.8,
+                              marginBottom: 12,
+                            }}
+                          >
                             {block.content}
                           </p>
                         );
                       if (block.type === "list")
                         return (
-                          <ul key={bi} className="tc-section__list">
+                          <ul
+                            key={bi}
+                            style={{
+                              listStyle: "none",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 8,
+                            }}
+                          >
                             {block.items.map((item, ii) => (
-                              <li key={ii} className="tc-section__li">
+                              <li
+                                key={ii}
+                                style={{
+                                  display: "flex",
+                                  gap: 11,
+                                  alignItems: "flex-start",
+                                  fontSize: 14,
+                                  color: C.text2,
+                                  lineHeight: 1.7,
+                                }}
+                              >
                                 <span
-                                  className="tc-section__li-dot"
-                                  aria-hidden="true"
+                                  style={{
+                                    width: 5,
+                                    height: 5,
+                                    borderRadius: "50%",
+                                    background: C.text,
+                                    flexShrink: 0,
+                                    marginTop: 9,
+                                    opacity: 0.5,
+                                  }}
                                 />
                                 {item}
                               </li>
@@ -357,31 +841,79 @@ const Terms = () => {
                         );
                       if (block.type === "contact")
                         return (
-                          <div key={bi} className="tc-contact">
-                            <div className="tc-contact__row">
-                              <i className="ti ti-mail" aria-hidden="true" />
-                              <span className="tc-contact__label">
-                                Legal enquiries
-                              </span>
-                              <a
-                                href={`mailto:${block.email}`}
-                                className="tc-contact__link"
+                          <div
+                            key={bi}
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 8,
+                              marginTop: 6,
+                            }}
+                          >
+                            {[
+                              {
+                                icon: Icons.mail,
+                                label: "Legal enquiries",
+                                link: block.email,
+                              },
+                              {
+                                icon: Icons.headset,
+                                label: "General support",
+                                link: block.support,
+                              },
+                            ].map((row, ri) => (
+                              <div
+                                key={ri}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 11,
+                                  background: C.bg1,
+                                  border: `1px solid ${C.border}`,
+                                  borderRadius: 10,
+                                  padding: "11px 14px",
+                                  flexWrap: "wrap",
+                                }}
                               >
-                                {block.email}
-                              </a>
-                            </div>
-                            <div className="tc-contact__row">
-                              <i className="ti ti-headset" aria-hidden="true" />
-                              <span className="tc-contact__label">
-                                General support
-                              </span>
-                              <a
-                                href={`mailto:${block.support}`}
-                                className="tc-contact__link"
-                              >
-                                {block.support}
-                              </a>
-                            </div>
+                                <span
+                                  style={{
+                                    display: "flex",
+                                    color: C.text,
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  {row.icon}
+                                </span>
+                                <span
+                                  style={{
+                                    fontSize: 12,
+                                    fontWeight: 500,
+                                    color: C.text3,
+                                    minWidth: 110,
+                                  }}
+                                >
+                                  {row.label}
+                                </span>
+                                <a
+                                  href={`mailto:${row.link}`}
+                                  style={{
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    color: C.text,
+                                    textDecoration: "none",
+                                    transition: "color 0.15s",
+                                  }}
+                                  onMouseEnter={(e) =>
+                                    (e.currentTarget.style.color = C.accentL)
+                                  }
+                                  onMouseLeave={(e) =>
+                                    (e.currentTarget.style.color = C.text)
+                                  }
+                                >
+                                  {row.link}
+                                </a>
+                              </div>
+                            ))}
                           </div>
                         );
                       return null;
@@ -390,13 +922,55 @@ const Terms = () => {
                 </section>
               ))}
 
-              <div className="tc-acceptance">
-                <div className="tc-acceptance__icon">
-                  <i className="ti ti-shield-check" aria-hidden="true" />
+              {/* Acceptance */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 14,
+                  alignItems: "flex-start",
+                  background: C.bg2,
+                  border: `1px solid ${C.border2}`,
+                  borderRadius: 14,
+                  padding: "22px 26px",
+                  marginTop: 44,
+                }}
+              >
+                <div
+                  style={{
+                    width: 34,
+                    height: 34,
+                    flexShrink: 0,
+                    borderRadius: 9,
+                    background: C.bg1,
+                    border: `1px solid ${C.border2}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: C.text,
+                    marginTop: 1,
+                  }}
+                >
+                  {Icons.shieldCheck}
                 </div>
                 <div>
-                  <h3 className="tc-acceptance__title">Acceptance of Terms</h3>
-                  <p className="tc-acceptance__body">
+                  <h3
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 800,
+                      color: C.text,
+                      marginBottom: 5,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    Acceptance of Terms
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: C.text2,
+                      lineHeight: 1.7,
+                    }}
+                  >
                     By creating an account or using Protiba, you acknowledge
                     that you have read, understood, and agree to be bound by
                     these Terms and Conditions and our Privacy Policy.
@@ -404,12 +978,74 @@ const Terms = () => {
                 </div>
               </div>
 
-              <div className="tc-cta-row">
-                <Link to="/signup" className="tc-btn-primary">
-                  Create your free account{" "}
-                  <i className="ti ti-arrow-right" aria-hidden="true" />
+              {/* CTA row */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  marginTop: 28,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Link
+                  to="/signup"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 7,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "#fff",
+                    background: C.accent,
+                    textDecoration: "none",
+                    padding: "11px 20px",
+                    borderRadius: 10,
+                    boxShadow: "0 2px 8px rgba(43,43,43,0.2)",
+                    transition: "all 0.15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = C.accent2;
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                    e.currentTarget.style.boxShadow =
+                      "0 4px 16px rgba(43,43,43,0.3)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = C.accent;
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow =
+                      "0 2px 8px rgba(43,43,43,0.2)";
+                  }}
+                >
+                  Create your free account
+                  <span style={{display: "flex"}}>{Icons.arrowRight}</span>
                 </Link>
-                <Link to="/login" className="tc-btn-ghost">
+                <Link
+                  to="/login"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 7,
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: C.text2,
+                    background: C.bg1,
+                    border: `1px solid ${C.border2}`,
+                    textDecoration: "none",
+                    padding: "11px 20px",
+                    borderRadius: 10,
+                    transition: "all 0.15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = C.text;
+                    e.currentTarget.style.background = C.bg2;
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = C.text2;
+                    e.currentTarget.style.background = C.bg1;
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }}
+                >
                   Sign in
                 </Link>
               </div>
@@ -418,34 +1054,69 @@ const Terms = () => {
         </div>
 
         {/* Footer */}
-        <footer className="tc-footer">
-          <div className="tc-footer__inner">
-            <Link
-              to="/"
-              className="tc-nav__logo"
-              style={{textDecoration: "none"}}
-            >
-              <div className="tc-logo-mark">
-                <i className="ti ti-calendar-event" aria-hidden="true" />
-              </div>
-              <span
-                style={{color: "var(--tc-text)", fontWeight: 700, fontSize: 15}}
-              >
-                Protiba
-              </span>
-            </Link>
-            <p className="tc-footer__note">
+        <footer
+          style={{
+            borderTop: `1px solid ${C.border}`,
+            padding: "32px",
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <div
+            style={{
+              maxWidth: 1080,
+              margin: "0 auto",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 16,
+              flexWrap: "wrap",
+            }}
+          >
+            <p style={{fontSize: 12, color: C.text3, margin: 0}}>
               © {new Date().getFullYear()} Protiba. All rights reserved.
-              Academic scheduling, automated.
             </p>
-            <div className="tc-footer__links">
-              <Link to="/login" className="tc-footer__link">
+            <div style={{display: "flex", gap: 18}}>
+              <Link
+                to="/login"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: C.text3,
+                  textDecoration: "none",
+                  transition: "color 0.15s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = C.text2)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = C.text3)}
+              >
                 Sign in
               </Link>
-              <Link to="/signup" className="tc-footer__link">
+              <Link
+                to="/signup"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: C.text3,
+                  textDecoration: "none",
+                  transition: "color 0.15s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = C.text2)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = C.text3)}
+              >
                 Sign up
               </Link>
-              <a href="mailto:support@protiba.app" className="tc-footer__link">
+              <a
+                href="mailto:support@protiba.app"
+                style={{
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: C.text3,
+                  textDecoration: "none",
+                  transition: "color 0.15s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = C.text2)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = C.text3)}
+              >
                 Contact
               </a>
             </div>
@@ -457,310 +1128,17 @@ const Terms = () => {
 };
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
-
 const css = `
-  @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css');
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --tc-bg: #08080b;
-    --tc-s1: #0f0f14;
-    --tc-s2: #14141a;
-    --tc-s3: #1a1a22;
-    --tc-b1: rgba(255,255,255,0.06);
-    --tc-b2: rgba(255,255,255,0.1);
-    --tc-text: #f0f0f5;
-    --tc-text2: #8888a0;
-    --tc-text3: #44445a;
-    --tc-acc: #5b4cf5;
-    --tc-acc2: #4a3de0;
-    --tc-accl: #8b82f8;
-    --tc-accbg: rgba(91,76,245,0.1);
-    --tc-accborder: rgba(91,76,245,0.2);
-    --tc-font: 'Inter', -apple-system, sans-serif;
-  }
-
-  .tc-root {
-    font-family: var(--tc-font);
-    background: var(--tc-bg);
-    color: var(--tc-text);
-    -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
-    position: relative;
-  }
-
-  /* Ambient */
-  .tc-ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-  .tc-ambient__orb {
-    position: absolute; top: -200px; left: -150px;
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(91,76,245,0.08) 0%, transparent 70%);
-    filter: blur(80px);
-  }
-  .tc-ambient__grid {
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 70% 50% at 50% 0%, black 0%, transparent 70%);
-  }
-
-  /* Nav */
-  .tc-nav {
-    position: sticky; top: 0; left: 0; right: 0; z-index: 100;
-    padding: 0 32px;
-    border-bottom: 1px solid transparent;
-    transition: background 0.2s, border-color 0.2s, backdrop-filter 0.2s;
-  }
-  .tc-nav--scrolled {
-    background: rgba(8,8,11,0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom-color: var(--tc-b1);
-  }
-  .tc-nav__inner {
-    max-width: 1080px; margin: 0 auto;
-    height: 60px; display: flex; align-items: center; justify-content: space-between;
-  }
-  .tc-nav__logo {
-    display: flex; align-items: center; gap: 9px;
-    text-decoration: none; font-size: 16px; font-weight: 700;
-    color: var(--tc-text); letter-spacing: -0.02em;
-  }
-  .tc-logo-mark {
-    width: 28px; height: 28px; border-radius: 8px;
-    background: var(--tc-acc); display: flex; align-items: center; justify-content: center;
-  }
-  .tc-logo-mark i { font-size: 14px; color: #fff; }
-  .tc-nav__links { display: flex; align-items: center; gap: 8px; }
-  .tc-nav__link {
-    font-size: 13px; font-weight: 500; color: var(--tc-text2);
-    text-decoration: none; padding: 6px 14px; border-radius: 8px;
-    transition: color 0.15s, background 0.15s;
-  }
-  .tc-nav__link:hover { color: var(--tc-text); background: rgba(255,255,255,0.05); }
-  .tc-nav__cta {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 13px; font-weight: 600; color: #fff;
-    background: var(--tc-acc); text-decoration: none;
-    padding: 7px 16px; border-radius: 8px;
-    box-shadow: 0 2px 12px rgba(91,76,245,0.35);
-    transition: all 0.15s;
-  }
-  .tc-nav__cta:hover { background: var(--tc-acc2); box-shadow: 0 4px 20px rgba(91,76,245,0.5); transform: translateY(-1px); }
-  .tc-nav__cta i { font-size: 13px; }
-
-  /* Header */
-  .tc-header {
-    position: relative; z-index: 1;
-    padding: 80px 32px 56px;
-    border-bottom: 1px solid var(--tc-b1);
-    overflow: hidden;
-  }
-  .tc-header::before {
-    content: ''; position: absolute; top: -120px; left: -100px;
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(91,76,245,0.07) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .tc-header__inner {
-    max-width: 1080px; margin: 0 auto;
-    animation: tc-reveal 0.7s cubic-bezier(0.16,1,0.3,1) both;
-  }
-  @keyframes tc-reveal { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-
-  .tc-back {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 13px; color: var(--tc-text3); text-decoration: none;
-    margin-bottom: 28px; transition: color 0.15s;
-  }
-  .tc-back:hover { color: var(--tc-text2); }
-  .tc-back i { font-size: 14px; }
-
-  .tc-eyebrow {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
-    color: var(--tc-accl); background: var(--tc-accbg);
-    border: 1px solid var(--tc-accborder);
-    padding: 5px 14px; border-radius: 20px; margin-bottom: 20px;
-  }
-  .tc-eyebrow__dot {
-    width: 5px; height: 5px; border-radius: 50%; background: var(--tc-accl);
-    animation: tc-pulse 2s ease-in-out infinite;
-  }
-  @keyframes tc-pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-  .tc-header__title {
-    font-size: clamp(32px, 4.5vw, 52px);
-    font-weight: 900; letter-spacing: -0.04em; line-height: 1.05;
-    color: var(--tc-text); margin-bottom: 16px;
-  }
-  .tc-header__sub {
-    font-size: 16px; color: var(--tc-text2); line-height: 1.75;
-    max-width: 520px; margin-bottom: 28px;
-  }
-  .tc-header__meta { display: flex; gap: 8px; flex-wrap: wrap; }
-  .tc-meta__badge {
-    display: inline-flex; align-items: center; gap: 7px;
-    font-size: 12px; font-weight: 500; color: var(--tc-text3);
-    background: var(--tc-s2); border: 1px solid var(--tc-b1);
-    padding: 5px 12px; border-radius: 20px;
-  }
-  .tc-meta__badge i { font-size: 13px; color: var(--tc-accl); }
-
-  /* Body */
-  .tc-body { position: relative; z-index: 1; padding: 0 32px; }
-  .tc-body__inner {
-    max-width: 1080px; margin: 0 auto;
-    display: grid; grid-template-columns: 200px 1fr;
-    gap: 56px; padding-top: 52px; padding-bottom: 80px;
-    align-items: start;
-  }
   @media (max-width: 860px) {
-    .tc-body__inner { grid-template-columns: 1fr; }
-    .tc-toc { display: none; }
+    .terms-toc { display: none !important; }
   }
-
-  /* TOC */
-  .tc-toc__sticky { position: sticky; top: 76px; }
-  .tc-toc__title {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.1em; color: var(--tc-text3);
-    margin-bottom: 10px; padding-left: 10px;
-  }
-  .tc-toc__nav { display: flex; flex-direction: column; gap: 1px; margin-bottom: 20px; }
-  .tc-toc__item {
-    display: flex; align-items: center; gap: 9px;
-    background: none; border: none; cursor: pointer;
-    padding: 7px 10px; border-radius: 8px; text-align: left; width: 100%;
-    font-family: var(--tc-font);
-    transition: background 0.15s;
-  }
-  .tc-toc__item:hover { background: rgba(255,255,255,0.04); }
-  .tc-toc__item--active { background: var(--tc-accbg); }
-  .tc-toc__num {
-    font-size: 10px; font-weight: 700; color: var(--tc-text3);
-    min-width: 18px; letter-spacing: 0.05em; transition: color 0.15s;
-  }
-  .tc-toc__item--active .tc-toc__num { color: var(--tc-accl); }
-  .tc-toc__label {
-    font-size: 12px; font-weight: 500; color: var(--tc-text3);
-    transition: color 0.15s; line-height: 1.3;
-  }
-  .tc-toc__item--active .tc-toc__label { color: var(--tc-accl); }
-  .tc-toc__actions { padding-left: 10px; }
-  .tc-toc__cta {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 12px; font-weight: 600; color: var(--tc-accl);
-    text-decoration: none; background: var(--tc-accbg);
-    border: 1px solid var(--tc-accborder);
-    padding: 8px 14px; border-radius: 8px; transition: all 0.15s;
-  }
-  .tc-toc__cta:hover { background: rgba(91,76,245,0.18); }
-  .tc-toc__cta i { font-size: 13px; }
-
-  /* Sections */
-  .tc-section {
-    padding: 36px 0; border-bottom: 1px solid var(--tc-b1);
-    scroll-margin-top: 84px;
-    opacity: 0;
-    animation: tc-reveal 0.6s cubic-bezier(0.16,1,0.3,1) forwards;
-  }
-  .tc-section:first-child { padding-top: 0; }
-  .tc-section:last-child { border-bottom: none; }
-
-  .tc-section__header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
-  .tc-section__icon {
-    width: 32px; height: 32px; flex-shrink: 0; border-radius: 9px;
-    background: var(--tc-accbg); border: 1px solid var(--tc-accborder);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--tc-accl); margin-top: 2px;
-  }
-  .tc-section__icon i { font-size: 15px; }
-  .tc-section__title-wrap { display: flex; align-items: baseline; gap: 9px; }
-  .tc-section__num { font-size: 10px; font-weight: 700; color: var(--tc-text3); letter-spacing: 0.06em; }
-  .tc-section__title { font-size: 17px; font-weight: 800; color: var(--tc-text); letter-spacing: -0.025em; }
-  .tc-section__body { padding-left: 46px; }
-
-  .tc-section__p { font-size: 14px; color: var(--tc-text2); line-height: 1.8; margin-bottom: 12px; }
-  .tc-section__p:last-child { margin-bottom: 0; }
-  .tc-section__list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-  .tc-section__li { display: flex; gap: 11px; align-items: flex-start; font-size: 14px; color: var(--tc-text2); line-height: 1.7; }
-  .tc-section__li-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--tc-accl); flex-shrink: 0; margin-top: 9px; opacity: 0.6; }
-
-  /* Contact */
-  .tc-contact { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
-  .tc-contact__row {
-    display: flex; align-items: center; gap: 11px;
-    background: var(--tc-s2); border: 1px solid var(--tc-b1);
-    border-radius: 10px; padding: 11px 14px; flex-wrap: wrap;
-  }
-  .tc-contact__row i { font-size: 15px; color: var(--tc-accl); flex-shrink: 0; }
-  .tc-contact__label { font-size: 12px; font-weight: 500; color: var(--tc-text3); min-width: 110px; }
-  .tc-contact__link { font-size: 13px; font-weight: 600; color: var(--tc-accl); text-decoration: none; transition: color 0.15s; }
-  .tc-contact__link:hover { color: #a89ff8; }
-
-  /* Acceptance */
-  .tc-acceptance {
-    display: flex; gap: 14px; align-items: flex-start;
-    background: var(--tc-s2); border: 1px solid var(--tc-accborder);
-    border-radius: 14px; padding: 22px 26px; margin-top: 44px;
-    position: relative; overflow: hidden;
-  }
-  .tc-acceptance::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(91,76,245,0.05) 0%, transparent 55%);
-    pointer-events: none;
-  }
-  .tc-acceptance__icon {
-    width: 34px; height: 34px; flex-shrink: 0; border-radius: 9px;
-    background: var(--tc-accbg); border: 1px solid var(--tc-accborder);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--tc-accl); margin-top: 1px;
-  }
-  .tc-acceptance__icon i { font-size: 15px; }
-  .tc-acceptance__title { font-size: 14px; font-weight: 800; color: var(--tc-text); margin-bottom: 5px; letter-spacing: -0.02em; }
-  .tc-acceptance__body { font-size: 13px; color: var(--tc-text2); line-height: 1.7; }
-
-  /* CTA row */
-  .tc-cta-row { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
-  .tc-btn-primary {
-    display: inline-flex; align-items: center; gap: 7px;
-    font-size: 13px; font-weight: 600; color: #fff;
-    background: var(--tc-acc); text-decoration: none;
-    padding: 11px 20px; border-radius: 10px;
-    box-shadow: 0 3px 14px rgba(91,76,245,0.35); transition: all 0.15s;
-  }
-  .tc-btn-primary:hover { background: var(--tc-acc2); transform: translateY(-1px); box-shadow: 0 6px 22px rgba(91,76,245,0.48); }
-  .tc-btn-primary i { font-size: 13px; }
-  .tc-btn-ghost {
-    display: inline-flex; align-items: center; gap: 7px;
-    font-size: 13px; font-weight: 500; color: var(--tc-text2);
-    background: rgba(255,255,255,0.04); border: 1px solid var(--tc-b2);
-    text-decoration: none; padding: 11px 20px; border-radius: 10px;
-    transition: all 0.15s;
-  }
-  .tc-btn-ghost:hover { color: var(--tc-text); background: rgba(255,255,255,0.07); transform: translateY(-1px); }
-
-  /* Footer */
-  .tc-footer { position: relative; z-index: 1; border-top: 1px solid var(--tc-b1); padding: 32px; }
-  .tc-footer__inner {
-    max-width: 1080px; margin: 0 auto;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 16px; flex-wrap: wrap;
-  }
-  .tc-footer__note { font-size: 12px; color: var(--tc-text3); }
-  .tc-footer__links { display: flex; gap: 18px; }
-  .tc-footer__link { font-size: 12px; font-weight: 500; color: var(--tc-text3); text-decoration: none; transition: color 0.15s; }
-  .tc-footer__link:hover { color: var(--tc-text2); }
 
   @media (max-width: 600px) {
-    .tc-section__body { padding-left: 0; }
-    .tc-cta-row { flex-direction: column; }
-    .tc-footer__inner { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .terms-section-body { padding-left: 0 !important; }
   }
 `;
 

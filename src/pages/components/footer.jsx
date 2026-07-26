@@ -1,8 +1,233 @@
-import React, {useState} from "react";
+import React, {useState, useRef} from "react";
 import {Link} from "react-router-dom";
 
-// ─── Social icon wrapper ──────────────────────────────────────────────────────
-function SocialLink({href, label, children, external = true}) {
+// ── Brand tokens (unchanged) ─────────────────────────────────────────────────
+const C = {
+  bg: "#F8F8F8",
+  bg1: "#F5F5F5",
+  bg2: "#F1F1F1",
+  bg3: "#ECECEC",
+  bg4: "#E8E8E8",
+  border: "rgba(43,43,43,0.06)",
+  border2: "rgba(43,43,43,0.10)",
+  border3: "rgba(43,43,43,0.14)",
+  text: "#2B2B2B",
+  text2: "#6E6E6E",
+  text3: "#858585",
+  text4: "#9A9A9A",
+  accent: "#2B2B2B",
+  accent2: "#454545",
+  green: "#16A34A",
+  blue: "#2563EB",
+  purple: "#7C3AED",
+  teal: "#0D9488",
+};
+
+// ── Dot for column headings ──────────────────────────────────────────────────
+const ColumnDot = ({color}) => (
+  <span
+    style={{
+      display: "inline-block",
+      width: 4,
+      height: 4,
+      borderRadius: "50%",
+      background: color,
+      marginRight: 6,
+      verticalAlign: "middle",
+      opacity: 0.5,
+    }}
+  />
+);
+
+// ── Newsletter form (simulated subscribe – replace with Resend later) ─────────
+function NewsletterForm() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState("idle"); // idle | loading | success | error
+  const [errorMsg, setErrorMsg] = useState("");
+  const timeoutRef = useRef(null);
+
+  const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+  // TODO: Replace with real Resend API call when ready
+  const fakeSubscribe = (value) =>
+    new Promise((resolve, reject) => {
+      timeoutRef.current = setTimeout(() => {
+        if (value.toLowerCase() === "taken@example.com") {
+          reject(new Error("That email is already subscribed."));
+        } else {
+          resolve();
+        }
+      }, 1400);
+    });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (status === "loading") return;
+
+    if (!email.trim()) {
+      setStatus("error");
+      setErrorMsg("Please enter an email address.");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setStatus("error");
+      setErrorMsg("Please enter a valid email address.");
+      return;
+    }
+
+    setStatus("loading");
+    setErrorMsg("");
+    try {
+      await fakeSubscribe(email);
+      setStatus("success");
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err.message || "Failed to subscribe. Please try again.");
+    }
+  };
+
+  const isSuccess = status === "success";
+  const isLoading = status === "loading";
+  const isError = status === "error";
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      style={{
+        display: "flex",
+        gap: 8,
+        width: "100%",
+        maxWidth: 360,
+        position: "relative",
+      }}
+    >
+      <div style={{position: "relative", flex: 1}}>
+        <input
+          type="email"
+          value={isSuccess ? "" : email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (status !== "idle") setStatus("idle");
+          }}
+          disabled={isLoading || isSuccess}
+          placeholder={isSuccess ? "Subscribed ✓" : "you@school.edu"}
+          aria-label="Email address"
+          aria-invalid={isError}
+          aria-describedby={isError ? "newsletter-error" : undefined}
+          style={{
+            width: "100%",
+            height: 42,
+            padding: "0 14px",
+            fontSize: 14,
+            color: isSuccess ? C.green : C.text,
+            fontWeight: isSuccess ? 600 : 400,
+            background: isSuccess
+              ? "rgba(22,163,74,0.06)"
+              : "rgba(255,255,255,0.9)",
+            border: `1px solid ${isError ? "rgba(220,38,38,0.4)" : C.border2}`,
+            borderRadius: 10,
+            outline: "none",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+            transition: "border-color 0.15s, background 0.15s",
+            boxSizing: "border-box",
+          }}
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={isLoading || isSuccess}
+        style={{
+          height: 42,
+          padding: "0 18px",
+          fontSize: 14,
+          fontWeight: 600,
+          color: "#fff",
+          border: "none",
+          borderRadius: 10,
+          cursor: isLoading || isSuccess ? "default" : "pointer",
+          whiteSpace: "nowrap",
+          background: isSuccess ? C.green : C.accent,
+          opacity: isLoading ? 0.85 : 1,
+          boxShadow: isSuccess
+            ? `0 2px 8px rgba(22,163,74,0.25)`
+            : `0 2px 8px rgba(43,43,43,0.2)`,
+          transition: "transform 0.12s, box-shadow 0.12s",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+        onMouseEnter={(e) => {
+          if (isLoading || isSuccess) return;
+          e.currentTarget.style.transform = "translateY(-1px)";
+          e.currentTarget.style.boxShadow = `0 4px 12px rgba(43,43,43,0.25)`;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = `0 2px 8px rgba(43,43,43,0.2)`;
+        }}
+      >
+        {isLoading ? (
+          <>
+            <span
+              style={{
+                width: 14,
+                height: 14,
+                borderRadius: "50%",
+                border: "2px solid rgba(255,255,255,0.4)",
+                borderTopColor: "#fff",
+                animation: "spin 0.7s linear infinite",
+                display: "inline-block",
+              }}
+            />
+            Joining…
+          </>
+        ) : isSuccess ? (
+          <>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            Subscribed
+          </>
+        ) : (
+          "Subscribe"
+        )}
+      </button>
+
+      {isError && (
+        <p
+          id="newsletter-error"
+          role="alert"
+          style={{
+            position: "absolute",
+            bottom: -22,
+            left: 0,
+            fontSize: 12,
+            color: "#DC2626",
+            margin: 0,
+          }}
+        >
+          {errorMsg}
+        </p>
+      )}
+    </form>
+  );
+}
+
+// ── Social link (restrained) ──────────────────────────────────────────────────
+function SocialLink({href, label, children, external = true, color}) {
   const [hovered, setHovered] = useState(false);
   return (
     <a
@@ -11,19 +236,15 @@ function SocialLink({href, label, children, external = true}) {
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
       style={{
-        width: 34,
-        height: 34,
-        borderRadius: 8,
+        width: 32,
+        height: 32,
+        borderRadius: 6,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: hovered
-          ? "rgba(251,191,36,0.12)"
-          : "rgba(255,255,255,0.04)",
-        border: `0.5px solid ${hovered ? "rgba(251,191,36,0.35)" : "rgba(255,255,255,0.08)"}`,
-        color: hovered ? "#fbbf24" : "#64748b",
-        transition: "all 0.18s",
-        transform: hovered ? "translateY(-2px)" : "translateY(0)",
+        background: hovered ? `${color}14` : "transparent",
+        color: hovered ? color : C.text3,
+        transition: "background 0.15s, color 0.15s",
         cursor: "pointer",
       }}
       onMouseEnter={() => setHovered(true)}
@@ -34,7 +255,7 @@ function SocialLink({href, label, children, external = true}) {
   );
 }
 
-// ─── Footer nav link ──────────────────────────────────────────────────────────
+// ── Footer link (simple, clean) ───────────────────────────────────────────────
 function FooterLink({to, children}) {
   const [hovered, setHovered] = useState(false);
   return (
@@ -43,230 +264,239 @@ function FooterLink({to, children}) {
         to={to}
         style={{
           fontSize: 13,
-          color: hovered ? "#e2e8f0" : "#64748b",
+          color: hovered ? C.text : C.text2,
           textDecoration: "none",
           transition: "color 0.15s",
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          lineHeight: 1,
+          display: "block",
+          lineHeight: 1.6,
         }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {hovered && (
-          <span style={{fontSize: 10, color: "#f59e0b", marginLeft: -2}}>
-            ›
-          </span>
-        )}
         {children}
       </Link>
     </li>
   );
 }
 
-// ─── Bottom bar link ──────────────────────────────────────────────────────────
-function LegalLink({to, children}) {
-  const [hovered, setHovered] = useState(false);
+// ── Trust badge (subtle) ──────────────────────────────────────────────────────
+function TrustBadge({icon, label}) {
   return (
-    <Link
-      to={to}
+    <div
       style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "6px 12px",
+        borderRadius: 8,
+        background: C.bg2,
+        border: `1px solid ${C.border}`,
+        color: C.text3,
         fontSize: 12,
-        color: hovered ? "#94a3b8" : "#475569",
-        textDecoration: "none",
-        transition: "color 0.15s",
+        fontWeight: 500,
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
-      {children}
-    </Link>
+      <span style={{display: "flex", color: C.text2}}>{icon}</span>
+      {label}
+    </div>
   );
 }
 
-// ─── Footer ───────────────────────────────────────────────────────────────────
+// ── Simple SVG trust icons ───────────────────────────────────────────────────
+const trustIcons = {
+  enterprise: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-6 4h1m4 0h1"
+      />
+    </svg>
+  ),
+  ai: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 2v3m0 14v3M4.2 4.2l2.1 2.1m11.4 11.4l2.1 2.1M2 12h3m14 0h3M4.2 19.8l2.1-2.1m11.4-11.4l2.1-2.1"
+      />
+      <circle cx="12" cy="12" r="3.5" />
+    </svg>
+  ),
+  secure: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 2l8 3.5v5.3c0 5-3.4 8.9-8 10.2-4.6-1.3-8-5.2-8-10.2V5.5L12 2z"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+    </svg>
+  ),
+  uptime: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3.2 2" />
+    </svg>
+  ),
+  privacy: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    >
+      <rect x="4.5" y="10.5" width="15" height="10" rx="2" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8 10.5V7a4 4 0 018 0v3.5"
+      />
+    </svg>
+  ),
+};
+
+// ── Main Footer ────────────────────────────────────────────────────────────────
 const Footer = () => {
   const year = new Date().getFullYear();
 
   return (
     <footer
       style={{
-        background: "linear-gradient(180deg, #0d1420 0%, #080d16 100%)",
-        borderTop: "0.5px solid rgba(255,255,255,0.06)",
+        background: "rgba(248,248,248,0.8)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        borderTop: `1px solid ${C.border}`,
         marginTop: "auto",
-        position: "relative",
-        overflow: "hidden",
+        padding: "80px 24px 32px",
       }}
     >
-      {/* Ambient glow */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: -80,
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: 600,
-          height: 200,
-          background:
-            "radial-gradient(ellipse, rgba(245,158,11,0.04) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after { animation-duration: 0.01ms !important; }
+        }
+      `}</style>
 
-      <div
-        style={{
-          maxWidth: 960,
-          margin: "0 auto",
-          padding: "56px 24px 0",
-          position: "relative",
-        }}
-      >
-        {/* ── Main grid ── */}
+      <div style={{maxWidth: 960, margin: "0 auto"}}>
+        {/* ── Newsletter ── */}
+        <div
+          style={{
+            padding: "40px 36px",
+            borderRadius: 16,
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.3) 100%)",
+            border: `1px solid ${C.border2}`,
+            marginBottom: 48,
+            boxShadow: "0 2px 12px rgba(0,0,0,0.02)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              marginBottom: 12,
+            }}
+          >
+            <span
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: C.green,
+              }}
+            />
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.6px",
+                color: C.text3,
+              }}
+            >
+              Newsletter
+            </span>
+          </div>
+          <h2
+            style={{
+              fontSize: 22,
+              fontWeight: 700,
+              letterSpacing: "-0.4px",
+              color: C.text,
+              margin: "0 0 8px",
+            }}
+          >
+            Stay informed
+          </h2>
+          <p
+            style={{
+              fontSize: 14,
+              color: C.text2,
+              lineHeight: 1.7,
+              marginBottom: 20,
+              maxWidth: 400,
+            }}
+          >
+            Product updates, tips, and insights for school administrators , a
+            few emails a month, no spam.
+          </p>
+          <NewsletterForm />
+        </div>
+
+        {/* ── Link columns (only pages that exist in navigation) ── */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-            gap: "40px 48px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+            gap: "48px 40px",
             marginBottom: 48,
           }}
         >
-          {/* Brand column */}
-          <div style={{gridColumn: "span 2", minWidth: 0}}>
-            <Link
-              to="/"
-              style={{
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 10,
-                marginBottom: 16,
-              }}
-            >
-              {/* Logo image – replaced the hardcoded “P” mark */}
-              <img
-                src="/logo.png"
-                alt="Protiba"
-                style={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: 8,
-                  objectFit: "contain",
-                  flexShrink: 0,
-                }}
-              />
-              <span
-                style={{
-                  fontSize: 18,
-                  fontWeight: 500,
-                  letterSpacing: "-0.3px",
-                  background: "linear-gradient(120deg, #fbbf24, #d97706)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                Protiba
-              </span>
-            </Link>
-
-            <p
-              style={{
-                fontSize: 13,
-                color: "#64748b",
-                lineHeight: 1.75,
-                maxWidth: 320,
-                marginBottom: 24,
-              }}
-            >
-              Intelligent scheduling for educational institutions. Eliminate
-              conflicts and build optimized timetables in minutes, not days.
-            </p>
-
-            {/* Status pill */}
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 7,
-                background: "rgba(16,185,129,0.08)",
-                border: "0.5px solid rgba(16,185,129,0.2)",
-                borderRadius: 20,
-                padding: "5px 12px",
-                marginBottom: 24,
-              }}
-            >
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "#10b981",
-                  boxShadow: "0 0 6px rgba(16,185,129,0.6)",
-                  display: "inline-block",
-                }}
-              />
-              <span
-                style={{
-                  fontSize: 11,
-                  color: "#10b981",
-                  fontWeight: 500,
-                  letterSpacing: "0.2px",
-                }}
-              >
-                All systems operational
-              </span>
-            </div>
-
-            {/* Social links */}
-            <div style={{display: "flex", gap: 8}}>
-              <SocialLink href="#" label="Twitter / X">
-                <svg
-                  width="15"
-                  height="15"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
-                </svg>
-              </SocialLink>
-              <SocialLink href="https://github.com/sigma700" label="GitHub">
-                <svg
-                  width="15"
-                  height="15"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                </svg>
-              </SocialLink>
-              <SocialLink
-                href="https://www.linkedin.com/in/allan-kirimi-31ba92323/"
-                label="LinkedIn"
-              >
-                <svg
-                  width="15"
-                  height="15"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                </svg>
-              </SocialLink>
-            </div>
-          </div>
-
-          {/* Quick links */}
+          {/* Product */}
           <div>
             <div
               style={{
                 fontSize: 11,
-                fontWeight: 500,
-                color: "#475569",
+                fontWeight: 700,
+                color: C.text,
                 textTransform: "uppercase",
-                letterSpacing: "0.6px",
-                marginBottom: 18,
+                letterSpacing: "0.8px",
+                marginBottom: 16,
               }}
             >
+              <ColumnDot color={C.green} />
               Product
             </div>
             <ul
@@ -276,11 +506,11 @@ const Footer = () => {
                 margin: 0,
                 display: "flex",
                 flexDirection: "column",
-                gap: 13,
+                gap: 10,
               }}
             >
               <FooterLink to="/home/demo">Demo</FooterLink>
-              <FooterLink to="/pricing">Pricing</FooterLink>
+              <FooterLink to="/home/pricing">Pricing</FooterLink>
               <FooterLink to="/home/manual">Documentation</FooterLink>
               <FooterLink to="/home/story">Our story</FooterLink>
             </ul>
@@ -291,13 +521,14 @@ const Footer = () => {
             <div
               style={{
                 fontSize: 11,
-                fontWeight: 500,
-                color: "#475569",
+                fontWeight: 700,
+                color: C.text,
                 textTransform: "uppercase",
-                letterSpacing: "0.6px",
-                marginBottom: 18,
+                letterSpacing: "0.8px",
+                marginBottom: 16,
               }}
             >
+              <ColumnDot color={C.blue} />
               Contact
             </div>
             <ul
@@ -307,7 +538,7 @@ const Footer = () => {
                 margin: 0,
                 display: "flex",
                 flexDirection: "column",
-                gap: 14,
+                gap: 10,
               }}
             >
               <li>
@@ -315,162 +546,104 @@ const Footer = () => {
                   href="mailto:allankirimi65@gmail.com"
                   style={{
                     fontSize: 13,
-                    color: "#64748b",
+                    color: C.text2,
                     textDecoration: "none",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 9,
                     transition: "color 0.15s",
                   }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#e2e8f0")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "#64748b")
-                  }
+                  onMouseEnter={(e) => (e.currentTarget.style.color = C.text)}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = C.text2)}
                 >
-                  <svg
-                    width="14"
-                    height="14"
-                    fill="none"
-                    stroke="#f59e0b"
-                    strokeWidth="1.5"
-                    viewBox="0 0 24 24"
-                    style={{flexShrink: 0, marginTop: 1}}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
                   allankirimi65@gmail.com
                 </a>
               </li>
-              <li>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: "#64748b",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: 9,
-                  }}
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    fill="none"
-                    stroke="#f59e0b"
-                    strokeWidth="1.5"
-                    viewBox="0 0 24 24"
-                    style={{flexShrink: 0, marginTop: 1}}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                  Nyeri, Kenya
-                </div>
-              </li>
+              <li style={{fontSize: 13, color: C.text2}}>Nyeri, Kenya</li>
             </ul>
+          </div>
 
-            {/* CTA */}
-            <div style={{marginTop: 28}}>
-              <Link
-                to="/home/demo"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 7,
-                  padding: "9px 16px",
-                  background: "rgba(245,158,11,0.1)",
-                  border: "0.5px solid rgba(245,158,11,0.3)",
-                  borderRadius: 8,
-                  fontSize: 12,
-                  fontWeight: 500,
-                  color: "#fbbf24",
-                  textDecoration: "none",
-                  transition: "all 0.18s",
-                  whiteSpace: "nowrap",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(245,158,11,0.16)";
-                  e.currentTarget.style.borderColor = "rgba(245,158,11,0.5)";
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(245,158,11,0.1)";
-                  e.currentTarget.style.borderColor = "rgba(245,158,11,0.3)";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                Try a free demo →
-              </Link>
+          {/* Legal */}
+          <div>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: C.text,
+                textTransform: "uppercase",
+                letterSpacing: "0.8px",
+                marginBottom: 16,
+              }}
+            >
+              <ColumnDot color={C.purple} />
+              Legal
             </div>
+            <ul
+              style={{
+                listStyle: "none",
+                padding: 0,
+                margin: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: 10,
+              }}
+            >
+              <FooterLink to="/privacy">Privacy</FooterLink>
+              <FooterLink to="/terms">Terms</FooterLink>
+              <FooterLink to="/cookies">Cookies</FooterLink>
+            </ul>
           </div>
         </div>
 
         {/* ── Trust strip ── */}
         <div
           style={{
-            borderTop: "0.5px solid rgba(255,255,255,0.05)",
-            padding: "20px 0",
+            borderTop: `1px solid ${C.border}`,
+            padding: "24px 0",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 32,
             flexWrap: "wrap",
-            marginBottom: 0,
+            justifyContent: "center",
+            gap: 10,
           }}
         >
-          {[
-            "Conflict-free scheduling",
-            "Multi-institution support",
-            "Automated generation",
-          ].map((item) => (
-            <div
-              key={item}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: 11,
-                color: "#334155",
-              }}
-            >
-              <span style={{color: "#10b981", fontSize: 12}}>✓</span>
-              {item}
-            </div>
-          ))}
+          <TrustBadge icon={trustIcons.enterprise} label="Enterprise ready" />
+          <TrustBadge icon={trustIcons.ai} label="AI powered" />
+          <TrustBadge icon={trustIcons.secure} label="Secure by design" />
+          <TrustBadge icon={trustIcons.uptime} label="99.9% uptime" />
+          <TrustBadge icon={trustIcons.privacy} label="Privacy first" />
         </div>
 
         {/* ── Bottom bar ── */}
         <div
           style={{
-            borderTop: "0.5px solid rgba(255,255,255,0.04)",
-            padding: "18px 0 24px",
+            borderTop: `1px solid ${C.border}`,
+            padding: "20px 0 0",
             display: "flex",
-            alignItems: "center",
             justifyContent: "space-between",
+            alignItems: "center",
             flexWrap: "wrap",
             gap: 12,
           }}
         >
-          <p style={{fontSize: 12, color: "#334155", margin: 0}}>
+          <p style={{fontSize: 12, color: C.text3, margin: 0}}>
             © {year} Protiba. All rights reserved.
           </p>
-          <div style={{display: "flex", alignItems: "center", gap: 20}}>
-            <LegalLink to="/privacy">Privacy policy</LegalLink>
-            <LegalLink to="/terms">Terms of service</LegalLink>
-            <LegalLink to="/cookies">Cookies</LegalLink>
+          <div style={{display: "flex", gap: 20}}>
+            <Link
+              to="/privacy"
+              style={{fontSize: 12, color: C.text3, textDecoration: "none"}}
+            >
+              Privacy
+            </Link>
+            <Link
+              to="/terms"
+              style={{fontSize: 12, color: C.text3, textDecoration: "none"}}
+            >
+              Terms
+            </Link>
+            <Link
+              to="/cookies"
+              style={{fontSize: 12, color: C.text3, textDecoration: "none"}}
+            >
+              Cookies
+            </Link>
           </div>
         </div>
       </div>

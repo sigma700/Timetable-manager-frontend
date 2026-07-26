@@ -906,7 +906,7 @@ function CTASection({user}) {
           }}
         >
           Join schools, colleges, and training institutions already running on
-          Protiba. Free to start — no credit card needed.
+          Protiba. Free to start , no credit card needed.
         </p>
 
         <div
@@ -1432,45 +1432,6 @@ const UserManual = () => {
             />
           ))}
         </div>
-      </div>
-
-      {/* ── Footer strip ─────────────────────────────────────────────────────── */}
-      <div
-        style={{
-          borderTop: "1px solid #E8E8E8",
-          padding: "28px 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "clamp(16px, 4vw, 32px)",
-          flexWrap: "wrap",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {[
-          {
-            Icon: CheckCircle2,
-            label: "Conflict-free scheduling",
-            color: "#16A34A",
-          },
-          {Icon: Sparkles, label: "Automated generation", color: "#DB2777"},
-          {Icon: Users, label: "Multi-institution support", color: "#2563EB"},
-        ].map(({Icon, label, color}) => (
-          <div
-            key={label}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 7,
-              fontSize: 12,
-              color: "#898989",
-            }}
-          >
-            <Icon size={13} color={color} strokeWidth={1.5} />
-            {label}
-          </div>
-        ))}
       </div>
     </main>
   );
