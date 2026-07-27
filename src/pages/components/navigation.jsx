@@ -34,7 +34,7 @@ import {
 const Icons = {
   Logo: () => (
     <img
-      src="/logo.png"
+      src="/new-protiba-logo.png"
       alt="Protiba"
       style={{
         width: 32,
