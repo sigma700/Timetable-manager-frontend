@@ -1216,7 +1216,7 @@ const Timetables = () => {
         body="Generate your first timetable to see it here."
         action={{
           label: "Generate timetable",
-          fn: () => (window.location.href = "/generate"),
+          fn: () => (window.location.href = "/home/create-table"),
         }}
         {...navProps}
       />

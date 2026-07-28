@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import {useAuthStore} from "../store/authStore";
 import {useNavigate, Link} from "react-router-dom";
+import {Navigation} from "./components/navigation";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const Icons = {
@@ -178,27 +179,67 @@ const getStrength = (pw) => {
 
 // ─── Trust Badges ─────────────────────────────────────────────────────────────
 const trustBadges = [
-  "SSL encrypted",
-  "GDPR compliant",
-  "No credit card required",
+  {icon: <Icons.Shield />, text: "SSL Encrypted"},
+  {icon: <Icons.Shield />, text: "GDPR Compliant"},
+  {icon: <Icons.Shield />, text: "No Credit Card"},
 ];
 
-// ─── Social Proof ─────────────────────────────────────────────────────────────
-const testimonials = [
+// ─── Timetable Image Carousel ──────────────────────────────────────────────
+// Replace these URLs with your actual images
+const timetableImages = [
   {
-    text: "Saved our admin team three full weeks every semester.",
-    author: "St. Mary's Academy",
-    role: "Nairobi",
+    src: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=600&h=400&fit=crop",
+    alt: "Timetable dashboard preview",
+    title: "Your institution's schedule, automated.",
+    subtitle:
+      "Join hundreds of schools already saving weeks of administrative work every semester.",
   },
   {
-    text: "Zero conflicts in our first generated timetable. Remarkable.",
-    author: "Greenfield College",
-    role: "Mombasa",
+    src: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&h=400&fit=crop",
+    alt: "Class schedule overview",
+    title: "Conflict-free timetables in minutes.",
+    subtitle:
+      "Our constraint engine resolves teacher, room, and class clashes automatically.",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&h=400&fit=crop",
+    alt: "Teacher allocation view",
+    title: "Real-time sync for your team.",
+    subtitle: "Push last-minute changes instantly. Everyone stays in sync.",
   },
 ];
+
+// ─── Helper: user-friendly error messages ──────────────────────────────────
+const getUserFriendlyError = (errorMessage) => {
+  if (!errorMessage) return null;
+  const lower = errorMessage.toLowerCase();
+  // Network / technical errors – hide from user
+  if (
+    lower.includes("failed to fetch") ||
+    lower.includes("networkerror") ||
+    lower.includes("network") ||
+    lower.includes("fetch") ||
+    lower.includes("unexpected token") ||
+    lower.includes("json") ||
+    lower.includes("syntaxerror") ||
+    lower.includes("internal server error") ||
+    lower.includes("500") ||
+    lower.includes("502") ||
+    lower.includes("503") ||
+    lower.includes("504") ||
+    lower.includes("econnrefused") ||
+    lower.includes("timeout") ||
+    lower.includes("aborted")
+  ) {
+    return "Unable to connect to the server. Please check your internet connection and try again.";
+  }
+  // Otherwise return the original message (user-facing server error)
+  return errorMessage;
+};
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 const SignUp = () => {
+  // Form state
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -206,35 +247,118 @@ const SignUp = () => {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(null);
-  const [testimonialIdx, setTestimonialIdx] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Validation state
+  const [touched, setTouched] = useState({});
+  const [errors, setErrors] = useState({});
 
   const {signUp, isLoading, error, isAuthenticated} = useAuthStore();
   const navigate = useNavigate();
   const strength = getStrength(password);
 
+  // Auto-advance carousel
   useEffect(() => {
-    const t = setInterval(
-      () => setTestimonialIdx((i) => (i + 1) % testimonials.length),
-      4000,
-    );
-    return () => clearInterval(t);
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % timetableImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/home", {replace: true});
     }
-  });
+  }, [isAuthenticated, navigate]);
+
+  // ─── Validation functions ──────────────────────────────────────────────
+  const validateField = (name, value) => {
+    let error = "";
+    switch (name) {
+      case "firstName":
+        if (!value.trim()) error = "First name is required";
+        break;
+      case "lastName":
+        if (!value.trim()) error = "Last name is required";
+        break;
+      case "email":
+        if (!value) error = "Email is required";
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+          error = "Please enter a valid email address";
+        break;
+      case "password":
+        if (!value) error = "Password is required";
+        else if (value.length < 8)
+          error = "Password must be at least 8 characters";
+        else if (!/[A-Z]/.test(value))
+          error = "Include at least one uppercase letter";
+        else if (!/[0-9]/.test(value)) error = "Include at least one number";
+        else if (!/[^A-Za-z0-9]/.test(value))
+          error = "Include at least one symbol";
+        break;
+      case "terms":
+        if (!value) error = "You must agree to the terms";
+        break;
+      default:
+        break;
+    }
+    return error;
+  };
+
+  const handleFieldChange = (name, value) => {
+    const setters = {
+      firstName: setFirstName,
+      lastName: setLastName,
+      email: setEmail,
+      password: setPassword,
+    };
+    setters[name]?.(value);
+
+    if (touched[name]) {
+      const error = validateField(name, value);
+      setErrors((prev) => ({...prev, [name]: error}));
+    }
+  };
+
+  const handleFieldBlur = (name, value) => {
+    setTouched((prev) => ({...prev, [name]: true}));
+    const error = validateField(name, value);
+    setErrors((prev) => ({...prev, [name]: error}));
+  };
+
+  const validateForm = () => {
+    const fields = {
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      password: password,
+      terms: agreeToTerms,
+    };
+    const newErrors = {};
+    let hasError = false;
+    Object.keys(fields).forEach((key) => {
+      const error = validateField(key, fields[key]);
+      if (error) {
+        newErrors[key] = error;
+        hasError = true;
+      }
+    });
+    setErrors(newErrors);
+    const allTouched = {};
+    Object.keys(fields).forEach((key) => (allTouched[key] = true));
+    setTouched(allTouched);
+    return !hasError;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!agreeToTerms) return;
+    if (!validateForm()) return;
     try {
       await signUp(email, password, firstName, lastName);
     } catch {}
   };
 
-  // Safe field state checker (no eval)
+  // ─── Field state helpers ──────────────────────────────────────────────
   const getFieldState = (name) => {
     const value = {firstName, lastName, email, password}[name];
     return value && value.length > 0;
@@ -243,75 +367,72 @@ const SignUp = () => {
   const fieldClass = (name) =>
     `su-field ${focused === name ? "su-field--focused" : ""} ${
       getFieldState(name) ? "su-field--filled" : ""
-    }`;
+    } ${touched[name] && errors[name] ? "su-field--error" : ""}`;
+
+  // ─── Navigation props ──────────────────────────────────────────────────
+  const userName = "Guest";
+  const institutionName = "Protiba";
+  const notificationCount = 0;
+  const handleLogout = () => {};
+
+  // ─── Filter error for display ──────────────────────────────────────────
+  const displayError = error ? getUserFriendlyError(error) : null;
 
   return (
     <>
       <style>{css}</style>
+      <Navigation
+        userName={userName}
+        institutionName={institutionName}
+        notificationCount={notificationCount}
+        onLogout={handleLogout}
+      />
       <div className="su-root">
         {/* ── Left panel ── */}
         <div className="su-left">
           <div className="su-left__inner">
-            {/* Logo */}
-            <Link to="/" className="su-logo">
-              <Icons.Logo />
-              <span>Protiba</span>
-            </Link>
-
-            {/* Heading */}
-            <div className="su-left__hero">
-              <div className="su-eyebrow">
-                <span className="su-eyebrow__dot" />
-                Free to get started
-              </div>
-              <h1 className="su-left__title">
-                Your institution's
-                <br />
-                <span className="su-left__title-accent">
-                  schedule, automated.
-                </span>
-              </h1>
-              <p className="su-left__sub">
-                Join hundreds of schools already saving weeks of administrative
-                work every semester.
-              </p>
-            </div>
-
-            {/* Testimonial carousel - FIXED */}
-            <div className="su-testimonial">
-              <div
-                className="su-testimonial__track"
-                style={{transform: `translateY(-${testimonialIdx * 100}%)`}}
-              >
-                {testimonials.map((t, i) => (
-                  <div key={i} className="su-testimonial__item">
-                    <p className="su-testimonial__text">"{t.text}"</p>
-                    <div className="su-testimonial__author">
-                      <span className="su-testimonial__name">{t.author}</span>
-                      <span className="su-testimonial__role">{t.role}</span>
+            {/* Carousel - full remaining space */}
+            <div className="su-carousel">
+              <div className="su-carousel__viewport">
+                <div
+                  className="su-carousel__track"
+                  style={{transform: `translateX(-${currentSlide * 100}%)`}}
+                >
+                  {timetableImages.map((img, idx) => (
+                    <div key={idx} className="su-carousel__slide">
+                      <img
+                        src={img.src}
+                        alt={img.alt}
+                        className="su-carousel__img"
+                      />
+                      <div className="su-carousel__overlay">
+                        <h2 className="su-carousel__title">{img.title}</h2>
+                        <p className="su-carousel__subtitle">{img.subtitle}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-              <div className="su-testimonial__dots">
-                {testimonials.map((_, i) => (
+              <div className="su-carousel__dots">
+                {timetableImages.map((_, idx) => (
                   <button
-                    key={i}
-                    className={`su-testimonial__dot ${
-                      i === testimonialIdx ? "su-testimonial__dot--active" : ""
+                    key={idx}
+                    className={`su-carousel__dot ${
+                      idx === currentSlide ? "su-carousel__dot--active" : ""
                     }`}
-                    onClick={() => setTestimonialIdx(i)}
+                    onClick={() => setCurrentSlide(idx)}
+                    aria-label={`Slide ${idx + 1}`}
                   />
                 ))}
               </div>
             </div>
 
-            {/* Trust */}
+            {/* Trust badges */}
             <div className="su-trust">
               {trustBadges.map((b) => (
-                <div key={b} className="su-trust__badge">
-                  <Icons.Shield />
-                  {b}
+                <div key={b.text} className="su-trust__badge">
+                  {b.icon}
+                  {b.text}
                 </div>
               ))}
             </div>
@@ -331,13 +452,14 @@ const SignUp = () => {
               </p>
             </div>
 
-            {error && (
+            {/* ── Display error only if it's a user-facing message ── */}
+            {displayError && (
               <div className="su-error">
-                <span>{error}</span>
+                <span>{displayError}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="su-form">
+            <form onSubmit={handleSubmit} className="su-form" noValidate>
               {/* Name row */}
               <div className="su-form__row">
                 <div className={fieldClass("firstName")}>
@@ -350,11 +472,19 @@ const SignUp = () => {
                     placeholder="First"
                     required
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    onChange={(e) =>
+                      handleFieldChange("firstName", e.target.value)
+                    }
                     onFocus={() => setFocused("firstName")}
-                    onBlur={() => setFocused(null)}
+                    onBlur={(e) => {
+                      setFocused(null);
+                      handleFieldBlur("firstName", e.target.value);
+                    }}
                     className="su-field__input"
                   />
+                  {touched.firstName && errors.firstName && (
+                    <div className="su-field__error">{errors.firstName}</div>
+                  )}
                 </div>
                 <div className={fieldClass("lastName")}>
                   <label className="su-field__label">
@@ -365,11 +495,19 @@ const SignUp = () => {
                     placeholder="Last"
                     required
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    onChange={(e) =>
+                      handleFieldChange("lastName", e.target.value)
+                    }
                     onFocus={() => setFocused("lastName")}
-                    onBlur={() => setFocused(null)}
+                    onBlur={(e) => {
+                      setFocused(null);
+                      handleFieldBlur("lastName", e.target.value);
+                    }}
                     className="su-field__input"
                   />
+                  {touched.lastName && errors.lastName && (
+                    <div className="su-field__error">{errors.lastName}</div>
+                  )}
                 </div>
               </div>
 
@@ -384,11 +522,17 @@ const SignUp = () => {
                   placeholder="you@institution.edu"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => handleFieldChange("email", e.target.value)}
                   onFocus={() => setFocused("email")}
-                  onBlur={() => setFocused(null)}
+                  onBlur={(e) => {
+                    setFocused(null);
+                    handleFieldBlur("email", e.target.value);
+                  }}
                   className="su-field__input"
                 />
+                {touched.email && errors.email && (
+                  <div className="su-field__error">{errors.email}</div>
+                )}
               </div>
 
               {/* Password */}
@@ -403,9 +547,14 @@ const SignUp = () => {
                     placeholder="Create a strong password"
                     required
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) =>
+                      handleFieldChange("password", e.target.value)
+                    }
                     onFocus={() => setFocused("password")}
-                    onBlur={() => setFocused(null)}
+                    onBlur={(e) => {
+                      setFocused(null);
+                      handleFieldBlur("password", e.target.value);
+                    }}
                     className="su-field__input su-field__input--pw"
                   />
                   <button
@@ -417,7 +566,9 @@ const SignUp = () => {
                     {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
                   </button>
                 </div>
-                {/* Strength meter */}
+                {touched.password && errors.password && (
+                  <div className="su-field__error">{errors.password}</div>
+                )}
                 {password && (
                   <div className="su-strength">
                     <div className="su-strength__bars">
@@ -457,37 +608,46 @@ const SignUp = () => {
                 </div>
               </div>
 
-              {/* Terms and conditions - FIXED: fully clickable checkbox */}
-              <label
-                className="su-terms"
-                onClick={() => setAgreeToTerms((prev) => !prev)}
-              >
-                <div
-                  className={`su-checkbox ${
-                    agreeToTerms ? "su-checkbox--checked" : ""
-                  }`}
+              {/* Terms */}
+              <div className="su-terms-wrapper">
+                <label
+                  className="su-terms"
+                  onClick={() => {
+                    const newVal = !agreeToTerms;
+                    setAgreeToTerms(newVal);
+                    handleFieldChange("terms", newVal);
+                  }}
                 >
-                  {agreeToTerms && <Icons.Check />}
-                </div>
-                <span>
-                  I agree to the{" "}
-                  <Link
-                    to="/terms"
-                    className="su-link"
-                    onClick={(e) => e.stopPropagation()}
+                  <div
+                    className={`su-checkbox ${
+                      agreeToTerms ? "su-checkbox--checked" : ""
+                    }`}
                   >
-                    terms and conditions
-                  </Link>
-                </span>
-              </label>
+                    {agreeToTerms && <Icons.Check />}
+                  </div>
+                  <span>
+                    I agree to the{" "}
+                    <Link
+                      to="/terms"
+                      className="su-link"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      terms and conditions
+                    </Link>
+                  </span>
+                </label>
+                {touched.terms && errors.terms && (
+                  <div className="su-field__error">{errors.terms}</div>
+                )}
+              </div>
 
-              {/* Submit button - enabled only when terms are accepted */}
+              {/* Submit */}
               <button
                 type="submit"
                 className={`su-btn-submit ${
                   isLoading ? "su-btn-submit--loading" : ""
                 }`}
-                disabled={isLoading || !agreeToTerms}
+                disabled={isLoading}
               >
                 {isLoading ? (
                   <>
@@ -512,21 +672,22 @@ const SignUp = () => {
   );
 };
 
-// ─── Styles (FIXED: carousel and checkbox) ───────────────────────────────────
+// ─── CSS ──────────────────────────────────────────────────────────────────
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0d0d10;
-    --surface: #131316;
-    --surface-2: #1a1a1f;
-    --surface-3: #212128;
-    --border: rgba(255,255,255,0.07);
+    --bg: #F8F8F8;
+    --surface: #FFFFFF;
+    --surface-2: #F5F5F5;
+    --surface-3: #F1F1F1;
+    --border: rgba(43,43,43,0.06);
     --border-focus: rgba(124,58,237,0.45);
-    --text: #f0f0f5;
-    --text-2: #9898a8;
-    --text-3: #55556a;
+    --text: #2B2B2B;
+    --text-2: #6E6E6E;
+    --text-3: #858585;
+    --text-4: #9A9A9A;
     --accent: #7c3aed;
     --accent-light: #a78bfa;
     --accent-glow: rgba(124,58,237,0.14);
@@ -543,13 +704,18 @@ const css = `
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    padding-top: 68px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     -webkit-font-smoothing: antialiased;
   }
+
   @media (max-width: 860px) {
-    .su-root { grid-template-columns: 1fr; }
-    .su-left { display: none; }
+    .su-root {
+      grid-template-columns: 1fr;
+      min-height: auto;
+      padding-top: 68px;
+    }
   }
 
   /* ── Left ── */
@@ -560,21 +726,26 @@ const css = `
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-height: 100%;
   }
   .su-left::before {
     content: '';
     position: absolute;
-    top: -120px; left: -80px;
-    width: 500px; height: 500px;
-    background: radial-gradient(ellipse, rgba(124,58,237,0.12) 0%, transparent 70%);
+    top: -120px;
+    left: -80px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(124,58,237,0.08) 0%, transparent 70%);
     pointer-events: none;
   }
   .su-left::after {
     content: '';
     position: absolute;
-    bottom: -80px; right: -80px;
-    width: 350px; height: 350px;
-    background: radial-gradient(ellipse, rgba(167,139,250,0.06) 0%, transparent 70%);
+    bottom: -80px;
+    right: -80px;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(ellipse, rgba(167,139,250,0.05) 0%, transparent 70%);
     pointer-events: none;
   }
   .su-left__inner {
@@ -583,9 +754,22 @@ const css = `
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 40px 48px;
-    gap: 40px;
+    padding: 40px 48px 32px;
+    gap: 24px;
   }
+  @media (max-width: 860px) {
+    .su-left__inner {
+      padding: 24px 20px 16px;
+      min-height: 50vh;
+      gap: 16px;
+    }
+    .su-left {
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      min-height: 0;
+    }
+  }
+
   .su-logo {
     display: flex;
     align-items: center;
@@ -597,103 +781,107 @@ const css = `
     letter-spacing: -0.02em;
     width: fit-content;
   }
-  .su-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--accent-light);
-    background: var(--accent-glow);
-    border: 1px solid rgba(124,58,237,0.2);
-    padding: 5px 12px;
-    border-radius: 20px;
-    margin-bottom: 16px;
-    width: fit-content;
-  }
-  .su-eyebrow__dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent-light);
-    box-shadow: 0 0 8px var(--accent-light);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
-  .su-left__hero { flex: 1; }
-  .su-left__title {
-    font-size: clamp(26px, 2.8vw, 36px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    margin-bottom: 14px;
-  }
-  .su-left__title-accent {
-    background: linear-gradient(135deg, var(--accent-light) 0%, #c4b5fd 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .su-left__sub {
-    font-size: 14px;
-    color: var(--text-2);
-    line-height: 1.7;
-    max-width: 340px;
-  }
 
-  /* ── Testimonial Carousel - FIXED ── */
-  .su-testimonial {
+  /* ─── Carousel ─── */
+  .su-carousel {
+    flex: 1;
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 24px;
     overflow: hidden;
     position: relative;
-    height: 120px;
-  }
-  .su-testimonial__track {
     display: flex;
     flex-direction: column;
+    min-height: 240px;
+  }
+  .su-carousel__viewport {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+  .su-carousel__track {
+    display: flex;
     height: 100%;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
     will-change: transform;
   }
-  .su-testimonial__item {
+  .su-carousel__slide {
     flex: 0 0 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    position: relative;
+    height: 100%;
+    min-height: 200px;
   }
-  .su-testimonial__text {
+  .su-carousel__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .su-carousel__overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24px 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+    color: #fff;
+    pointer-events: none;
+  }
+  .su-carousel__title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .su-carousel__subtitle {
     font-size: 13px;
-    color: var(--text-2);
-    line-height: 1.65;
-    font-style: italic;
-    margin-bottom: 10px;
+    font-weight: 400;
+    opacity: 0.9;
+    line-height: 1.5;
   }
-  .su-testimonial__author {
+  @media (max-width: 860px) {
+    .su-carousel__title {
+      font-size: 18px;
+    }
+    .su-carousel__subtitle {
+      font-size: 12px;
+    }
+  }
+
+  .su-carousel__dots {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: auto;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 0;
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
   }
-  .su-testimonial__name { font-size: 12px; font-weight: 600; color: var(--text); }
-  .su-testimonial__role { font-size: 11px; color: var(--text-3); }
-  .su-testimonial__dots { position: absolute; bottom: 14px; left: 24px; display: flex; gap: 5px; }
-  .su-testimonial__dot {
-    width: 5px; height: 5px;
+  .su-carousel__dot {
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: var(--border);
+    background: var(--text-4);
     border: none;
-    cursor: pointer;
-    transition: background var(--t), transform var(--t);
     padding: 0;
+    cursor: pointer;
+    transition: all var(--t);
   }
-  .su-testimonial__dot--active { background: var(--accent-light); transform: scale(1.3); }
+  .su-carousel__dot--active {
+    background: var(--accent);
+    transform: scale(1.3);
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
 
   /* ── Trust ── */
-  .su-trust { display: flex; flex-direction: column; gap: 8px; }
+  .su-trust {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: auto;
+    flex-shrink: 0;
+  }
   .su-trust__badge {
     display: flex;
     align-items: center;
@@ -711,19 +899,42 @@ const css = `
     padding: 48px 32px;
     overflow-y: auto;
   }
+  @media (max-width: 860px) {
+    .su-right {
+      padding: 32px 20px;
+    }
+  }
   .su-form-wrap {
     width: 100%;
     max-width: 420px;
     animation: formIn 0.6s ease both;
   }
-  @keyframes formIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes formIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-  .su-form-header { margin-bottom: 28px; }
-  .su-form-header__title { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; color: var(--text); margin-bottom: 6px; }
-  .su-form-header__sub { font-size: 13px; color: var(--text-3); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .su-form-header {
+    margin-bottom: 28px;
+  }
+  .su-form-header__title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .su-form-header__sub {
+    font-size: 13px;
+    color: var(--text-3);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
 
   .su-link {
-    color: var(--accent-light);
+    color: var(--accent);
     text-decoration: none;
     font-weight: 500;
     display: inline-flex;
@@ -731,9 +942,10 @@ const css = `
     gap: 3px;
     transition: color var(--t);
   }
-  .su-link:hover { color: #c4b5fd; }
+  .su-link:hover {
+    color: #6d28d9;
+  }
 
-  /* ── Error ── */
   .su-error {
     background: rgba(244,63,94,0.07);
     border: 1px solid rgba(244,63,94,0.2);
@@ -744,23 +956,44 @@ const css = `
     margin-bottom: 20px;
   }
 
-  /* ── Form ── */
-  .su-form { display: flex; flex-direction: column; gap: 14px; }
-  .su-form__row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .su-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .su-form__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 480px) {
+    .su-form__row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
 
-  /* ── Fields ── */
-  .su-field { display: flex; flex-direction: column; gap: 5px; }
+  .su-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
   .su-field__label {
     font-size: 12px;
     font-weight: 500;
-    color: var(--text-2);
+    color: var(--text-3);
     display: flex;
     align-items: center;
     gap: 5px;
     transition: color var(--t);
   }
-  .su-field--focused .su-field__label { color: var(--accent-light); }
-  .su-field__req { color: var(--red); font-size: 11px; }
+  .su-field--focused .su-field__label {
+    color: var(--accent);
+  }
+  .su-field__req {
+    color: var(--red);
+    font-size: 11px;
+  }
   .su-field__input {
     background: var(--surface-2);
     border: 1px solid var(--border);
@@ -774,14 +1007,24 @@ const css = `
     transition: border-color var(--t), background var(--t), box-shadow var(--t);
     -webkit-appearance: none;
   }
-  .su-field__input::placeholder { color: var(--text-3); }
+  .su-field__input::placeholder {
+    color: var(--text-4);
+  }
   .su-field__input:focus {
     border-color: var(--border-focus);
-    background: var(--surface-3);
+    background: var(--surface);
     box-shadow: 0 0 0 3px rgba(124,58,237,0.09);
   }
-  .su-field__input--pw { padding-right: 44px; }
-  .su-field__control { position: relative; }
+  .su-field--error .su-field__input {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(244,63,94,0.12);
+  }
+  .su-field__input--pw {
+    padding-right: 44px;
+  }
+  .su-field__control {
+    position: relative;
+  }
   .su-field__toggle {
     position: absolute;
     right: 12px;
@@ -789,23 +1032,34 @@ const css = `
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: var(--text-3);
+    color: var(--text-4);
     cursor: pointer;
     display: flex;
     align-items: center;
     padding: 2px;
     transition: color var(--t);
   }
-  .su-field__toggle:hover { color: var(--text-2); }
+  .su-field__toggle:hover {
+    color: var(--text-2);
+  }
+  .su-field__error {
+    font-size: 11px;
+    color: var(--red);
+    margin-top: 2px;
+    font-weight: 500;
+  }
 
-  /* ── Password Strength ── */
   .su-strength {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-top: 4px;
   }
-  .su-strength__bars { display: flex; gap: 4px; flex: 1; }
+  .su-strength__bars {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+  }
   .su-strength__bar {
     flex: 1;
     height: 3px;
@@ -813,7 +1067,13 @@ const css = `
     background: var(--surface-3);
     transition: background 0.3s ease;
   }
-  .su-strength__label { font-size: 11px; font-weight: 600; min-width: 44px; text-align: right; transition: color 0.3s ease; }
+  .su-strength__label {
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 44px;
+    text-align: right;
+    transition: color 0.3s ease;
+  }
 
   .su-pw-rules {
     display: flex;
@@ -840,7 +1100,11 @@ const css = `
     border-color: rgba(16,185,129,0.2);
   }
 
-  /* ── Custom Checkbox - FIXED ── */
+  .su-terms-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
   .su-terms {
     display: flex;
     align-items: flex-start;
@@ -852,7 +1116,8 @@ const css = `
     user-select: none;
   }
   .su-checkbox {
-    width: 18px; height: 18px;
+    width: 18px;
+    height: 18px;
     border-radius: 5px;
     border: 1.5px solid var(--border);
     background: var(--surface-2);
@@ -874,7 +1139,6 @@ const css = `
     z-index: 2;
   }
 
-  /* ── Submit Button ── */
   .su-btn-submit {
     display: flex;
     align-items: center;
@@ -899,12 +1163,20 @@ const css = `
     box-shadow: 0 6px 24px rgba(124,58,237,0.4);
     transform: translateY(-1px);
   }
-  .su-btn-submit:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; transform: none; }
-  .su-btn-submit--loading { pointer-events: none; }
+  .su-btn-submit:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+  .su-btn-submit--loading {
+    pointer-events: none;
+  }
 
-  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 
-  /* ── Footer note ── */
   .su-footer-note {
     font-size: 11px;
     color: var(--text-3);

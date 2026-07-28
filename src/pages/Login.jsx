@@ -1,8 +1,9 @@
-import React, {useEffect, useState} from "react";
+import React, {useState, useEffect} from "react";
 import {useAuthStore} from "../store/authStore";
-import {useNavigate, Link, replace} from "react-router-dom";
+import {useNavigate, Link} from "react-router-dom";
+import {Navigation} from "./components/navigation";
 
-// ─── Icons (same set as SignUp) ───────────────────────────────────────────────
+// ─── Icons ────────────────────────────────────────────────────────────────────
 const Icons = {
   Logo: () => (
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -128,31 +129,73 @@ const Icons = {
       />
     </svg>
   ),
-  Sparkle: () => (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+  Check: () => (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
       <path
-        d="M7 1v2M7 11v2M1 7h2M11 7h2M3.05 3.05l1.42 1.42M9.54 9.54l1.41 1.41M3.05 10.95l1.42-1.41M9.54 4.46l1.41-1.41"
+        d="M2 6l3 3 5-5"
         stroke="currentColor"
-        strokeWidth="1.3"
+        strokeWidth="1.5"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   ),
 };
 
-// ─── Left-panel feature list ──────────────────────────────────────────────────
-const features = [
+// ─── Helper: user-friendly error messages ──────────────────────────────────
+const getUserFriendlyError = (errorMessage) => {
+  if (!errorMessage) return null;
+  const lower = errorMessage.toLowerCase();
+  // Network / technical errors – hide from user
+  if (
+    lower.includes("failed to fetch") ||
+    lower.includes("networkerror") ||
+    lower.includes("network") ||
+    lower.includes("fetch") ||
+    lower.includes("unexpected token") ||
+    lower.includes("json") ||
+    lower.includes("syntaxerror") ||
+    lower.includes("internal server error") ||
+    lower.includes("500") ||
+    lower.includes("502") ||
+    lower.includes("503") ||
+    lower.includes("504") ||
+    lower.includes("econnrefused") ||
+    lower.includes("timeout") ||
+    lower.includes("aborted")
+  ) {
+    return "Unable to connect to the server. Please check your internet connection and try again.";
+  }
+  // Otherwise return the original message (user-facing server error)
+  return errorMessage;
+};
+
+// ─── Trust Badges ─────────────────────────────────────────────────────────────
+const trustBadges = [
+  {icon: <Icons.Shield />, text: "SSL Encrypted"},
+  {icon: <Icons.Shield />, text: "GDPR Compliant"},
+  {icon: <Icons.Shield />, text: "No Credit Card"},
+];
+
+// ─── Carousel Images ──────────────────────────────────────────────────────────
+const loginImages = [
   {
-    title: "Conflict-free timetables",
-    desc: "Our engine resolves room, teacher, and class clashes automatically.",
+    src: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=600&h=400&fit=crop",
+    alt: "Timetable dashboard preview",
+    title: "Welcome back.",
+    subtitle: "Continue building smarter timetables for your institution.",
   },
   {
-    title: "Instant schedule updates",
-    desc: "Push changes to all stakeholders in a single click.",
+    src: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&h=400&fit=crop",
+    alt: "Class schedule overview",
+    title: "All your schedules, one place.",
+    subtitle: "Instantly access every timetable, teacher, and room.",
   },
   {
-    title: "Works for any institution",
-    desc: "Primary schools to universities — fully configurable.",
+    src: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&h=400&fit=crop",
+    alt: "Teacher allocation view",
+    title: "Stay in sync, always.",
+    subtitle: "Real‑time updates keep your entire team aligned.",
   },
 ];
 
@@ -163,9 +206,18 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(null);
   const [rememberMe, setRememberMe] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const {logIn, isLoading, error, isAuthenticated} = useAuthStore();
   const navigate = useNavigate();
+
+  // Auto-advance carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % loginImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -180,68 +232,78 @@ const Login = () => {
     } catch {}
   };
 
-  const f = (name) => {
-    const val = name === "email" ? email : password;
-    return `li-field ${focused === name ? "li-field--focused" : ""} ${val ? "li-field--filled" : ""}`;
+  // ─── Field helpers ─────────────────────────────────────────────────────
+  const getFieldState = (name) => {
+    const value = {email, password}[name];
+    return value && value.length > 0;
   };
+
+  const fieldClass = (name) =>
+    `li-field ${focused === name ? "li-field--focused" : ""} ${
+      getFieldState(name) ? "li-field--filled" : ""
+    }`;
+
+  // ─── Navigation props ──────────────────────────────────────────────────
+  const userName = "Guest";
+  const institutionName = "Protiba";
+  const notificationCount = 0;
+  const handleLogout = () => {};
 
   return (
     <>
       <style>{css}</style>
+      <Navigation
+        userName={userName}
+        institutionName={institutionName}
+        notificationCount={notificationCount}
+        onLogout={handleLogout}
+      />
       <div className="li-root">
         {/* ── Left panel ── */}
         <div className="li-left">
           <div className="li-left__inner">
-            {/* Logo */}
-            <Link to="/" className="li-logo">
-              <Icons.Logo />
-              <span>Protiba</span>
-            </Link>
-
-            {/* Hero */}
-            <div className="li-left__hero">
-              <div className="li-eyebrow">
-                <span className="li-eyebrow__dot" />
-                Welcome back
-              </div>
-              <h1 className="li-left__title">
-                Pick up right
-                <br />
-                <span className="li-left__title-accent">
-                  where you left off.
-                </span>
-              </h1>
-              <p className="li-left__sub">
-                Your timetables, teachers, and rooms are waiting. Sign in to
-                continue building smarter schedules.
-              </p>
-            </div>
-
-            {/* Feature list */}
-            <div className="li-features">
-              {features.map((feat) => (
-                <div key={feat.title} className="li-feature">
-                  <div className="li-feature__icon">
-                    <Icons.Sparkle />
-                  </div>
-                  <div>
-                    <div className="li-feature__title">{feat.title}</div>
-                    <div className="li-feature__desc">{feat.desc}</div>
-                  </div>
+            {/* Carousel */}
+            <div className="li-carousel">
+              <div className="li-carousel__viewport">
+                <div
+                  className="li-carousel__track"
+                  style={{transform: `translateX(-${currentSlide * 100}%)`}}
+                >
+                  {loginImages.map((img, idx) => (
+                    <div key={idx} className="li-carousel__slide">
+                      <img
+                        src={img.src}
+                        alt={img.alt}
+                        className="li-carousel__img"
+                      />
+                      <div className="li-carousel__overlay">
+                        <h2 className="li-carousel__title">{img.title}</h2>
+                        <p className="li-carousel__subtitle">{img.subtitle}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+              <div className="li-carousel__dots">
+                {loginImages.map((_, idx) => (
+                  <button
+                    key={idx}
+                    className={`li-carousel__dot ${
+                      idx === currentSlide ? "li-carousel__dot--active" : ""
+                    }`}
+                    onClick={() => setCurrentSlide(idx)}
+                    aria-label={`Slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
             </div>
 
-            {/* Trust */}
+            {/* Trust badges */}
             <div className="li-trust">
-              {[
-                "SSL encrypted",
-                "GDPR compliant",
-                "No credit card required",
-              ].map((b) => (
-                <div key={b} className="li-trust__badge">
-                  <Icons.Shield />
-                  {b}
+              {trustBadges.map((b) => (
+                <div key={b.text} className="li-trust__badge">
+                  {b.icon}
+                  {b.text}
                 </div>
               ))}
             </div>
@@ -261,15 +323,16 @@ const Login = () => {
               </p>
             </div>
 
+            {/* ── Display error only if it's user-friendly ── */}
             {error && (
               <div className="li-error">
-                <span>{error}</span>
+                <span>{getUserFriendlyError(error)}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="li-form">
+            <form onSubmit={handleSubmit} className="li-form" noValidate>
               {/* Email */}
-              <div className={f("email")}>
+              <div className={fieldClass("email")}>
                 <label className="li-field__label">
                   <Icons.Mail /> Email Address{" "}
                   <span className="li-field__req">*</span>
@@ -287,7 +350,7 @@ const Login = () => {
               </div>
 
               {/* Password */}
-              <div className={f("password")}>
+              <div className={fieldClass("password")}>
                 <div className="li-field__label-row">
                   <label className="li-field__label">
                     <Icons.Lock /> Password{" "}
@@ -325,17 +388,7 @@ const Login = () => {
                   className={`li-checkbox ${rememberMe ? "li-checkbox--checked" : ""}`}
                   onClick={() => setRememberMe((s) => !s)}
                 >
-                  {rememberMe && (
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <path
-                        d="M2 6l3 3 5-5"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
+                  {rememberMe && <Icons.Check />}
                 </div>
                 <input
                   type="checkbox"
@@ -375,21 +428,22 @@ const Login = () => {
   );
 };
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// ─── CSS ──────────────────────────────────────────────────────────────────
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0d0d10;
-    --surface: #131316;
-    --surface-2: #1a1a1f;
-    --surface-3: #212128;
-    --border: rgba(255,255,255,0.07);
+    --bg: #F8F8F8;
+    --surface: #FFFFFF;
+    --surface-2: #F5F5F5;
+    --surface-3: #F1F1F1;
+    --border: rgba(43,43,43,0.06);
     --border-focus: rgba(124,58,237,0.45);
-    --text: #f0f0f5;
-    --text-2: #9898a8;
-    --text-3: #55556a;
+    --text: #2B2B2B;
+    --text-2: #6E6E6E;
+    --text-3: #858585;
+    --text-4: #9A9A9A;
     --accent: #7c3aed;
     --accent-light: #a78bfa;
     --accent-glow: rgba(124,58,237,0.14);
@@ -406,16 +460,21 @@ const css = `
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    padding-top: 68px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     -webkit-font-smoothing: antialiased;
   }
+
   @media (max-width: 860px) {
-    .li-root { grid-template-columns: 1fr; }
-    .li-left { display: none; }
+    .li-root {
+      grid-template-columns: 1fr;
+      min-height: auto;
+      padding-top: 68px;
+    }
   }
 
-  /* ── Left ── */
+  /* ── Left panel ── */
   .li-left {
     position: relative;
     background: var(--surface);
@@ -423,21 +482,26 @@ const css = `
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-height: 100%;
   }
   .li-left::before {
     content: '';
     position: absolute;
-    top: -120px; left: -80px;
-    width: 500px; height: 500px;
-    background: radial-gradient(ellipse, rgba(124,58,237,0.12) 0%, transparent 70%);
+    top: -120px;
+    left: -80px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(124,58,237,0.08) 0%, transparent 70%);
     pointer-events: none;
   }
   .li-left::after {
     content: '';
     position: absolute;
-    bottom: -80px; right: -80px;
-    width: 350px; height: 350px;
-    background: radial-gradient(ellipse, rgba(167,139,250,0.06) 0%, transparent 70%);
+    bottom: -80px;
+    right: -80px;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(ellipse, rgba(167,139,250,0.05) 0%, transparent 70%);
     pointer-events: none;
   }
   .li-left__inner {
@@ -446,11 +510,22 @@ const css = `
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 40px 48px;
-    gap: 40px;
+    padding: 40px 48px 32px;
+    gap: 24px;
+  }
+  @media (max-width: 860px) {
+    .li-left__inner {
+      padding: 24px 20px 16px;
+      min-height: 50vh;
+      gap: 16px;
+    }
+    .li-left {
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      min-height: 0;
+    }
   }
 
-  /* Logo */
   .li-logo {
     display: flex;
     align-items: center;
@@ -463,90 +538,106 @@ const css = `
     width: fit-content;
   }
 
-  /* Eyebrow */
-  .li-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--accent-light);
-    background: var(--accent-glow);
-    border: 1px solid rgba(124,58,237,0.2);
-    padding: 5px 12px;
-    border-radius: 20px;
-    margin-bottom: 16px;
-    width: fit-content;
-  }
-  .li-eyebrow__dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent-light);
-    box-shadow: 0 0 8px var(--accent-light);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
-
-  .li-left__hero { flex: 1; }
-  .li-left__title {
-    font-size: clamp(26px, 2.8vw, 36px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    margin-bottom: 14px;
-  }
-  .li-left__title-accent {
-    background: linear-gradient(135deg, var(--accent-light) 0%, #c4b5fd 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .li-left__sub {
-    font-size: 14px;
-    color: var(--text-2);
-    line-height: 1.7;
-    max-width: 340px;
-  }
-
-  /* ── Feature list ── */
-  .li-features {
+  /* ─── Carousel ─── */
+  .li-carousel {
+    flex: 1;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    min-height: 240px;
   }
-  .li-feature {
+  .li-carousel__viewport {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+  .li-carousel__track {
     display: flex;
-    gap: 12px;
-    align-items: flex-start;
+    height: 100%;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
   }
-  .li-feature__icon {
-    width: 28px; height: 28px;
-    border-radius: 7px;
-    background: var(--accent-glow);
-    border: 1px solid rgba(124,58,237,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: var(--accent-light);
-    margin-top: 1px;
+  .li-carousel__slide {
+    flex: 0 0 100%;
+    position: relative;
+    height: 100%;
+    min-height: 200px;
   }
-  .li-feature__title {
+  .li-carousel__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .li-carousel__overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24px 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+    color: #fff;
+    pointer-events: none;
+  }
+  .li-carousel__title {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .li-carousel__subtitle {
     font-size: 13px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 2px;
+    font-weight: 400;
+    opacity: 0.9;
+    line-height: 1.5;
   }
-  .li-feature__desc {
-    font-size: 12px;
-    color: var(--text-3);
-    line-height: 1.55;
+  @media (max-width: 860px) {
+    .li-carousel__title {
+      font-size: 18px;
+    }
+    .li-carousel__subtitle {
+      font-size: 12px;
+    }
+  }
+
+  .li-carousel__dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 0;
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .li-carousel__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-4);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all var(--t);
+  }
+  .li-carousel__dot--active {
+    background: var(--accent);
+    transform: scale(1.3);
+    box-shadow: 0 0 8px var(--accent-glow);
   }
 
   /* ── Trust ── */
-  .li-trust { display: flex; flex-direction: column; gap: 8px; }
+  .li-trust {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: auto;
+    flex-shrink: 0;
+  }
   .li-trust__badge {
     display: flex;
     align-items: center;
@@ -556,7 +647,7 @@ const css = `
     font-weight: 500;
   }
 
-  /* ── Right ── */
+  /* ── Right panel ── */
   .li-right {
     display: flex;
     align-items: center;
@@ -564,14 +655,24 @@ const css = `
     padding: 48px 32px;
     overflow-y: auto;
   }
+  @media (max-width: 860px) {
+    .li-right {
+      padding: 32px 20px;
+    }
+  }
   .li-form-wrap {
     width: 100%;
     max-width: 420px;
     animation: formIn 0.6s ease both;
   }
-  @keyframes formIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes formIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-  .li-form-header { margin-bottom: 28px; }
+  .li-form-header {
+    margin-bottom: 28px;
+  }
   .li-form-header__title {
     font-size: 22px;
     font-weight: 800;
@@ -589,7 +690,7 @@ const css = `
   }
 
   .li-link {
-    color: var(--accent-light);
+    color: var(--accent);
     text-decoration: none;
     font-weight: 500;
     display: inline-flex;
@@ -597,10 +698,14 @@ const css = `
     gap: 3px;
     transition: color var(--t);
   }
-  .li-link:hover { color: #c4b5fd; }
-  .li-link--sm { font-size: 12px; margin-left: auto; }
+  .li-link:hover {
+    color: #6d28d9;
+  }
+  .li-link--sm {
+    font-size: 12px;
+    margin-left: auto;
+  }
 
-  /* ── Error ── */
   .li-error {
     background: rgba(244,63,94,0.07);
     border: 1px solid rgba(244,63,94,0.2);
@@ -611,26 +716,39 @@ const css = `
     margin-bottom: 20px;
   }
 
-  /* ── Form ── */
-  .li-form { display: flex; flex-direction: column; gap: 14px; }
+  .li-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 
   /* ── Fields ── */
-  .li-field { display: flex; flex-direction: column; gap: 5px; }
+  .li-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
   .li-field__label-row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
   }
   .li-field__label {
     font-size: 12px;
     font-weight: 500;
-    color: var(--text-2);
+    color: var(--text-3);
     display: flex;
     align-items: center;
     gap: 5px;
     transition: color var(--t);
   }
-  .li-field--focused .li-field__label { color: var(--accent-light); }
-  .li-field__req { color: var(--red); font-size: 11px; }
+  .li-field--focused .li-field__label {
+    color: var(--accent);
+  }
+  .li-field__req {
+    color: var(--red);
+    font-size: 11px;
+  }
   .li-field__input {
     background: var(--surface-2);
     border: 1px solid var(--border);
@@ -644,14 +762,20 @@ const css = `
     transition: border-color var(--t), background var(--t), box-shadow var(--t);
     -webkit-appearance: none;
   }
-  .li-field__input::placeholder { color: var(--text-3); }
+  .li-field__input::placeholder {
+    color: var(--text-4);
+  }
   .li-field__input:focus {
     border-color: var(--border-focus);
-    background: var(--surface-3);
+    background: var(--surface);
     box-shadow: 0 0 0 3px rgba(124,58,237,0.09);
   }
-  .li-field__input--pw { padding-right: 44px; }
-  .li-field__control { position: relative; }
+  .li-field__input--pw {
+    padding-right: 44px;
+  }
+  .li-field__control {
+    position: relative;
+  }
   .li-field__toggle {
     position: absolute;
     right: 12px;
@@ -659,14 +783,16 @@ const css = `
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: var(--text-3);
+    color: var(--text-4);
     cursor: pointer;
     display: flex;
     align-items: center;
     padding: 2px;
     transition: color var(--t);
   }
-  .li-field__toggle:hover { color: var(--text-2); }
+  .li-field__toggle:hover {
+    color: var(--text-2);
+  }
 
   /* ── Remember me ── */
   .li-remember {
@@ -679,7 +805,8 @@ const css = `
     user-select: none;
   }
   .li-checkbox {
-    width: 18px; height: 18px;
+    width: 18px;
+    height: 18px;
     border-radius: 5px;
     border: 1.5px solid var(--border);
     background: var(--surface-2);
@@ -688,7 +815,6 @@ const css = `
     justify-content: center;
     flex-shrink: 0;
     transition: all var(--t);
-    cursor: pointer;
     color: #fff;
   }
   .li-checkbox--checked {
@@ -722,12 +848,20 @@ const css = `
     box-shadow: 0 6px 24px rgba(124,58,237,0.4);
     transform: translateY(-1px);
   }
-  .li-btn-submit:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; transform: none; }
-  .li-btn-submit--loading { pointer-events: none; }
+  .li-btn-submit:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+  .li-btn-submit--loading {
+    pointer-events: none;
+  }
 
-  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 
-  /* ── Footer note ── */
   .li-footer-note {
     font-size: 11px;
     color: var(--text-3);

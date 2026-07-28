@@ -29,7 +29,9 @@ import {
   Clock3,
   CalendarDays,
   ChevronRight,
+  PlusCircle,
 } from "lucide-react";
+import {Link} from "react-router-dom";
 
 import {
   useAnalyticsOverview,
@@ -1077,6 +1079,12 @@ const Analytics = () => {
   const {data: recentActivity, isLoading: activityLoading} =
     useRecentActivity(8);
 
+  // Determine if there are no timetables
+  const hasNoTimetables =
+    !overviewLoading &&
+    (overview?.totalTimetables === 0 ||
+      overview?.totalTimetables === undefined);
+
   return (
     <div
       className="analytics-light mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8"
@@ -1830,6 +1838,84 @@ const Analytics = () => {
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* ── Button to start creating if no timetables ── */}
+      {hasNoTimetables && (
+        <div
+          style={{
+            marginTop: 48,
+            paddingTop: 32,
+            borderTop: "1px solid #E8E8E8",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: 480,
+              margin: "0 auto",
+              background: "#FFFFFF",
+              border: "1px solid #E8E8E8",
+              borderRadius: 16,
+              padding: "32px 24px",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+            }}
+          >
+            <PlusCircle
+              size={36}
+              style={{color: "#0b69ff", marginBottom: 12}}
+            />
+            <h3
+              style={{
+                fontSize: 18,
+                fontWeight: 600,
+                color: "#2B2B2B",
+                marginBottom: 6,
+              }}
+            >
+              No timetables yet
+            </h3>
+            <p
+              style={{
+                fontSize: 13,
+                color: "#898989",
+                marginBottom: 20,
+                lineHeight: 1.6,
+              }}
+            >
+              Generate your first timetable to start seeing analytics and
+              insights.
+            </p>
+            <Link
+              to="/home/create-table"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 24px",
+                background: "#2B2B2B",
+                color: "#FFFFFF",
+                borderRadius: 10,
+                fontSize: 14,
+                fontWeight: 500,
+                textDecoration: "none",
+                border: "1px solid #2B2B2B",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#1F1F1F";
+                e.currentTarget.style.borderColor = "#1F1F1F";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#2B2B2B";
+                e.currentTarget.style.borderColor = "#2B2B2B";
+              }}
+            >
+              Start creating
+              <ChevronRight size={16} strokeWidth={2} />
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
