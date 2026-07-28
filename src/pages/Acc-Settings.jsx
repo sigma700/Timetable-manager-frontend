@@ -2,6 +2,105 @@ import React, {useState, useRef, useEffect} from "react";
 import {useAuthStore} from "../store/authStore";
 import Navigation from "./components/navigation";
 
+// ─── SVG Icons (replacing emojis) ──────────────────────────────────────────
+const Icon = {
+  User: () => (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  ),
+  Lock: () => (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  ),
+  Bell: () => (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  ),
+  Building: () => (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+      <line x1="9" y1="22" x2="9" y2="18" />
+      <line x1="15" y1="22" x2="15" y2="18" />
+      <line x1="9" y1="10" x2="15" y2="10" />
+      <line x1="9" y1="14" x2="15" y2="14" />
+      <line x1="9" y1="6" x2="15" y2="6" />
+    </svg>
+  ),
+  CreditCard: () => (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+      <line x1="1" y1="10" x2="23" y2="10" />
+    </svg>
+  ),
+  AlertTriangle: () => (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 9v4" />
+      <path d="M12 17h.01" />
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+    </svg>
+  ),
+};
+
 // ─── Brand tokens (light, premium) ────────────────────────────────────────────
 const C = {
   bg: "#F8F8F8",
@@ -17,6 +116,7 @@ const C = {
   text3: "#858585",
   text4: "#9A9A9A",
   accent: "#2B2B2B",
+  accent2: "#454545",
   accentL: "#5C5C5C",
   green: "#22C55E",
   greenG: "rgba(34,197,94,0.08)",
@@ -38,7 +138,7 @@ const CSS = `
 
   @keyframes spin { to { transform: rotate(360deg); } }
   @keyframes slideInToast { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes panelIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes panelIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
   .acct-spinner {
     width: 36px; height: 36px;
@@ -69,7 +169,7 @@ const CSS = `
 
   .toast-pos { position: fixed; bottom: 28px; right: 28px; z-index: 999; animation: slideInToast 0.3s ease; }
 
-  .panel-in { animation: panelIn 0.28s ease both; }
+  .panel-in { animation: panelIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
   .billing-scroll { overflow-x: auto; }
   .billing-inner  { min-width: 420px; }
@@ -84,17 +184,26 @@ const CSS = `
     .acct-nav {
       flex-direction: row !important;
       overflow-x: auto;
-      gap: 6px !important;
-      padding-bottom: 2px;
+      gap: 4px !important;
+      padding: 4px 0 6px;
       scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
     }
     .acct-nav::-webkit-scrollbar { display: none; }
     .acct-nav-item {
       flex-shrink: 0 !important;
       width: auto !important;
-      padding: 7px 12px !important;
+      padding: 8px 14px !important;
       white-space: nowrap;
+      border-radius: 20px !important;
+      border: 1px solid transparent !important;
     }
+    .acct-nav-item--active {
+      background: ${C.accent} !important;
+      color: #fff !important;
+      border-color: ${C.accent} !important;
+    }
+    .acct-nav-item--active svg { color: #fff !important; }
     .acct-nav-badge-hide { display: none !important; }
     .sec-body { padding: 14px !important; }
     .fg2, .fg4 { grid-template-columns: 1fr !important; }
@@ -104,7 +213,7 @@ const CSS = `
 
   @media (max-width: 380px) {
     .sec-body { padding: 10px !important; }
-    .acct-nav-item { padding: 6px 10px !important; font-size: 12px !important; }
+    .acct-nav-item { padding: 6px 12px !important; font-size: 12px !important; }
   }
 `;
 
@@ -146,7 +255,9 @@ function Toast({message, type, onDone}) {
         boxShadow: "0 16px 40px rgba(0,0,0,0.08)",
       }}
     >
-      <span style={{fontSize: 16}}>{ok ? "✓" : "✕"}</span>
+      <span style={{fontSize: 16, color: ok ? C.green : C.red}}>
+        {ok ? "✓" : "✕"}
+      </span>
       <span
         style={{fontSize: 13, color: ok ? C.green : C.red, fontWeight: 500}}
       >
@@ -562,32 +673,45 @@ function SaveButton({loading, onClick, label = "Save changes"}) {
   );
 }
 
-// ─── Nav items (emojis kept for simplicity; consider replacing with icons later) ──
+// ─── Nav items with SVG icons ──────────────────────────────────────────────
 const NAV = [
-  {id: "profile", label: "Profile", icon: "👤"},
-  {id: "security", label: "Security", icon: "🔒"},
-  {id: "notifications", label: "Notifications", icon: "🔔"},
-  {id: "institution", label: "Institution", icon: "🏫"},
-  {id: "billing", label: "Billing", icon: "💳", badge: "Free"},
-  {id: "danger", label: "Danger zone", icon: "⚠️"},
+  {id: "profile", label: "Profile", icon: Icon.User},
+  {id: "security", label: "Security", icon: Icon.Lock},
+  {id: "notifications", label: "Notifications", icon: Icon.Bell},
+  {id: "institution", label: "Institution", icon: Icon.Building},
+  {id: "billing", label: "Billing", icon: Icon.CreditCard, badge: "Free"},
+  {id: "danger", label: "Danger zone", icon: Icon.AlertTriangle},
 ];
 
 function SidebarNav({active, onChange}) {
   const barRef = useRef(null);
+  // Scroll to top on tab change
+  useEffect(() => {
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }, [active]);
+
   useEffect(() => {
     const el = barRef.current?.querySelector(`[data-id="${active}"]`);
-    el?.scrollIntoView({inline: "nearest", behavior: "smooth"});
+    if (el) {
+      el.scrollIntoView({inline: "nearest", behavior: "smooth"});
+    }
   }, [active]);
+
   return (
     <nav className="acct-nav" ref={barRef}>
       {NAV.map((item) => {
         const on = active === item.id;
+        const IconComp = item.icon;
         return (
           <button
             key={item.id}
             data-id={item.id}
-            onClick={() => onChange(item.id)}
-            className="acct-nav-item"
+            onClick={() => {
+              onChange(item.id);
+              // scroll to top
+              window.scrollTo({top: 0, behavior: "smooth"});
+            }}
+            className={`acct-nav-item ${on ? "acct-nav-item--active" : ""}`}
             style={{
               display: "flex",
               alignItems: "center",
@@ -619,7 +743,7 @@ function SidebarNav({active, onChange}) {
             }}
           >
             <span style={{display: "flex", alignItems: "center", gap: 8}}>
-              <span style={{fontSize: 14}}>{item.icon}</span>
+              <IconComp />
               {item.label}
             </span>
             {item.badge && (
