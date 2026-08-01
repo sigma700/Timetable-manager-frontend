@@ -156,42 +156,42 @@ const currentYear = currentDate.getFullYear();
 const timelineData = [
   {
     month: "June",
-    year: 2024,
+    year: 2025,
     title: "The Spark",
     description:
       "After witnessing the struggles of school administrators during timetable creation season, the concept for Protiba was born. Research into the complexities of educational scheduling began.",
   },
   {
     month: "July",
-    year: 2024,
+    year: 2025,
     title: "Algorithm Development",
     description:
       "Dedicated to designing the core scheduling algorithm that would become the foundation. Countless hours perfecting the conflict resolution system.",
   },
   {
     month: "August",
-    year: 2024,
+    year: 2025,
     title: "Prototyping",
     description:
       "First interactive prototypes created, focusing on making complex scheduling intuitive and accessible for educators of all technical abilities.",
   },
   {
     month: "September",
-    year: 2024,
+    year: 2025,
     title: "Frontend Build",
     description:
       "React application built with a focus on performance and user experience — dashboard and timetable visualization components took shape.",
   },
   {
     month: "October",
-    year: 2024,
+    year: 2025,
     title: "Backend Integration",
     description:
       "API and database architecture developed to handle complex scheduling operations. User authentication and data persistence implemented.",
   },
   {
     month: "November",
-    year: 2024,
+    year: 2025,
     title: "Testing & Feedback",
     description:
       "Extensive testing with sample data from real schools. Feedback from educators drove crucial improvements to the algorithm.",
@@ -297,7 +297,7 @@ const Story = () => {
             </p>
             <div className="story-hero__stats">
               {[
-                ["2024", "Founded"],
+                ["2025", "Founded"],
                 ["7", "Months to launch"],
                 ["1", "Core engineer"],
                 ["∞", "Schools to help"],
