@@ -1,5 +1,5 @@
-import React, {useState, useEffect, useRef} from "react";
-import {useQuery} from "@tanstack/react-query";
+import React, {useState, useEffect, useRef, useCallback} from "react";
+import {useQuery, useQueryClient} from "@tanstack/react-query";
 import {useAuthStore} from "../store/authStore";
 import {Navigation} from "./components/navigation";
 import {
@@ -18,10 +18,17 @@ import {
   CheckCircle,
   XCircle,
   Info,
+  Pencil,
+  X,
+  Save,
+  ChevronDown,
+  Check,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import {getTimetable} from "../api/timetable";
 
-// ─── Tokens (light theme, semantic colours preserved) ─────────────────────────
+// ─── Design tokens ─────────────────────────────────────────────────────────────
 const tk = {
   bg0: "#F8F8F8",
   bg1: "#FFFFFF",
@@ -55,7 +62,7 @@ const tk = {
   tealBorder: "rgba(45,212,191,0.2)",
 };
 
-// ─── Subject colour palette (unchanged) ───────────────────────────────────────
+// ─── Subject colour palette ────────────────────────────────────────────────────
 const SUBJECT_PALETTE = [
   {
     bg: "rgba(79,110,247,0.12)",
@@ -90,7 +97,6 @@ const SUBJECT_PALETTE = [
   },
   {bg: "rgba(239,68,68,0.10)", border: "rgba(239,68,68,0.24)", text: "#f87171"},
 ];
-
 const subjectColorMap = {};
 let colorIdx = 0;
 function getSubjectColor(name) {
@@ -102,7 +108,7 @@ function getSubjectColor(name) {
   return subjectColorMap[name];
 }
 
-// ─── Hooks ────────────────────────────────────────────────────────────────────
+// ─── Hooks ─────────────────────────────────────────────────────────────────────
 function useInView(threshold = 0.1) {
   const ref = useRef(null);
   const [inView, setInView] = useState(false);
@@ -137,48 +143,35 @@ function useAnimatedCount(target, inView, duration = 1200) {
   return count;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function formatTime(timeStr) {
-  if (!timeStr || typeof timeStr !== "string") return "";
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+function formatTime(t) {
+  if (!t || typeof t !== "string") return "";
   try {
-    const [hours, minutes] = timeStr.split(":");
-    const hour = parseInt(hours, 10);
-    if (isNaN(hour)) return timeStr;
-    return `${hour > 12 ? hour - 12 : hour}:${minutes} ${hour >= 12 ? "PM" : "AM"}`;
+    const [h, m] = t.split(":");
+    const hour = parseInt(h, 10);
+    if (isNaN(hour)) return t;
+    return `${hour > 12 ? hour - 12 : hour}:${m} ${hour >= 12 ? "PM" : "AM"}`;
   } catch {
-    return timeStr;
+    return t;
   }
 }
-
-function getPeriodDuration(period) {
-  if (!period?.startTime || !period?.endTime) return 0;
-  const start = new Date(`2000-01-01T${period.startTime}`);
-  const end = new Date(`2000-01-01T${period.endTime}`);
-  return (end - start) / (1000 * 60);
+function getPeriodDuration(p) {
+  if (!p?.startTime || !p?.endTime) return 0;
+  return (
+    (new Date(`2000-01-01T${p.endTime}`) -
+      new Date(`2000-01-01T${p.startTime}`)) /
+    60000
+  );
 }
-
-function isDoublePeriod(period, config) {
-  if (!period?.startTime || !period?.endTime) return false;
-  return getPeriodDuration(period) > (config?.periodDuration || 40);
+function isDoublePeriod(p, cfg) {
+  if (!p?.startTime || !p?.endTime) return false;
+  return getPeriodDuration(p) > (cfg?.periodDuration || 40);
 }
-
-const DAYS_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const DAYS_FULL = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
-
 function getTodayIndex() {
   const d = new Date().getDay();
   return d === 0 ? 6 : d - 1;
 }
 
-// ─── Loading screen ───────────────────────────────────────────────────────────
 const LOAD_STEPS = [
   {icon: <BookOpen size={16} />, label: "Collecting timetable data"},
   {icon: <Users size={16} />, label: "Analyzing teacher assignments"},
@@ -188,6 +181,7 @@ const LOAD_STEPS = [
   {icon: <CheckCircle size={16} />, label: "Finalizing timetable"},
 ];
 
+// ─── Loading screen ────────────────────────────────────────────────────────────
 function LoadingScreen({
   userName,
   institutionName,
@@ -196,22 +190,17 @@ function LoadingScreen({
 }) {
   const [step, setStep] = useState(0);
   const [progress, setProgress] = useState(0);
-
   useEffect(() => {
-    const stepTimer = setInterval(
-      () => setStep((s) => Math.min(s + 1, LOAD_STEPS.length - 1)),
+    const s = setInterval(
+      () => setStep((p) => Math.min(p + 1, LOAD_STEPS.length - 1)),
       600,
     );
-    const progTimer = setInterval(
-      () => setProgress((p) => Math.min(p + 2, 95)),
-      80,
-    );
+    const p = setInterval(() => setProgress((p) => Math.min(p + 2, 95)), 80);
     return () => {
-      clearInterval(stepTimer);
-      clearInterval(progTimer);
+      clearInterval(s);
+      clearInterval(p);
     };
   }, []);
-
   return (
     <>
       <Navigation
@@ -228,7 +217,7 @@ function LoadingScreen({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "'Inter',system-ui,sans-serif",
         }}
       >
         <div
@@ -278,8 +267,8 @@ function LoadingScreen({
           </p>
           <div style={{marginBottom: 32, textAlign: "left"}}>
             {LOAD_STEPS.map((s, i) => {
-              const done = i < step;
-              const active = i === step;
+              const done = i < step,
+                active = i === step;
               return (
                 <div
                   key={i}
@@ -342,7 +331,7 @@ function LoadingScreen({
               style={{
                 height: "100%",
                 width: `${progress}%`,
-                background: `linear-gradient(90deg, ${tk.accent}, ${tk.violet})`,
+                background: `linear-gradient(90deg,${tk.accent},${tk.violet})`,
                 borderRadius: 2,
                 transition: "width 0.08s linear",
               }}
@@ -364,7 +353,7 @@ function LoadingScreen({
   );
 }
 
-// ─── Error / Empty states ─────────────────────────────────────────────────────
+// ─── State screen ──────────────────────────────────────────────────────────────
 function StateScreen({
   icon,
   title,
@@ -391,7 +380,7 @@ function StateScreen({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontFamily: "'Inter', system-ui, sans-serif",
+          fontFamily: "'Inter',system-ui,sans-serif",
         }}
       >
         <div style={{textAlign: "center", maxWidth: 360, padding: "0 24px"}}>
@@ -459,7 +448,7 @@ function StateScreen({
   );
 }
 
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
+// ─── KPI Card ──────────────────────────────────────────────────────────────────
 function KpiCard({icon, value, label, color, delay}) {
   const [ref, inView] = useInView(0.2);
   const count = useAnimatedCount(
@@ -476,7 +465,7 @@ function KpiCard({icon, value, label, color, delay}) {
         padding: "20px 22px",
         opacity: inView ? 1 : 0,
         transform: inView ? "translateY(0)" : "translateY(16px)",
-        transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms`,
+        transition: `opacity 0.5s ease ${delay}ms,transform 0.5s ease ${delay}ms`,
         cursor: "default",
         boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
       }}
@@ -534,456 +523,1215 @@ function KpiCard({icon, value, label, color, delay}) {
   );
 }
 
-// ─── Class Selector ───────────────────────────────────────────────────────────
+// ─── Class selector ────────────────────────────────────────────────────────────
 function ClassSelector({timetables, selected, onChange}) {
-  const scrollRef = useRef(null);
   return (
-    <div style={{position: "relative"}}>
+    <div style={{display: "flex", gap: 7, flexWrap: "wrap"}}>
+      {timetables.map((t, i) => {
+        const name = t.name?.replace("Timetable for ", "") ?? `Class ${i + 1}`;
+        const active = t.name === selected;
+        return (
+          <button
+            key={t.name}
+            onClick={() => onChange(t.name)}
+            style={{
+              padding: "7px 16px",
+              background: active ? tk.accent : "transparent",
+              border: `1px solid ${active ? tk.accent : tk.border}`,
+              borderRadius: 9,
+              fontSize: 13,
+              fontWeight: active ? 600 : 400,
+              color: active ? "#fff" : tk.text2,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              transition: "all 0.18s",
+              flexShrink: 0,
+            }}
+            onMouseEnter={(e) => {
+              if (!active) e.currentTarget.style.borderColor = tk.borderHov;
+            }}
+            onMouseLeave={(e) => {
+              if (!active) e.currentTarget.style.borderColor = tk.border;
+            }}
+          >
+            {name}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Slot Edit Modal ───────────────────────────────────────────────────────────
+function SlotEditModal({
+  slot,
+  onClose,
+  onSave,
+  timetableId,
+  classIndex,
+  dayIndex,
+  periodIndex,
+  allSubjects,
+  allTeachers,
+}) {
+  const [selectedSubject, setSelectedSubject] = useState(slot?.subject ?? null);
+  const [selectedTeacher, setSelectedTeacher] = useState(slot?.teacher ?? null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const overlayRef = useRef(null);
+
+  // Filter teachers to those who teach the selected subject
+  const eligibleTeachers = selectedSubject
+    ? allTeachers.filter((t) =>
+        t.subjects?.some(
+          (s) =>
+            s._id === selectedSubject._id || s.name === selectedSubject.name,
+        ),
+      )
+    : allTeachers;
+
+  // Close on overlay click
+  const handleOverlayClick = useCallback(
+    (e) => {
+      if (e.target === overlayRef.current) onClose();
+    },
+    [onClose],
+  );
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  // Reset teacher when subject changes and current teacher no longer eligible
+  useEffect(() => {
+    if (selectedTeacher && selectedSubject) {
+      const stillEligible = eligibleTeachers.some(
+        (t) => t._id === selectedTeacher._id || t.name === selectedTeacher.name,
+      );
+      if (!stillEligible) setSelectedTeacher(null);
+    }
+  }, [selectedSubject]);
+
+  const handleSave = async () => {
+    if (saving) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/timetable/${timetableId}/slot`,
+        {
+          method: "PATCH",
+          headers: {"Content-Type": "application/json"},
+          credentials: "include",
+          body: JSON.stringify({
+            classIndex,
+            dayIndex,
+            periodIndex,
+            subject: selectedSubject
+              ? {_id: selectedSubject._id, name: selectedSubject.name}
+              : null,
+            teacher: selectedTeacher
+              ? {_id: selectedTeacher._id, name: selectedTeacher.name}
+              : null,
+          }),
+        },
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Update failed");
+      setSuccess(true);
+      setTimeout(() => {
+        onSave(data.data);
+        onClose();
+      }, 800);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const isBreak = slot?.isBreak;
+
+  return (
+    <div
+      ref={overlayRef}
+      onClick={handleOverlayClick}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "rgba(0,0,0,0.35)",
+        backdropFilter: "blur(4px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+        animation: "fadeIn 0.18s ease",
+      }}
+    >
       <div
-        ref={scrollRef}
         style={{
-          display: "flex",
-          gap: 8,
-          overflowX: "auto",
-          paddingBottom: 2,
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
+          background: tk.bg1,
+          borderRadius: 18,
+          width: "100%",
+          maxWidth: 460,
+          border: `1px solid ${tk.border}`,
+          boxShadow: "0 24px 60px rgba(0,0,0,0.14),0 4px 16px rgba(0,0,0,0.08)",
+          overflow: "hidden",
+          animation: "slideUp 0.22s cubic-bezier(0.16,1,0.3,1)",
         }}
       >
-        {timetables.map((t) => {
-          const name = t.name.replace("Timetable for ", "");
-          const active = selected === t.name;
-          return (
-            <button
-              key={t.name}
-              onClick={() => onChange(t.name)}
+        {/* Header */}
+        <div
+          style={{
+            padding: "20px 24px 16px",
+            borderBottom: `1px solid ${tk.border}`,
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          <div>
+            <div
               style={{
-                whiteSpace: "nowrap",
-                padding: "8px 16px",
-                background: active ? tk.accentSubtle : "transparent",
-                border: `1px solid ${active ? tk.accentBorder : tk.border}`,
-                borderRadius: 9,
-                fontSize: 13,
-                fontWeight: active ? 600 : 400,
-                color: active ? tk.accent : tk.text2,
-                cursor: "pointer",
-                fontFamily: "inherit",
-                transition: "all 0.18s",
-                flexShrink: 0,
-              }}
-              onMouseEnter={(e) => {
-                if (!active) e.currentTarget.style.borderColor = tk.borderHov;
-              }}
-              onMouseLeave={(e) => {
-                if (!active) e.currentTarget.style.borderColor = tk.border;
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 4,
               }}
             >
-              {name}
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 8,
+                  background: tk.accentSubtle,
+                  border: `1px solid ${tk.accentBorder}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: tk.accent,
+                }}
+              >
+                <Pencil size={13} />
+              </div>
+              <h3
+                style={{
+                  fontSize: 15,
+                  fontWeight: 600,
+                  color: tk.text1,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Edit Slot
+              </h3>
+            </div>
+            <p style={{fontSize: 12, color: tk.text3, lineHeight: 1.5}}>
+              {slot?.startTime && slot?.endTime
+                ? `${formatTime(slot.startTime)} – ${formatTime(slot.endTime)}`
+                : "Select period details"}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 8,
+              border: `1px solid ${tk.border}`,
+              background: "transparent",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: tk.text3,
+              flexShrink: 0,
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = tk.bg2;
+              e.currentTarget.style.color = tk.text1;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+              e.currentTarget.style.color = tk.text3;
+            }}
+          >
+            <X size={15} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{padding: "20px 24px"}}>
+          {isBreak ? (
+            <div
+              style={{
+                padding: "16px",
+                background: tk.amberSubtle,
+                border: `1px solid ${tk.amberBorder}`,
+                borderRadius: 10,
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <Coffee size={16} color={tk.amber} />
+              <div>
+                <p
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: tk.amber,
+                    marginBottom: 2,
+                  }}
+                >
+                  Break Period
+                </p>
+                <p style={{fontSize: 12, color: tk.text3}}>
+                  Break slots cannot be edited. They are fixed by your timetable
+                  configuration.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div style={{display: "flex", flexDirection: "column", gap: 18}}>
+              {/* Current values preview */}
+              {(slot?.subject || slot?.teacher) && (
+                <div
+                  style={{
+                    padding: "12px 14px",
+                    background: tk.bg2,
+                    borderRadius: 10,
+                    border: `1px solid ${tk.border}`,
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 600,
+                      color: tk.text3,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.07em",
+                      marginBottom: 8,
+                    }}
+                  >
+                    Current
+                  </p>
+                  <div style={{display: "flex", gap: 14, flexWrap: "wrap"}}>
+                    {slot.subject && (
+                      <div
+                        style={{display: "flex", alignItems: "center", gap: 6}}
+                      >
+                        <BookOpen size={12} color={tk.accent} />
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: tk.text2,
+                            fontWeight: 500,
+                          }}
+                        >
+                          {slot.subject.name}
+                        </span>
+                      </div>
+                    )}
+                    {slot.teacher && (
+                      <div
+                        style={{display: "flex", alignItems: "center", gap: 6}}
+                      >
+                        <Users size={12} color={tk.violet} />
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: tk.text2,
+                            fontWeight: 500,
+                          }}
+                        >
+                          {slot.teacher.name}
+                        </span>
+                      </div>
+                    )}
+                    {!slot.teacher && slot.subject && (
+                      <div
+                        style={{display: "flex", alignItems: "center", gap: 6}}
+                      >
+                        <AlertTriangle size={12} color={tk.danger} />
+                        <span
+                          style={{
+                            fontSize: 12,
+                            color: tk.danger,
+                            fontWeight: 500,
+                          }}
+                        >
+                          No teacher assigned
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Subject select */}
+              <div>
+                <label
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: tk.text2,
+                    display: "block",
+                    marginBottom: 7,
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  Subject
+                </label>
+                <div style={{position: "relative"}}>
+                  <select
+                    value={selectedSubject?._id ?? ""}
+                    onChange={(e) => {
+                      const found = allSubjects.find(
+                        (s) => s._id === e.target.value,
+                      );
+                      setSelectedSubject(found || null);
+                      setError(null);
+                    }}
+                    style={{
+                      width: "100%",
+                      padding: "10px 36px 10px 12px",
+                      fontSize: 13,
+                      color: tk.text1,
+                      background: tk.bg1,
+                      border: `1px solid ${tk.border}`,
+                      borderRadius: 10,
+                      outline: "none",
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      appearance: "none",
+                      transition: "border-color 0.15s",
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = tk.accent)}
+                    onBlur={(e) => (e.target.style.borderColor = tk.border)}
+                  >
+                    <option value="">Select a subject...</option>
+                    {allSubjects.map((s) => (
+                      <option key={s._id} value={s._id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    size={14}
+                    style={{
+                      position: "absolute",
+                      right: 12,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: tk.text3,
+                      pointerEvents: "none",
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Teacher select */}
+              <div>
+                <label
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: tk.text2,
+                    display: "block",
+                    marginBottom: 7,
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  Teacher
+                  {selectedSubject && eligibleTeachers.length === 0 && (
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: tk.danger,
+                        fontWeight: 400,
+                        marginLeft: 8,
+                      }}
+                    >
+                      No teachers available for this subject
+                    </span>
+                  )}
+                </label>
+                <div style={{position: "relative"}}>
+                  <select
+                    value={selectedTeacher?._id ?? ""}
+                    onChange={(e) => {
+                      const found = eligibleTeachers.find(
+                        (t) => t._id === e.target.value,
+                      );
+                      setSelectedTeacher(found || null);
+                      setError(null);
+                    }}
+                    disabled={!selectedSubject || eligibleTeachers.length === 0}
+                    style={{
+                      width: "100%",
+                      padding: "10px 36px 10px 12px",
+                      fontSize: 13,
+                      color: !selectedSubject ? tk.text3 : tk.text1,
+                      background: !selectedSubject ? tk.bg2 : tk.bg1,
+                      border: `1px solid ${tk.border}`,
+                      borderRadius: 10,
+                      outline: "none",
+                      cursor: !selectedSubject ? "not-allowed" : "pointer",
+                      fontFamily: "inherit",
+                      appearance: "none",
+                      transition: "border-color 0.15s,background 0.15s",
+                      opacity: !selectedSubject ? 0.6 : 1,
+                    }}
+                    onFocus={(e) => {
+                      if (selectedSubject)
+                        e.target.style.borderColor = tk.accent;
+                    }}
+                    onBlur={(e) => (e.target.style.borderColor = tk.border)}
+                  >
+                    <option value="">Select a teacher...</option>
+                    {eligibleTeachers.map((t) => (
+                      <option key={t._id} value={t._id}>
+                        {t.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    size={14}
+                    style={{
+                      position: "absolute",
+                      right: 12,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: tk.text3,
+                      pointerEvents: "none",
+                    }}
+                  />
+                </div>
+                {selectedSubject && eligibleTeachers.length > 0 && (
+                  <p style={{fontSize: 11, color: tk.text3, marginTop: 5}}>
+                    {eligibleTeachers.length} teacher
+                    {eligibleTeachers.length !== 1 ? "s" : ""} available for{" "}
+                    {selectedSubject.name}
+                  </p>
+                )}
+              </div>
+
+              {/* Clear option */}
+              {(selectedSubject || selectedTeacher) && (
+                <button
+                  onClick={() => {
+                    setSelectedSubject(null);
+                    setSelectedTeacher(null);
+                    setError(null);
+                  }}
+                  style={{
+                    fontSize: 12,
+                    color: tk.text3,
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                    textAlign: "left",
+                    fontFamily: "inherit",
+                    textDecoration: "underline",
+                    textDecorationColor: "transparent",
+                    transition: "all 0.15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = tk.danger;
+                    e.currentTarget.style.textDecorationColor = tk.danger;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = tk.text3;
+                    e.currentTarget.style.textDecorationColor = "transparent";
+                  }}
+                >
+                  Clear slot
+                </button>
+              )}
+
+              {/* Error state */}
+              {error && (
+                <div
+                  style={{
+                    padding: "11px 14px",
+                    background: tk.dangerSubtle,
+                    border: `1px solid ${tk.dangerBorder}`,
+                    borderRadius: 9,
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 9,
+                  }}
+                >
+                  <AlertCircle
+                    size={14}
+                    color={tk.danger}
+                    style={{flexShrink: 0, marginTop: 1}}
+                  />
+                  <p style={{fontSize: 12, color: tk.danger, lineHeight: 1.5}}>
+                    {error}
+                  </p>
+                </div>
+              )}
+
+              {/* Success state */}
+              {success && (
+                <div
+                  style={{
+                    padding: "11px 14px",
+                    background: tk.successSubtle,
+                    border: `1px solid ${tk.successBorder}`,
+                    borderRadius: 9,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 9,
+                  }}
+                >
+                  <CheckCircle size={14} color={tk.success} />
+                  <p style={{fontSize: 12, color: tk.success, fontWeight: 500}}>
+                    Slot updated successfully
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {!isBreak && (
+          <div
+            style={{
+              padding: "14px 24px",
+              borderTop: `1px solid ${tk.border}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: 10,
+              background: tk.bg0,
+            }}
+          >
+            <button
+              onClick={onClose}
+              disabled={saving}
+              style={{
+                padding: "9px 18px",
+                fontSize: 13,
+                fontWeight: 500,
+                color: tk.text2,
+                background: "transparent",
+                border: `1px solid ${tk.border}`,
+                borderRadius: 9,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = tk.borderHov;
+                e.currentTarget.style.color = tk.text1;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = tk.border;
+                e.currentTarget.style.color = tk.text2;
+              }}
+            >
+              Cancel
             </button>
-          );
-        })}
+            <button
+              onClick={handleSave}
+              disabled={saving || success}
+              style={{
+                padding: "9px 20px",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#fff",
+                background: success
+                  ? tk.success
+                  : saving
+                    ? "rgba(79,110,247,0.7)"
+                    : tk.accent,
+                border: "none",
+                borderRadius: 9,
+                cursor: saving || success ? "default" : "pointer",
+                fontFamily: "inherit",
+                transition: "all 0.2s",
+                display: "flex",
+                alignItems: "center",
+                gap: 7,
+                boxShadow:
+                  saving || success
+                    ? "none"
+                    : `0 2px 10px rgba(79,110,247,0.3)`,
+              }}
+              onMouseEnter={(e) => {
+                if (!saving && !success)
+                  e.currentTarget.style.background = tk.accentHov;
+              }}
+              onMouseLeave={(e) => {
+                if (!saving && !success)
+                  e.currentTarget.style.background = tk.accent;
+              }}
+            >
+              {saving ? (
+                <>
+                  <Loader2
+                    size={13}
+                    style={{animation: "spin 0.7s linear infinite"}}
+                  />{" "}
+                  Saving...
+                </>
+              ) : success ? (
+                <>
+                  <Check size={13} /> Saved
+                </>
+              ) : (
+                <>
+                  <Save size={13} /> Save changes
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-// ─── Desktop Timetable ────────────────────────────────────────────────────────
-function DesktopTimetable({timetable}) {
+// ─── Desktop Timetable ─────────────────────────────────────────────────────────
+function DesktopTimetable({
+  timetable,
+  timetableId,
+  classIndex,
+  allSubjects,
+  allTeachers,
+  onSlotUpdated,
+}) {
   const [hovCell, setHovCell] = useState(null);
+  const [editSlot, setEditSlot] = useState(null); // { period, dayIndex, periodIndex }
   const todayIdx = getTodayIndex();
   const days = timetable.schedule || [];
   const periods = days[0]?.periods || [];
   const config = timetable.config;
 
+  const handleCellClick = (period, dayIdx, periodIdx) => {
+    if (period?.isBreak) return; // breaks are not editable
+    setEditSlot({period, dayIndex: dayIdx, periodIndex: periodIdx});
+  };
+
   return (
-    <div style={{overflowX: "auto", borderRadius: 14}}>
-      <table
-        style={{width: "100%", borderCollapse: "separate", borderSpacing: 0}}
-      >
-        <thead>
-          <tr>
-            <th
-              style={{
-                padding: "12px 16px",
-                fontSize: 10,
-                fontWeight: 600,
-                color: tk.text3,
-                textTransform: "uppercase",
-                letterSpacing: "0.07em",
-                background: tk.bg2,
-                borderBottom: `1px solid ${tk.border}`,
-                borderRight: `1px solid ${tk.border}`,
-                textAlign: "left",
-                minWidth: 110,
-                position: "sticky",
-                left: 0,
-                zIndex: 2,
-                borderRadius: "14px 0 0 0",
-              }}
-            >
-              Time
-            </th>
-            {days.map((day, di) => {
-              const isToday = di === todayIdx;
+    <>
+      {editSlot && (
+        <SlotEditModal
+          slot={editSlot.period}
+          timetableId={timetableId}
+          classIndex={classIndex}
+          dayIndex={editSlot.dayIndex}
+          periodIndex={editSlot.periodIndex}
+          allSubjects={allSubjects}
+          allTeachers={allTeachers}
+          onClose={() => setEditSlot(null)}
+          onSave={(updatedSlot) => {
+            onSlotUpdated();
+            setEditSlot(null);
+          }}
+        />
+      )}
+      <div style={{overflowX: "auto", borderRadius: 14}}>
+        <table
+          style={{width: "100%", borderCollapse: "separate", borderSpacing: 0}}
+        >
+          <thead>
+            <tr>
+              <th
+                style={{
+                  padding: "12px 16px",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: tk.text3,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.07em",
+                  background: tk.bg2,
+                  borderBottom: `1px solid ${tk.border}`,
+                  borderRight: `1px solid ${tk.border}`,
+                  textAlign: "left",
+                  minWidth: 110,
+                  position: "sticky",
+                  left: 0,
+                  zIndex: 2,
+                  borderRadius: "14px 0 0 0",
+                }}
+              >
+                Time
+              </th>
+              {days.map((day, di) => {
+                const isToday = di === todayIdx;
+                return (
+                  <th
+                    key={day.day}
+                    style={{
+                      padding: "12px 16px",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: isToday ? tk.accent : tk.text2,
+                      background: isToday ? tk.accentSubtle : tk.bg2,
+                      borderBottom: `1px solid ${tk.border}`,
+                      borderRight:
+                        di < days.length - 1
+                          ? `1px solid ${tk.border}`
+                          : "none",
+                      textAlign: "center",
+                      minWidth: 140,
+                      whiteSpace: "nowrap",
+                      borderTop: isToday
+                        ? `2px solid ${tk.accent}`
+                        : "2px solid transparent",
+                      letterSpacing: "0.02em",
+                      borderRadius: di === days.length - 1 ? "0 14px 0 0" : 0,
+                    }}
+                  >
+                    {day.day}
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {periods.map((_, pi) => {
+              const refPeriod = days[0]?.periods?.[pi];
+              const timeLabel = refPeriod
+                ? `${formatTime(refPeriod.startTime)} – ${formatTime(refPeriod.endTime)}`
+                : `Period ${pi + 1}`;
               return (
-                <th
-                  key={day.day}
-                  style={{
-                    padding: "12px 16px",
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: isToday ? tk.accent : tk.text2,
-                    background: isToday ? tk.accentSubtle : tk.bg2,
-                    borderBottom: `1px solid ${tk.border}`,
-                    borderRight:
-                      di < days.length - 1 ? `1px solid ${tk.border}` : "none",
-                    textAlign: "center",
-                    minWidth: 140,
-                    whiteSpace: "nowrap",
-                    borderTop: isToday
-                      ? `2px solid ${tk.accent}`
-                      : "2px solid transparent",
-                    letterSpacing: "0.02em",
-                    borderRadius: di === days.length - 1 ? "0 14px 0 0" : 0,
-                  }}
-                >
-                  {day.day}
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {periods.map((_, pi) => {
-            const refPeriod = days[0]?.periods?.[pi];
-            const timeLabel = refPeriod
-              ? `${formatTime(refPeriod.startTime)} – ${formatTime(refPeriod.endTime)}`
-              : `Period ${pi + 1}`;
-            return (
-              <tr key={`row-${pi}`}>
-                <td
-                  style={{
-                    padding: "10px 16px",
-                    fontSize: 11,
-                    color: tk.text3,
-                    background: tk.bg2,
-                    borderBottom: `1px solid ${tk.border}`,
-                    borderRight: `1px solid ${tk.border}`,
-                    fontVariantNumeric: "tabular-nums",
-                    position: "sticky",
-                    left: 0,
-                    zIndex: 1,
-                    whiteSpace: "nowrap",
-                    fontWeight: 500,
-                  }}
-                >
-                  {timeLabel}
-                </td>
-                {days.map((day, di) => {
-                  const period = day.periods?.[pi];
-                  const cellKey = `${di}-${pi}`;
-                  const isHov = hovCell === cellKey;
-                  const isToday = di === todayIdx;
-                  const dp = isDoublePeriod(period, config);
-                  const isBreak = period?.isBreak;
-                  const hasWarn = period?.warning;
-                  const subColor = period?.subject
-                    ? getSubjectColor(period.subject.name)
-                    : null;
-                  let bg = isToday ? "rgba(79,110,247,0.03)" : tk.bg1;
-                  let borderL = isToday
-                    ? `2px solid ${tk.accentBorder}`
-                    : `1px solid ${tk.border}`;
-                  if (isBreak) bg = tk.amberSubtle;
-                  if (hasWarn) bg = tk.dangerSubtle;
-                  if (dp)
-                    bg = isToday ? "rgba(139,92,246,0.1)" : tk.violetSubtle;
-                  return (
-                    <td
-                      key={cellKey}
-                      onMouseEnter={() => setHovCell(cellKey)}
-                      onMouseLeave={() => setHovCell(null)}
-                      style={{
-                        padding: 0,
-                        background: isHov ? tk.bg3 : bg,
-                        borderBottom: `1px solid ${tk.border}`,
-                        borderRight:
-                          di < days.length - 1
-                            ? `1px solid ${tk.border}`
-                            : "none",
-                        borderLeft: borderL,
-                        transition: "background 0.15s",
-                        verticalAlign: "top",
-                        minWidth: 140,
-                      }}
-                    >
-                      <div style={{padding: "10px 12px"}}>
-                        {isBreak ? (
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 6,
-                            }}
-                          >
-                            <Coffee size={12} color={tk.amber} />
-                            <span
-                              style={{
-                                fontSize: 12,
-                                color: tk.amber,
-                                fontWeight: 500,
-                              }}
-                            >
-                              {period.name || "Break"}
-                            </span>
-                          </div>
-                        ) : period?.subject ? (
-                          <>
-                            {dp && (
-                              <span
-                                style={{
-                                  display: "inline-block",
-                                  marginBottom: 5,
-                                  fontSize: 9,
-                                  fontWeight: 600,
-                                  color: tk.violet,
-                                  background: tk.violetSubtle,
-                                  border: `1px solid ${tk.violetBorder}`,
-                                  borderRadius: 4,
-                                  padding: "2px 7px",
-                                  textTransform: "uppercase",
-                                  letterSpacing: "0.06em",
-                                }}
-                              >
-                                Double
-                              </span>
-                            )}
+                <tr key={`row-${pi}`}>
+                  <td
+                    style={{
+                      padding: "10px 16px",
+                      fontSize: 11,
+                      color: tk.text3,
+                      background: tk.bg2,
+                      borderBottom: `1px solid ${tk.border}`,
+                      borderRight: `1px solid ${tk.border}`,
+                      fontVariantNumeric: "tabular-nums",
+                      position: "sticky",
+                      left: 0,
+                      zIndex: 1,
+                      whiteSpace: "nowrap",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {timeLabel}
+                  </td>
+                  {days.map((day, di) => {
+                    const period = day.periods?.[pi];
+                    const cellKey = `${di}-${pi}`;
+                    const isHov = hovCell === cellKey;
+                    const isToday = di === todayIdx;
+                    const dp = isDoublePeriod(period, config);
+                    const isBreak = period?.isBreak;
+                    const hasWarn = period?.warning;
+                    const subColor = period?.subject
+                      ? getSubjectColor(period.subject.name)
+                      : null;
+                    let bg = isToday ? "rgba(79,110,247,0.03)" : tk.bg1;
+                    let borderL = isToday
+                      ? `2px solid ${tk.accentBorder}`
+                      : `1px solid ${tk.border}`;
+                    if (isBreak) bg = tk.amberSubtle;
+                    if (hasWarn) bg = tk.dangerSubtle;
+                    if (dp)
+                      bg = isToday ? "rgba(139,92,246,0.1)" : tk.violetSubtle;
+
+                    return (
+                      <td
+                        key={cellKey}
+                        onMouseEnter={() => setHovCell(cellKey)}
+                        onMouseLeave={() => setHovCell(null)}
+                        onClick={() => handleCellClick(period, di, pi)}
+                        style={{
+                          padding: 0,
+                          background: isHov && !isBreak ? tk.bg3 : bg,
+                          borderBottom: `1px solid ${tk.border}`,
+                          borderRight:
+                            di < days.length - 1
+                              ? `1px solid ${tk.border}`
+                              : "none",
+                          borderLeft: borderL,
+                          transition: "background 0.15s",
+                          verticalAlign: "top",
+                          minWidth: 140,
+                          cursor: isBreak ? "default" : "pointer",
+                          position: "relative",
+                        }}
+                      >
+                        <div style={{padding: "10px 12px"}}>
+                          {isBreak ? (
                             <div
                               style={{
-                                fontSize: 13,
-                                fontWeight: 600,
-                                color: subColor?.text || tk.text1,
-                                marginBottom: 3,
-                                lineHeight: 1.3,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
                               }}
                             >
-                              {period.subject.name}
-                            </div>
-                            <div style={{fontSize: 11, color: tk.text3}}>
-                              {period.teacher?.name || "Unassigned"}
-                            </div>
-                            {hasWarn && (
-                              <div
+                              <Coffee size={12} color={tk.amber} />
+                              <span
                                 style={{
-                                  marginTop: 5,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 5,
-                                  fontSize: 10,
-                                  color: tk.danger,
+                                  fontSize: 12,
+                                  color: tk.amber,
+                                  fontWeight: 500,
                                 }}
                               >
-                                <AlertTriangle size={10} />
-                                {period.warning}
+                                {period.name || "Break"}
+                              </span>
+                            </div>
+                          ) : period?.subject ? (
+                            <>
+                              {dp && (
+                                <span
+                                  style={{
+                                    display: "inline-block",
+                                    marginBottom: 5,
+                                    fontSize: 9,
+                                    fontWeight: 600,
+                                    color: tk.violet,
+                                    background: tk.violetSubtle,
+                                    border: `1px solid ${tk.violetBorder}`,
+                                    borderRadius: 4,
+                                    padding: "2px 7px",
+                                    textTransform: "uppercase",
+                                    letterSpacing: "0.06em",
+                                  }}
+                                >
+                                  Double
+                                </span>
+                              )}
+                              <div
+                                style={{
+                                  fontSize: 13,
+                                  fontWeight: 600,
+                                  color: subColor?.text || tk.text1,
+                                  marginBottom: 3,
+                                  lineHeight: 1.3,
+                                }}
+                              >
+                                {period.subject.name}
                               </div>
-                            )}
-                          </>
-                        ) : (
-                          <span style={{fontSize: 11, color: tk.text3}}>—</span>
-                        )}
-                      </div>
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+                              <div style={{fontSize: 11, color: tk.text3}}>
+                                {period.teacher?.name || "Unassigned"}
+                              </div>
+                              {hasWarn && (
+                                <div
+                                  style={{
+                                    marginTop: 5,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 5,
+                                    fontSize: 10,
+                                    color: tk.danger,
+                                  }}
+                                >
+                                  <AlertTriangle size={10} />
+                                  {period.warning}
+                                </div>
+                              )}
+                              {/* Edit hint on hover */}
+                              {isHov && (
+                                <div
+                                  style={{
+                                    marginTop: 7,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 5,
+                                    fontSize: 10,
+                                    color: tk.accent,
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  <Pencil size={10} /> Click to edit
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            <div>
+                              <span style={{fontSize: 11, color: tk.text3}}>
+                                Free period
+                              </span>
+                              {isHov && (
+                                <div
+                                  style={{
+                                    marginTop: 5,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 5,
+                                    fontSize: 10,
+                                    color: tk.accent,
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  <Pencil size={10} /> Click to assign
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
-// ─── Mobile Day View ──────────────────────────────────────────────────────────
-function MobileTimetable({timetable}) {
+// ─── Mobile Timetable ──────────────────────────────────────────────────────────
+function MobileTimetable({
+  timetable,
+  timetableId,
+  classIndex,
+  allSubjects,
+  allTeachers,
+  onSlotUpdated,
+}) {
   const days = timetable.schedule || [];
   const todayIdx = Math.min(getTodayIndex(), days.length - 1);
   const [dayIdx, setDayIdx] = useState(todayIdx >= 0 ? todayIdx : 0);
+  const [editSlot, setEditSlot] = useState(null);
   const config = timetable.config;
   const day = days[dayIdx];
   if (!day) return null;
 
   return (
-    <div>
-      <div
-        style={{
-          display: "flex",
-          gap: 6,
-          overflowX: "auto",
-          paddingBottom: 4,
-          marginBottom: 20,
-          scrollbarWidth: "none",
-        }}
-      >
-        {days.map((d, i) => {
-          const active = i === dayIdx;
-          const isToday = i === todayIdx;
-          return (
-            <button
-              key={d.day}
-              onClick={() => setDayIdx(i)}
-              style={{
-                flexShrink: 0,
-                padding: "8px 14px",
-                background: active
-                  ? tk.accent
-                  : isToday
-                    ? tk.accentSubtle
-                    : "transparent",
-                border: `1px solid ${active ? tk.accent : isToday ? tk.accentBorder : tk.border}`,
-                borderRadius: 9,
-                fontSize: 12,
-                fontWeight: active ? 600 : 400,
-                color: active ? "#fff" : isToday ? tk.accent : tk.text2,
-                cursor: "pointer",
-                fontFamily: "inherit",
-                transition: "all 0.18s",
-              }}
-            >
-              {d.day.slice(0, 3)}
-            </button>
-          );
-        })}
-      </div>
-      <div style={{display: "flex", flexDirection: "column", gap: 10}}>
-        {day.periods?.map((period, idx) => {
-          const dp = isDoublePeriod(period, config);
-          const isBreak = period?.isBreak;
-          const subColor = period?.subject
-            ? getSubjectColor(period.subject.name)
-            : null;
-          return (
-            <div
-              key={idx}
-              style={{
-                background: isBreak ? tk.amberSubtle : tk.bg1,
-                border: `1px solid ${isBreak ? tk.amberBorder : dp ? tk.violetBorder : tk.border}`,
-                borderRadius: 12,
-                padding: "14px 16px",
-                borderLeft: `3px solid ${isBreak ? tk.amber : dp ? tk.violet : subColor?.text || tk.border}`,
-              }}
-            >
-              <div
+    <>
+      {editSlot && (
+        <SlotEditModal
+          slot={editSlot.period}
+          timetableId={timetableId}
+          classIndex={classIndex}
+          dayIndex={editSlot.dayIndex}
+          periodIndex={editSlot.periodIndex}
+          allSubjects={allSubjects}
+          allTeachers={allTeachers}
+          onClose={() => setEditSlot(null)}
+          onSave={() => {
+            onSlotUpdated();
+            setEditSlot(null);
+          }}
+        />
+      )}
+      <div>
+        {/* Day tabs */}
+        <div
+          style={{
+            display: "flex",
+            gap: 6,
+            overflowX: "auto",
+            paddingBottom: 4,
+            marginBottom: 20,
+            scrollbarWidth: "none",
+          }}
+        >
+          {days.map((d, i) => {
+            const active = i === dayIdx,
+              isToday = i === todayIdx;
+            return (
+              <button
+                key={d.day}
+                onClick={() => setDayIdx(i)}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: isBreak || period?.subject ? 8 : 0,
+                  flexShrink: 0,
+                  padding: "8px 14px",
+                  background: active
+                    ? tk.accent
+                    : isToday
+                      ? tk.accentSubtle
+                      : "transparent",
+                  border: `1px solid ${active ? tk.accent : isToday ? tk.accentBorder : tk.border}`,
+                  borderRadius: 9,
+                  fontSize: 12,
+                  fontWeight: active ? 600 : 400,
+                  color: active ? "#fff" : isToday ? tk.accent : tk.text2,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  transition: "all 0.18s",
                 }}
               >
-                <span
+                {d.day.slice(0, 3)}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Period cards */}
+        <div style={{display: "flex", flexDirection: "column", gap: 10}}>
+          {day.periods?.map((period, idx) => {
+            const dp = isDoublePeriod(period, config);
+            const isBreak = period?.isBreak;
+            const subColor = period?.subject
+              ? getSubjectColor(period.subject.name)
+              : null;
+            return (
+              <div
+                key={idx}
+                onClick={() => {
+                  if (!isBreak)
+                    setEditSlot({period, dayIndex: dayIdx, periodIndex: idx});
+                }}
+                style={{
+                  background: isBreak ? tk.amberSubtle : tk.bg1,
+                  border: `1px solid ${isBreak ? tk.amberBorder : dp ? tk.violetBorder : tk.border}`,
+                  borderRadius: 12,
+                  padding: "14px 16px",
+                  borderLeft: `3px solid ${isBreak ? tk.amber : dp ? tk.violet : subColor?.text || tk.border}`,
+                  cursor: isBreak ? "default" : "pointer",
+                  transition: "all 0.15s",
+                  position: "relative",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isBreak) {
+                    e.currentTarget.style.borderColor = tk.accentBorder;
+                    e.currentTarget.style.boxShadow = `0 2px 12px rgba(79,110,247,0.1)`;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = isBreak
+                    ? tk.amberBorder
+                    : dp
+                      ? tk.violetBorder
+                      : tk.border;
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              >
+                <div
                   style={{
-                    fontSize: 11,
-                    color: tk.text3,
-                    fontVariantNumeric: "tabular-nums",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: isBreak || period?.subject ? 8 : 0,
                   }}
                 >
-                  {formatTime(period.startTime)} – {formatTime(period.endTime)}
-                </span>
-                <div style={{display: "flex", gap: 6}}>
-                  {dp && (
-                    <span
-                      style={{
-                        fontSize: 9,
-                        fontWeight: 600,
-                        color: tk.violet,
-                        background: tk.violetSubtle,
-                        border: `1px solid ${tk.violetBorder}`,
-                        borderRadius: 4,
-                        padding: "2px 7px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.06em",
-                      }}
-                    >
-                      Double
-                    </span>
-                  )}
-                  {isBreak && (
-                    <span
-                      style={{
-                        fontSize: 9,
-                        fontWeight: 600,
-                        color: tk.amber,
-                        background: tk.amberSubtle,
-                        border: `1px solid ${tk.amberBorder}`,
-                        borderRadius: 4,
-                        padding: "2px 7px",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.06em",
-                      }}
-                    >
-                      Break
-                    </span>
-                  )}
-                </div>
-              </div>
-              {isBreak ? (
-                <div style={{display: "flex", alignItems: "center", gap: 7}}>
-                  <Coffee size={14} color={tk.amber} />
                   <span
-                    style={{fontSize: 14, fontWeight: 500, color: tk.amber}}
-                  >
-                    {period.name || "Break"}
-                  </span>
-                  <span
-                    style={{fontSize: 12, color: tk.text3, marginLeft: "auto"}}
-                  >
-                    {period.duration} min
-                  </span>
-                </div>
-              ) : period?.subject ? (
-                <div>
-                  <div
                     style={{
-                      fontSize: 15,
-                      fontWeight: 600,
-                      color: subColor?.text || tk.text1,
-                      marginBottom: 4,
+                      fontSize: 11,
+                      color: tk.text3,
+                      fontVariantNumeric: "tabular-nums",
                     }}
                   >
-                    {period.subject.name}
+                    {formatTime(period.startTime)} –{" "}
+                    {formatTime(period.endTime)}
+                  </span>
+                  <div style={{display: "flex", gap: 6, alignItems: "center"}}>
+                    {dp && (
+                      <span
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 600,
+                          color: tk.violet,
+                          background: tk.violetSubtle,
+                          border: `1px solid ${tk.violetBorder}`,
+                          borderRadius: 4,
+                          padding: "2px 7px",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                        }}
+                      >
+                        Double
+                      </span>
+                    )}
+                    {isBreak && (
+                      <span
+                        style={{
+                          fontSize: 9,
+                          fontWeight: 600,
+                          color: tk.amber,
+                          background: tk.amberSubtle,
+                          border: `1px solid ${tk.amberBorder}`,
+                          borderRadius: 4,
+                          padding: "2px 7px",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                        }}
+                      >
+                        Break
+                      </span>
+                    )}
+                    {!isBreak && <Pencil size={12} color={tk.text3} />}
                   </div>
-                  <div style={{fontSize: 12, color: tk.text3}}>
-                    {period.teacher?.name || "Unassigned"}
-                  </div>
-                  {period.warning && (
-                    <div
+                </div>
+                {isBreak ? (
+                  <div style={{display: "flex", alignItems: "center", gap: 7}}>
+                    <Coffee size={14} color={tk.amber} />
+                    <span
+                      style={{fontSize: 14, fontWeight: 500, color: tk.amber}}
+                    >
+                      {period.name || "Break"}
+                    </span>
+                    <span
                       style={{
-                        marginTop: 7,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        fontSize: 11,
-                        color: tk.danger,
+                        fontSize: 12,
+                        color: tk.text3,
+                        marginLeft: "auto",
                       }}
                     >
-                      <AlertTriangle size={11} />
-                      {period.warning}
+                      {period.duration} min
+                    </span>
+                  </div>
+                ) : period?.subject ? (
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 15,
+                        fontWeight: 600,
+                        color: subColor?.text || tk.text1,
+                        marginBottom: 4,
+                      }}
+                    >
+                      {period.subject.name}
                     </div>
-                  )}
-                </div>
-              ) : (
-                <span style={{fontSize: 13, color: tk.text3}}>Free period</span>
-              )}
-            </div>
-          );
-        })}
+                    <div style={{fontSize: 12, color: tk.text3}}>
+                      {period.teacher?.name || "Unassigned"}
+                    </div>
+                    {period.warning && (
+                      <div
+                        style={{
+                          marginTop: 7,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          fontSize: 11,
+                          color: tk.danger,
+                        }}
+                      >
+                        <AlertTriangle size={11} />
+                        {period.warning}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <span style={{fontSize: 13, color: tk.text3}}>
+                    Free period — tap to assign
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
-// ─── Insights ─────────────────────────────────────────────────────────────────
+// ─── Insight card ──────────────────────────────────────────────────────────────
 function InsightCard({icon, label, value, color, delay}) {
   const [ref, inView] = useInView(0.1);
   return (
@@ -996,7 +1744,7 @@ function InsightCard({icon, label, value, color, delay}) {
         padding: "16px 18px",
         opacity: inView ? 1 : 0,
         transform: inView ? "translateY(0)" : "translateY(14px)",
-        transition: `opacity 0.5s ease ${delay}ms, transform 0.5s ease ${delay}ms`,
+        transition: `opacity 0.5s ease ${delay}ms,transform 0.5s ease ${delay}ms`,
         boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
       }}
     >
@@ -1052,57 +1800,56 @@ function InsightCard({icon, label, value, color, delay}) {
 function buildInsights(timetable) {
   const {schedule, config} = timetable;
   if (!schedule) return [];
-
-  const doublePeriods = [];
-  const subjectCount = {};
-  const teacherPeriods = {};
-  const dayLengths = {};
+  const doublePeriods = [],
+    subjectCount = {},
+    teacherPeriods = {};
   let totalBreaks = 0;
-
   schedule.forEach((day) => {
-    let dayPeriods = 0;
+    let dayLessons = 0;
     day.periods?.forEach((p) => {
       if (p.isBreak) {
         totalBreaks++;
         return;
       }
-      if (isDoublePeriod(p, config) && p.subject)
-        doublePeriods.push({day: day.day, ...p});
-      if (p.subject?.name)
+      if (isDoublePeriod(p, config)) doublePeriods.push(p);
+      if (p.subject) {
         subjectCount[p.subject.name] = (subjectCount[p.subject.name] || 0) + 1;
-      if (p.teacher?.name)
+        dayLessons++;
+      }
+      if (p.teacher) {
         teacherPeriods[p.teacher.name] =
           (teacherPeriods[p.teacher.name] || 0) + 1;
-      dayPeriods++;
+      }
     });
-    dayLengths[day.day] = dayPeriods;
   });
-
   const topSubject = Object.entries(subjectCount).sort(
     (a, b) => b[1] - a[1],
   )[0];
-  const busiestTeacher = Object.entries(teacherPeriods).sort(
+  const topTeacher = Object.entries(teacherPeriods).sort(
     (a, b) => b[1] - a[1],
   )[0];
-  const busiestDay = Object.entries(dayLengths).sort((a, b) => b[1] - a[1])[0];
-
+  const dayLoads = schedule.map((d) => ({
+    day: d.day,
+    count: d.periods?.filter((p) => !p.isBreak && p.subject).length || 0,
+  }));
+  const busiestDay = dayLoads.sort((a, b) => b.count - a.count)[0];
   return [
     topSubject && {
-      icon: <Award size={13} />,
+      icon: <BookOpen size={13} />,
       label: "Most taught subject",
-      value: `${topSubject[0]} - ${topSubject[1]} periods`,
+      value: `${topSubject[0]} - ${topSubject[1]} lessons`,
       color: {bg: tk.accentSubtle, border: tk.accentBorder, text: tk.accent},
     },
-    busiestTeacher && {
-      icon: <Users size={13} />,
-      label: "Highest workload teacher",
-      value: `${busiestTeacher[0]} - ${busiestTeacher[1]} periods/week`,
+    topTeacher && {
+      icon: <Award size={13} />,
+      label: "Busiest teacher",
+      value: `${topTeacher[0]} - ${topTeacher[1]} periods`,
       color: {bg: tk.violetSubtle, border: tk.violetBorder, text: tk.violet},
     },
     busiestDay && {
       icon: <TrendingUp size={13} />,
       label: "Busiest day",
-      value: `${busiestDay[0]} - ${busiestDay[1]} lessons`,
+      value: `${busiestDay.day} - ${busiestDay.count} lessons`,
       color: {bg: tk.tealSubtle, border: tk.tealBorder, text: tk.teal},
     },
     {
@@ -1123,14 +1870,16 @@ function buildInsights(timetable) {
   ].filter(Boolean);
 }
 
-// ─── MAIN TIMETABLES COMPONENT ─────────────────────────────────────────────────
+// ─── MAIN COMPONENT ────────────────────────────────────────────────────────────
 const Timetables = () => {
   const {user, isLoading: authLoading, requiredData} = useAuthStore();
+  const queryClient = useQueryClient();
 
   const {
     data: gottenTable,
     isLoading,
     error: queryError,
+    refetch,
   } = useQuery({
     queryKey: ["timetable", requiredData],
     queryFn: () => getTimetable(requiredData),
@@ -1140,8 +1889,45 @@ const Timetables = () => {
     refetchOnReconnect: true,
   });
 
-  const error = queryError ? queryError.message || "Unknown error" : null;
+  // Fetch school subjects and teachers for the edit modal
+  const [allSubjects, setAllSubjects] = useState([]);
+  const [allTeachers, setAllTeachers] = useState([]);
 
+  useEffect(() => {
+    if (!gottenTable) return;
+    const base = import.meta.env.VITE_BACKEND_URL;
+    const opts = {
+      method: "GET",
+      headers: {"Content-Type": "application/json"},
+      credentials: "include",
+    };
+    Promise.all([
+      fetch(`${base}/api/analytics/subjects`, opts).then((r) => r.json()),
+      fetch(`${base}/api/analytics/teachers`, opts).then((r) => r.json()),
+    ])
+      .then(([subRes, tchRes]) => {
+        if (subRes?.data?.subjects) {
+          setAllSubjects(
+            subRes.data.subjects.map((s) => ({
+              _id: s.subjectId,
+              name: s.subjectName,
+            })),
+          );
+        }
+        if (tchRes?.data?.teachers) {
+          setAllTeachers(
+            tchRes.data.teachers.map((t) => ({
+              _id: t.teacherId,
+              name: t.teacherName,
+              subjects: t.subjects?.map((name) => ({name})) ?? [],
+            })),
+          );
+        }
+      })
+      .catch(() => {});
+  }, [gottenTable]);
+
+  const error = queryError ? queryError.message || "Unknown error" : null;
   const [selectedClass, setSelectedClass] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [mounted, setMounted] = useState(false);
@@ -1166,7 +1952,7 @@ const Timetables = () => {
       );
       if (res.ok) window.location.href = "/login";
     } catch (err) {
-      console.error("Logout error", err);
+      console.error(err);
     }
   };
 
@@ -1175,7 +1961,6 @@ const Timetables = () => {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-
   useEffect(() => {
     if (gottenTable?.timetables?.length > 0 && !selectedClass)
       setSelectedClass(gottenTable.timetables[0].name);
@@ -1225,12 +2010,12 @@ const Timetables = () => {
     !gottenTable.timetables ||
     !Array.isArray(gottenTable.timetables) ||
     gottenTable.timetables.length === 0
-  ) {
+  )
     return (
       <StateScreen
         icon={<Info size={22} />}
         title="No classes found"
-        body="Your timetable was generated but contains no class data. Please check your configuration."
+        body="Your timetable was generated but contains no class data."
         action={{
           label: "Reconfigure",
           fn: () => (window.location.href = "/setup"),
@@ -1238,7 +2023,6 @@ const Timetables = () => {
         {...navProps}
       />
     );
-  }
   if (!selectedClass)
     return (
       <StateScreen
@@ -1252,9 +2036,10 @@ const Timetables = () => {
   const {timetables} = gottenTable;
   const selectedTimetable =
     timetables.find((t) => t.name === selectedClass) || timetables[0];
+  const classIndex = timetables.findIndex((t) => t.name === selectedClass);
+  const timetableId = gottenTable._id;
   const schedule = selectedTimetable.schedule || [];
   const config = selectedTimetable.config || {};
-
   const allPeriods = schedule.flatMap((d) => d.periods || []);
   const lessons = allPeriods.filter((p) => !p.isBreak && p.subject).length;
   const breaks = allPeriods.filter((p) => p.isBreak).length;
@@ -1269,32 +2054,35 @@ const Timetables = () => {
   ).size;
   const insights = buildInsights(selectedTimetable);
 
+  // After a slot is saved, refetch to get fresh data
+  const handleSlotUpdated = () => {
+    queryClient.invalidateQueries({queryKey: ["timetable", requiredData]});
+  };
+
   return (
     <>
       <style>{`
-        * { box-sizing: border-box; }
-        ::-webkit-scrollbar { width: 3px; height: 3px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
-
-        @media (max-width: 767px) {
-          .tt-desktop { display: none !important; }
-          .tt-mobile { display: block !important; }
-          .tt-hero { padding: 48px 20px 36px !important; }
-          .tt-metrics { padding: 0 20px 36px !important; }
-          .tt-section { padding: 0 20px 36px !important; }
-          .tt-footer { padding: 18px 20px !important; flex-direction: column !important; gap: 6px !important; text-align: center; }
+        *{box-sizing:border-box;}
+        ::-webkit-scrollbar{width:3px;height:3px;}
+        ::-webkit-scrollbar-track{background:transparent;}
+        ::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:2px;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        @keyframes pulse{0%,100%{opacity:.4}50%{opacity:.9}}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @media(max-width:767px){
+          .tt-desktop{display:none!important;}
+          .tt-mobile{display:block!important;}
+          .tt-hero{padding:48px 20px 36px!important;}
+          .tt-metrics{padding:0 20px 36px!important;}
+          .tt-section{padding:0 20px 36px!important;}
         }
-        @media (min-width: 768px) {
-          .tt-mobile { display: none !important; }
-          .tt-desktop { display: block !important; }
+        @media(min-width:768px){
+          .tt-mobile{display:none!important;}
+          .tt-desktop{display:block!important;}
         }
-
-        @media (prefers-reduced-motion: reduce) {
-          *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        @media(prefers-reduced-motion:reduce){
+          *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;}
         }
       `}</style>
 
@@ -1306,23 +2094,9 @@ const Timetables = () => {
           background: tk.bg0,
           color: tk.text1,
           paddingTop: 64,
-          fontFamily: "'Inter', 'SF Pro Text', system-ui, sans-serif",
+          fontFamily: "'Inter','SF Pro Text',system-ui,sans-serif",
         }}
       >
-        {/* Ambient glows removed */}
-        <div
-          style={{
-            position: "fixed",
-            top: -200,
-            left: -100,
-            width: 600,
-            height: 600,
-            background: "transparent",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-
         {/* Hero */}
         <div
           className="tt-hero"
@@ -1351,7 +2125,7 @@ const Timetables = () => {
               marginBottom: 20,
               opacity: heroInView ? 1 : 0,
               transform: heroInView ? "translateY(0)" : "translateY(10px)",
-              transition: "opacity 0.5s ease, transform 0.5s ease",
+              transition: "opacity 0.5s ease,transform 0.5s ease",
             }}
           >
             <span
@@ -1363,12 +2137,12 @@ const Timetables = () => {
                 display: "inline-block",
                 animation: "pulse 2s infinite",
               }}
-            />{" "}
+            />
             AI Generated Schedule
           </div>
           <h1
             style={{
-              fontSize: "clamp(26px, 4vw, 42px)",
+              fontSize: "clamp(26px,4vw,42px)",
               fontWeight: 600,
               lineHeight: 1.06,
               letterSpacing: "-0.03em",
@@ -1377,8 +2151,7 @@ const Timetables = () => {
               maxWidth: 600,
               opacity: heroInView ? 1 : 0,
               transform: heroInView ? "translateY(0)" : "translateY(16px)",
-              transition:
-                "opacity 0.55s ease 0.08s, transform 0.55s ease 0.08s",
+              transition: "opacity 0.55s ease 0.08s,transform 0.55s ease 0.08s",
             }}
           >
             {user?.firstName ? `${user.firstName}'s ` : ""}Timetables
@@ -1392,12 +2165,11 @@ const Timetables = () => {
               marginBottom: 0,
               opacity: heroInView ? 1 : 0,
               transform: heroInView ? "translateY(0)" : "translateY(16px)",
-              transition:
-                "opacity 0.55s ease 0.16s, transform 0.55s ease 0.16s",
+              transition: "opacity 0.55s ease 0.16s,transform 0.55s ease 0.16s",
             }}
           >
-            Optimized timetables for {institutionName}. Conflict-free scheduling
-            powered by Protiba's scheduling intelligence engine.
+            Optimized timetables for {institutionName}. Click any slot to edit
+            subject and teacher assignments.
           </p>
         </div>
 
@@ -1415,7 +2187,7 @@ const Timetables = () => {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))",
               gap: 12,
             }}
           >
@@ -1484,7 +2256,6 @@ const Timetables = () => {
           </div>
         </div>
 
-        {/* Divider */}
         <div
           style={{
             height: 1,
@@ -1541,22 +2312,41 @@ const Timetables = () => {
                   : selectedTimetable.name.replace("Timetable for ", "")}
               </h2>
             </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 7,
-                fontSize: 11,
-                color: tk.success,
-                background: tk.successSubtle,
-                border: `1px solid ${tk.successBorder}`,
-                borderRadius: 20,
-                padding: "5px 12px",
-              }}
-            >
-              <CheckCircle size={12} /> Conflict-free
+            <div style={{display: "flex", alignItems: "center", gap: 10}}>
+              {/* Edit hint */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: 11,
+                  color: tk.text3,
+                  background: tk.bg2,
+                  border: `1px solid ${tk.border}`,
+                  borderRadius: 20,
+                  padding: "5px 12px",
+                }}
+              >
+                <Pencil size={11} /> Click any slot to edit
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 7,
+                  fontSize: 11,
+                  color: tk.success,
+                  background: tk.successSubtle,
+                  border: `1px solid ${tk.successBorder}`,
+                  borderRadius: 20,
+                  padding: "5px 12px",
+                }}
+              >
+                <CheckCircle size={12} /> Conflict-free
+              </div>
             </div>
           </div>
+
           {timetables.length > 1 && (
             <div style={{marginBottom: 24}}>
               <ClassSelector
@@ -1566,6 +2356,7 @@ const Timetables = () => {
               />
             </div>
           )}
+
           <div
             style={{
               background: tk.bg1,
@@ -1575,10 +2366,24 @@ const Timetables = () => {
             }}
           >
             <div className="tt-desktop">
-              <DesktopTimetable timetable={selectedTimetable} />
+              <DesktopTimetable
+                timetable={selectedTimetable}
+                timetableId={timetableId}
+                classIndex={classIndex}
+                allSubjects={allSubjects}
+                allTeachers={allTeachers}
+                onSlotUpdated={handleSlotUpdated}
+              />
             </div>
             <div className="tt-mobile" style={{padding: "20px 16px"}}>
-              <MobileTimetable timetable={selectedTimetable} />
+              <MobileTimetable
+                timetable={selectedTimetable}
+                timetableId={timetableId}
+                classIndex={classIndex}
+                allSubjects={allSubjects}
+                allTeachers={allTeachers}
+                onSlotUpdated={handleSlotUpdated}
+              />
             </div>
           </div>
         </div>
@@ -1621,7 +2426,7 @@ const Timetables = () => {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))",
                 gap: 12,
               }}
             >
@@ -1632,7 +2437,6 @@ const Timetables = () => {
           </div>
         )}
 
-        {/* Divider */}
         <div
           style={{
             height: 1,
