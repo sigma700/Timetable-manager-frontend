@@ -433,7 +433,7 @@ export const Navigation = ({
           {/* Brand with clean image logo */}
           <Link to="/" className="nav-logo" aria-label="Protiba home">
             <img
-              src="/public/new-protiba-logo.png"
+              src="/new-protiba-logo.png"
               alt="Protiba Logo"
               className="nav-logo__image"
             />
