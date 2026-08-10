@@ -131,7 +131,15 @@ export const useAuthStore = create((set, get) => ({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error("Authentication check failed !");
+        // Don't throw an error for auth check - this is expected on login/signup pages
+        set({
+          isCheckingAuth: false,
+          error: null, // <-- Don't set error here
+          isAuthenticated: false,
+          user: null,
+          requiredData: null,
+        });
+        return false;
       }
 
       const userData = data.data || null;
@@ -143,15 +151,16 @@ export const useAuthStore = create((set, get) => ({
         isCheckingAuth: false,
         error: null,
         isAuthenticated: true,
-        user: userData, // full user object
+        user: userData,
         requiredData: firstTimetableId,
       });
 
       return true;
     } catch (error) {
+      // Network errors should also not show on login/signup pages
       set({
         isCheckingAuth: false,
-        error: error.message,
+        error: null, // <-- Don't set error for network issues during auth check
         isAuthenticated: false,
         user: null,
         requiredData: null,

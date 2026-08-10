@@ -185,7 +185,6 @@ const trustBadges = [
 ];
 
 // ─── Timetable Image Carousel ──────────────────────────────────────────────
-// Replace these URLs with your actual images
 const timetableImages = [
   {
     src: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=600&h=400&fit=crop",
@@ -213,7 +212,8 @@ const timetableImages = [
 const getUserFriendlyError = (errorMessage) => {
   if (!errorMessage) return null;
   const lower = errorMessage.toLowerCase();
-  // Network / technical errors – hide from user
+
+  // Hide technical/network errors from users
   if (
     lower.includes("failed to fetch") ||
     lower.includes("networkerror") ||
@@ -229,11 +229,15 @@ const getUserFriendlyError = (errorMessage) => {
     lower.includes("504") ||
     lower.includes("econnrefused") ||
     lower.includes("timeout") ||
-    lower.includes("aborted")
+    lower.includes("aborted") ||
+    lower.includes("authentication check failed") ||
+    lower.includes("check-auth") ||
+    lower.includes("checkauth")
   ) {
     return "Unable to connect to the server. Please check your internet connection and try again.";
   }
-  // Otherwise return the original message (user-facing server error)
+
+  // Return the original message for user-facing errors (like "Email already exists", etc.)
   return errorMessage;
 };
 
@@ -253,7 +257,8 @@ const SignUp = () => {
   const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
 
-  const {signUp, isLoading, error, isAuthenticated} = useAuthStore();
+  const {signUp, isLoading, error, isAuthenticated, isCheckingAuth} =
+    useAuthStore();
   const navigate = useNavigate();
   const strength = getStrength(password);
 
@@ -265,6 +270,7 @@ const SignUp = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/home", {replace: true});
@@ -355,7 +361,9 @@ const SignUp = () => {
     if (!validateForm()) return;
     try {
       await signUp(email, password, firstName, lastName);
-    } catch {}
+    } catch {
+      // Error is handled by the store and displayed via the 'error' state
+    }
   };
 
   // ─── Field state helpers ──────────────────────────────────────────────
@@ -377,6 +385,34 @@ const SignUp = () => {
 
   // ─── Filter error for display ──────────────────────────────────────────
   const displayError = error ? getUserFriendlyError(error) : null;
+
+  // Don't show the form while checking auth
+  if (isCheckingAuth) {
+    return (
+      <>
+        <style>{css}</style>
+        <Navigation
+          userName={userName}
+          institutionName={institutionName}
+          notificationCount={notificationCount}
+          onLogout={handleLogout}
+        />
+        <div className="su-root">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minHeight: "60vh",
+              gridColumn: "1 / -1",
+            }}
+          >
+            <Icons.Loader />
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -651,7 +687,7 @@ const SignUp = () => {
               >
                 {isLoading ? (
                   <>
-                    <Icons.Loader /> Creating account…
+                    <Icons.Loader /> Creating account...
                   </>
                 ) : (
                   <>
