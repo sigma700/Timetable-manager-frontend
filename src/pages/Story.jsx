@@ -180,7 +180,7 @@ const timelineData = [
     year: 2025,
     title: "Frontend Build",
     description:
-      "React application built with a focus on performance and user experience — dashboard and timetable visualization components took shape.",
+      "React application built with a focus on performance and user experience , dashboard and timetable visualization components took shape.",
   },
   {
     month: "October",
