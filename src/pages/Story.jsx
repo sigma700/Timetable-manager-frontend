@@ -328,7 +328,7 @@ const Story = () => {
               <p className="section-body">
                 Creating school timetables has always been a tedious,
                 error-prone process that takes administrators away from what
-                matters — supporting teachers and students.
+                matters , supporting teachers and students.
               </p>
               <ul className="problem-list">
                 {problems.map((p, i) => (
@@ -390,7 +390,7 @@ const Story = () => {
               </h2>
               <p className="section-body section-body--centered">
                 We built a scheduling engine that understands the real-world
-                constraints of schools — and eliminates the manual work
+                constraints of schools , and eliminates the manual work
                 entirely.
               </p>
             </Reveal>
@@ -471,7 +471,7 @@ const Story = () => {
               </h2>
               <p className="story-cta__body">
                 Join the educators who've taken weeks of manual work off their
-                plate — permanently.
+                plate , permanently.
               </p>
               <div className="story-cta__actions">
                 <Link to="/signup" className="btn-primary">
