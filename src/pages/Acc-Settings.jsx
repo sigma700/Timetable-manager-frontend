@@ -1354,7 +1354,7 @@ function DangerPanel({onError}) {
     <div className="as-panel">
       <Section
         title="Danger zone"
-        subtitle="Irreversible actions — proceed with caution"
+        subtitle="Irreversible actions , proceed with caution"
         badge="Destructive"
         badgeColor={C.red}
         badgeBg={C.redG}
