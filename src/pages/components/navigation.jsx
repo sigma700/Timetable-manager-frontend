@@ -26,6 +26,9 @@ import {
   Command,
 } from "lucide-react";
 
+// Import the logo - make sure this path matches your actual logo file location
+import protibaLogo from "/new-protiba-logo.png";
+
 /* ═════════════════════════════════════════════════════════════════════════
    ICONS
    ═════════════════════════════════════════════════════════════════════════ */
@@ -188,7 +191,7 @@ const getInitials = (name) =>
 const spring = {type: "spring", stiffness: 420, damping: 34, mass: 0.8};
 
 /* ═════════════════════════════════════════════════════════════════════════
-   MAGNETIC WRAPPER — cursor-follow micro-interaction (pointer devices only)
+   MAGNETIC WRAPPER
    ═════════════════════════════════════════════════════════════════════════ */
 const Magnetic = ({children, strength = 8, className, ...rest}) => {
   const ref = useRef(null);
@@ -373,7 +376,6 @@ export const Navigation = ({
     setUserMenuOpen(false);
   }, [currentPath]);
 
-  // lock body scroll while the mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
@@ -424,16 +426,16 @@ export const Navigation = ({
     <MotionConfig reducedMotion="user">
       <style>{navStyles}</style>
 
-      {/* ── TOP BAR ─────────────────────────────────────────────────── */}
+      {/* ── TOP BAR ── */}
       <header
         className={`nav-header${scrolled ? " nav-header--scrolled" : ""}`}
       >
         <div className="nav-header__sheen" aria-hidden="true" />
         <div className="nav-header__inner">
-          {/* Brand with clean image logo */}
+          {/* Brand logo - same for desktop and mobile */}
           <Link to="/" className="nav-logo" aria-label="Protiba home">
             <img
-              src="/new-protiba-logo.png"
+              src={protibaLogo}
               alt="Protiba Logo"
               className="nav-logo__image"
             />
@@ -462,7 +464,6 @@ export const Navigation = ({
                   }}
                   onMouseLeave={() => item.children && scheduleClose()}
                 >
-                  {/* hover halo — travels between items */}
                   <AnimatePresence>
                     {hovered === item.id && !active && (
                       <motion.span
@@ -542,7 +543,6 @@ export const Navigation = ({
                     </Link>
                   )}
 
-                  {/* Mega dropdown */}
                   {item.children && (
                     <AnimatePresence>
                       {isOpen && (
@@ -769,7 +769,7 @@ export const Navigation = ({
               </AnimatePresence>
             </div>
 
-            {/* Mobile-only quick search + menu */}
+            {/* Mobile-only buttons */}
             <button
               className="nav-action-btn nav-mobile-only"
               onClick={() => setSearchOpen(true)}
@@ -820,7 +820,7 @@ export const Navigation = ({
         />
       </header>
 
-      {/* ── COMMAND PALETTE ─────────────────────────────────────────── */}
+      {/* ── COMMAND PALETTE ── */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div
@@ -844,7 +844,7 @@ export const Navigation = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoFocus
-                  placeholder="Search timetables, teachers, classes…"
+                  placeholder="Search timetables, teachers, classes..."
                   className="nav-search-input"
                 />
                 <span className="nav-search-esc">ESC</span>
@@ -882,7 +882,7 @@ export const Navigation = ({
         )}
       </AnimatePresence>
 
-      {/* ── MOBILE SIDEBAR ────────────────────────────────────────────── */}
+      {/* ── MOBILE SIDEBAR ── */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -905,7 +905,7 @@ export const Navigation = ({
                 mass: 1,
               }}
             >
-              {/* Mobile header with logo */}
+              {/* Mobile header with logo - using same imported logo */}
               <div className="nav-mobile-header">
                 <Link
                   to="/"
@@ -914,7 +914,7 @@ export const Navigation = ({
                   onClick={() => setMobileOpen(false)}
                 >
                   <img
-                    src="/public/new-protiba-logo.png"
+                    src={protibaLogo}
                     alt="Protiba Logo"
                     className="nav-logo__image"
                     style={{height: "32px"}}
@@ -1054,7 +1054,7 @@ const navStyles = `
   }
   .nav-header--scrolled .nav-header__inner { height: 64px; }
 
-  /* Brand - Clean logo only, no borders, no shadows */
+  /* Brand - logo visible on all screens */
   .nav-logo {
     display: flex; align-items: center; text-decoration: none;
     flex-shrink: 0;
@@ -1062,7 +1062,9 @@ const navStyles = `
   .nav-logo__image {
     height: 38px;
     width: auto;
+    max-width: none;
     object-fit: contain;
+    display: block;
     transition: transform 420ms var(--nav-ease), opacity var(--nav-transition);
   }
   .nav-logo:hover .nav-logo__image { 
@@ -1234,7 +1236,7 @@ const navStyles = `
   .nav-search-quick__item:hover { background: rgba(28,28,30,0.045); }
   .nav-search-hints { padding: 10px 14px; font-size: 11.5px; color: #A0A0AC; border-top: 1px solid rgba(28,28,30,0.06); }
 
-  /* Mobile sidebar - slides from left */
+  /* Mobile sidebar */
   .nav-mobile-only { display: none; }
   .nav-mobile-toggle {
     display: none; background: rgba(28,28,30,0.045); border: none; cursor: pointer;
@@ -1259,6 +1261,7 @@ const navStyles = `
     display: flex; align-items: center; justify-content: space-between;
     padding: 16px 18px 12px; flex-shrink: 0;
     border-bottom: 1px solid rgba(28,28,30,0.06);
+    min-height: 56px;
   }
   .nav-mobile-close {
     width: 34px; height: 34px; border-radius: 999px; border: none; flex-shrink: 0;
@@ -1303,7 +1306,7 @@ const navStyles = `
   .nav-mobile-section { padding: 6px 0 10px; margin-top: 8px; border-top: 1px solid rgba(28,28,30,0.06); }
   .nav-mobile-section__label { display: block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: #A0A0AC; padding: 12px 12px 6px; }
   
-  /* Mobile footer with brand-themed CTA */
+  /* Mobile footer */
   .nav-mobile-footer { 
     padding: 14px 16px; flex-shrink: 0;
     border-top: 1px solid rgba(28,28,30,0.06); 
@@ -1336,6 +1339,16 @@ const navStyles = `
     .nav-user-info, .nav-action-btn--search, .nav-user-chevron { display: none; }
     .nav-user-trigger { padding: 4px; }
     .nav-header__inner, .nav-header--scrolled .nav-header__inner { height: 62px; }
+    
+    /* Ensure logo stays visible on mobile */
+    .nav-logo {
+      display: flex !important;
+      flex-shrink: 0;
+    }
+    .nav-logo__image {
+      height: 30px;
+      max-width: none;
+    }
   }
   @media (prefers-reduced-motion: reduce) {
     .nav-header *, .nav-mobile-panel * { animation: none !important; transition-duration: 1ms !important; }
