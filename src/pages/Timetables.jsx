@@ -25,6 +25,10 @@ import {
   Check,
   AlertCircle,
   Loader2,
+  Download,
+  FileText,
+  ChevronRight,
+  ShieldAlert,
 } from "lucide-react";
 import {getTimetable} from "../api/timetable";
 
@@ -1870,6 +1874,562 @@ function buildInsights(timetable) {
   ].filter(Boolean);
 }
 
+// ─── Health check ──────────────────────────────────────────────────────────────
+function buildHealthIssues(timetables) {
+  const issues = [];
+  timetables.forEach((tt) => {
+    const className = tt.name?.replace("Timetable for ", "") ?? tt.name;
+    (tt.schedule || []).forEach((day) => {
+      (day.periods || []).forEach((p, pi) => {
+        if (p.isBreak) return;
+        if (p.subject && !p.teacher) {
+          issues.push({
+            className,
+            day: day.day,
+            period: pi + 1,
+            time: `${formatTime(p.startTime)} – ${formatTime(p.endTime)}`,
+            subject: p.subject.name,
+            type: "unassigned_teacher",
+          });
+        }
+        if (!p.subject && !p.isBreak) {
+          issues.push({
+            className,
+            day: day.day,
+            period: pi + 1,
+            time: `${formatTime(p.startTime)} – ${formatTime(p.endTime)}`,
+            subject: null,
+            type: "empty_slot",
+          });
+        }
+      });
+    });
+  });
+  return issues;
+}
+
+// ─── PDF download ───────────────────────────────────────────────────────────────
+function generateTimetablePDF(timetable, institutionName) {
+  const className =
+    timetable.name?.replace("Timetable for ", "") ?? timetable.name;
+  const days = timetable.schedule || [];
+  const periods = days[0]?.periods || [];
+  const config = timetable.config || {};
+
+  const cellStyle = `
+    border: 1px solid #e5e7eb;
+    padding: 8px 10px;
+    font-size: 12px;
+    vertical-align: top;
+    min-width: 120px;
+    word-break: break-word;
+  `;
+  const headerStyle = `
+    border: 1px solid #e5e7eb;
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: #f3f4f6;
+    color: #374151;
+    text-align: center;
+  `;
+  const timeStyle = `
+    border: 1px solid #e5e7eb;
+    padding: 10px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #f9fafb;
+    color: #6b7280;
+    white-space: nowrap;
+    vertical-align: middle;
+    min-width: 110px;
+  `;
+
+  const rows = periods
+    .map((_, pi) => {
+      const refP = days[0]?.periods?.[pi];
+      const timeLabel = refP
+        ? `${formatTime(refP.startTime)} – ${formatTime(refP.endTime)}`
+        : `Period ${pi + 1}`;
+
+      const cells = days
+        .map((day) => {
+          const p = day.periods?.[pi];
+          if (!p) return `<td style="${cellStyle}"></td>`;
+          if (p.isBreak) {
+            return `<td style="${cellStyle} background:#fffbeb; text-align:center; color:#b45309; font-weight:600;">${p.name || "Break"}</td>`;
+          }
+          const isDouble = isDoublePeriod(p, config);
+          const warnTag = p.warning
+            ? `<div style="color:#ef4444;font-size:10px;margin-top:4px;">⚠ ${p.warning}</div>`
+            : "";
+          const noTeacher =
+            p.subject && !p.teacher
+              ? `<div style="color:#ef4444;font-size:10px;margin-top:4px;">⚠ No teacher assigned</div>`
+              : "";
+          const doubleBadge = isDouble
+            ? `<span style="display:inline-block;background:#ede9fe;color:#7c3aed;font-size:9px;font-weight:700;border-radius:3px;padding:1px 5px;margin-bottom:3px;text-transform:uppercase;">Double</span><br/>`
+            : "";
+          const subject = p.subject
+            ? `<strong style="color:#1f2937;">${p.subject.name}</strong><br/><span style="color:#6b7280;font-size:11px;">${p.teacher?.name || "<em style='color:#ef4444'>Unassigned</em>"}</span>${noTeacher}${warnTag}`
+            : `<span style="color:#9ca3af;font-size:11px;">Free period</span>`;
+          return `<td style="${cellStyle} ${isDouble ? "background:#faf5ff;" : ""}">${doubleBadge}${subject}</td>`;
+        })
+        .join("");
+
+      return `<tr><td style="${timeStyle}">${timeLabel}</td>${cells}</tr>`;
+    })
+    .join("");
+
+  const dayHeaders = days
+    .map((d) => `<th style="${headerStyle}">${d.day}</th>`)
+    .join("");
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>${className} Timetable – ${institutionName}</title>
+  <style>
+    @page { size: A4 landscape; margin: 18mm 14mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #111827; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #4f6ef7; }
+    .header-left h1 { font-size: 20px; font-weight: 800; color: #1f2937; letter-spacing: -0.02em; }
+    .header-left p { font-size: 12px; color: #6b7280; margin-top: 3px; }
+    .header-right { text-align: right; font-size: 11px; color: #9ca3af; }
+    .header-right strong { color: #4f6ef7; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; font-family: inherit; }
+    .legend { margin-top: 16px; display: flex; gap: 18px; font-size: 10px; color: #6b7280; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+    .footer { margin-top: 20px; font-size: 10px; color: #9ca3af; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <h1>${className}</h1>
+      <p>${institutionName} – Generated by Protiba</p>
+    </div>
+    <div class="header-right">
+      <strong>Protiba</strong><br/>
+      Printed ${new Date().toLocaleDateString("en-GB", {day: "2-digit", month: "long", year: "numeric"})}
+    </div>
+  </div>
+  <table>
+    <thead><tr><th style="${headerStyle} text-align:left;">Time</th>${dayHeaders}</tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#ede9fe;border:1px solid #ddd6fe;"></div> Double period</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fffbeb;border:1px solid #fde68a;"></div> Break</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fef2f2;border:1px solid #fecaca;"></div> Unassigned / Warning</div>
+  </div>
+  <div class="footer">Protiba Academic Scheduling Infrastructure</div>
+</body>
+</html>`;
+
+  const w = window.open("", "_blank", "width=1100,height=750");
+  if (!w) return;
+  w.document.write(html);
+  w.document.close();
+  w.onload = () => {
+    setTimeout(() => {
+      w.focus();
+      w.print();
+    }, 350);
+  };
+}
+
+// ─── Download button component ──────────────────────────────────────────────────
+function DownloadButton({timetables, institutionName}) {
+  const [open, setOpen] = useState(false);
+  const [downloading, setDownloading] = useState(null);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleDownload = (tt) => {
+    setDownloading(tt.name);
+    setTimeout(() => {
+      generateTimetablePDF(tt, institutionName);
+      setDownloading(null);
+      setOpen(false);
+    }, 200);
+  };
+
+  const handleDownloadAll = () => {
+    timetables.forEach((tt, i) => {
+      setTimeout(() => generateTimetablePDF(tt, institutionName), i * 800);
+    });
+    setOpen(false);
+  };
+
+  return (
+    <div ref={ref} style={{position: "relative"}}>
+      <button
+        onClick={() =>
+          timetables.length === 1
+            ? handleDownload(timetables[0])
+            : setOpen((o) => !o)
+        }
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 7,
+          padding: "8px 16px",
+          background: tk.accent,
+          color: "#fff",
+          border: "none",
+          borderRadius: 9,
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: "pointer",
+          fontFamily: "inherit",
+          boxShadow: `0 2px 10px rgba(79,110,247,0.3)`,
+          transition: "all 0.22s cubic-bezier(0.22,1,0.36,1)",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = tk.accentHov;
+          e.currentTarget.style.transform = "translateY(-1px)";
+          e.currentTarget.style.boxShadow = `0 6px 18px rgba(79,110,247,0.35)`;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = tk.accent;
+          e.currentTarget.style.transform = "translateY(0)";
+          e.currentTarget.style.boxShadow = `0 2px 10px rgba(79,110,247,0.3)`;
+        }}
+      >
+        <Download size={14} />
+        Download PDF
+        {timetables.length > 1 && (
+          <ChevronDown
+            size={13}
+            style={{
+              opacity: 0.75,
+              transform: open ? "rotate(180deg)" : "rotate(0)",
+              transition: "transform 0.2s",
+            }}
+          />
+        )}
+      </button>
+
+      {open && timetables.length > 1 && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 8px)",
+            right: 0,
+            zIndex: 999,
+            background: tk.bg1,
+            border: `1px solid ${tk.border}`,
+            borderRadius: 12,
+            overflow: "hidden",
+            minWidth: 220,
+            boxShadow:
+              "0 12px 36px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06)",
+            animation: "dropIn 0.2s cubic-bezier(0.22,1,0.36,1)",
+          }}
+        >
+          <div
+            style={{
+              padding: "10px 14px",
+              borderBottom: `1px solid ${tk.border}`,
+            }}
+          >
+            <p
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                color: tk.text3,
+                textTransform: "uppercase",
+                letterSpacing: "0.07em",
+              }}
+            >
+              Download timetable
+            </p>
+          </div>
+          {timetables.map((tt) => {
+            const name = tt.name?.replace("Timetable for ", "") ?? tt.name;
+            const isThis = downloading === tt.name;
+            return (
+              <button
+                key={tt.name}
+                onClick={() => handleDownload(tt)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  width: "100%",
+                  padding: "10px 14px",
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  transition: "background 0.15s",
+                  textAlign: "left",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = tk.bg2)
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
+              >
+                {isThis ? (
+                  <Loader2
+                    size={14}
+                    color={tk.accent}
+                    style={{animation: "spin 0.7s linear infinite"}}
+                  />
+                ) : (
+                  <FileText size={14} color={tk.text3} />
+                )}
+                <span style={{fontSize: 13, color: tk.text1, fontWeight: 500}}>
+                  {name}
+                </span>
+                <ChevronRight
+                  size={13}
+                  color={tk.text3}
+                  style={{marginLeft: "auto"}}
+                />
+              </button>
+            );
+          })}
+          <div style={{padding: "8px", borderTop: `1px solid ${tk.border}`}}>
+            <button
+              onClick={handleDownloadAll}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 7,
+                width: "100%",
+                padding: "9px 14px",
+                background: tk.accentSubtle,
+                border: `1px solid ${tk.accentBorder}`,
+                borderRadius: 8,
+                color: tk.accent,
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "rgba(79,110,247,0.14)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = tk.accentSubtle)
+              }
+            >
+              <Download size={13} /> Download all ({timetables.length})
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Health banner ──────────────────────────────────────────────────────────────
+function HealthBanner({issues, onDismiss}) {
+  const [expanded, setExpanded] = useState(false);
+  if (!issues || issues.length === 0) return null;
+
+  const unassigned = issues.filter((i) => i.type === "unassigned_teacher");
+  const empty = issues.filter((i) => i.type === "empty_slot");
+
+  return (
+    <div
+      style={{
+        maxWidth: 1200,
+        margin: "0 auto",
+        padding: "0 48px 20px",
+        position: "relative",
+        zIndex: 1,
+        animation: "slideDown 0.4s cubic-bezier(0.22,1,0.36,1)",
+      }}
+      className="tt-metrics"
+    >
+      <div
+        style={{
+          background: tk.dangerSubtle,
+          border: `1px solid ${tk.dangerBorder}`,
+          borderRadius: 12,
+          overflow: "hidden",
+        }}
+      >
+        {/* Banner header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "14px 18px",
+            cursor: "pointer",
+          }}
+          onClick={() => setExpanded((e) => !e)}
+        >
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              flexShrink: 0,
+              background: "rgba(248,113,113,0.15)",
+              border: `1px solid ${tk.dangerBorder}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: tk.danger,
+            }}
+          >
+            <ShieldAlert size={16} />
+          </div>
+          <div style={{flex: 1}}>
+            <p
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#991b1b",
+                marginBottom: 1,
+              }}
+            >
+              {issues.length} slot{issues.length !== 1 ? "s" : ""} need
+              attention
+            </p>
+            <p style={{fontSize: 12, color: "#b91c1c"}}>
+              {unassigned.length > 0 &&
+                `${unassigned.length} unassigned teacher${unassigned.length !== 1 ? "s" : ""}`}
+              {unassigned.length > 0 && empty.length > 0 && " · "}
+              {empty.length > 0 &&
+                `${empty.length} empty slot${empty.length !== 1 ? "s" : ""}`}{" "}
+              — click to review
+            </p>
+          </div>
+          <div style={{display: "flex", alignItems: "center", gap: 8}}>
+            <ChevronDown
+              size={15}
+              color="#b91c1c"
+              style={{
+                transform: expanded ? "rotate(180deg)" : "rotate(0)",
+                transition: "transform 0.22s cubic-bezier(0.22,1,0.36,1)",
+              }}
+            />
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDismiss();
+              }}
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 6,
+                border: "none",
+                background: "rgba(248,113,113,0.15)",
+                color: "#b91c1c",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "rgba(248,113,113,0.28)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "rgba(248,113,113,0.15)")
+              }
+              title="Dismiss"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        </div>
+
+        {/* Expanded issue list */}
+        {expanded && (
+          <div
+            style={{
+              borderTop: `1px solid ${tk.dangerBorder}`,
+              maxHeight: 260,
+              overflowY: "auto",
+              animation: "fadeIn 0.2s ease",
+            }}
+          >
+            {issues.map((issue, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "10px 18px",
+                  borderBottom:
+                    i < issues.length - 1
+                      ? `1px solid rgba(248,113,113,0.12)`
+                      : "none",
+                }}
+              >
+                <AlertTriangle
+                  size={12}
+                  color={tk.danger}
+                  style={{flexShrink: 0}}
+                />
+                <div style={{flex: 1}}>
+                  <span
+                    style={{fontSize: 12, fontWeight: 600, color: "#991b1b"}}
+                  >
+                    {issue.className}
+                  </span>
+                  <span style={{fontSize: 12, color: "#b91c1c"}}>
+                    {" "}
+                    · {issue.day}, Period {issue.period} ({issue.time}) ·{" "}
+                    {issue.type === "unassigned_teacher"
+                      ? `${issue.subject} — no teacher assigned`
+                      : "Empty slot"}
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 600,
+                    padding: "2px 8px",
+                    borderRadius: 4,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.06em",
+                    background:
+                      issue.type === "unassigned_teacher"
+                        ? "rgba(245,158,11,0.15)"
+                        : "rgba(248,113,113,0.15)",
+                    color:
+                      issue.type === "unassigned_teacher"
+                        ? tk.amber
+                        : tk.danger,
+                    border: `1px solid ${issue.type === "unassigned_teacher" ? tk.amberBorder : tk.dangerBorder}`,
+                  }}
+                >
+                  {issue.type === "unassigned_teacher" ? "No Teacher" : "Empty"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── MAIN COMPONENT ────────────────────────────────────────────────────────────
 const Timetables = () => {
   const {user, isLoading: authLoading, requiredData} = useAuthStore();
@@ -1931,6 +2491,7 @@ const Timetables = () => {
   const [selectedClass, setSelectedClass] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [mounted, setMounted] = useState(false);
+  const [healthDismissed, setHealthDismissed] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
@@ -2053,6 +2614,7 @@ const Timetables = () => {
     allPeriods.filter((p) => p.teacher).map((p) => p.teacher.name),
   ).size;
   const insights = buildInsights(selectedTimetable);
+  const healthIssues = buildHealthIssues(timetables);
 
   // After a slot is saved, refetch to get fresh data
   const handleSlotUpdated = () => {
@@ -2070,6 +2632,8 @@ const Timetables = () => {
         @keyframes pulse{0%,100%{opacity:.4}50%{opacity:.9}}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes dropIn{from{opacity:0;transform:translateY(-8px) scale(0.96)}to{opacity:1;transform:translateY(0) scale(1)}}
         @media(max-width:767px){
           .tt-desktop{display:none!important;}
           .tt-mobile{display:block!important;}
@@ -2256,6 +2820,14 @@ const Timetables = () => {
           </div>
         </div>
 
+        {/* Health Banner */}
+        {!healthDismissed && (
+          <HealthBanner
+            issues={healthIssues}
+            onDismiss={() => setHealthDismissed(true)}
+          />
+        )}
+
         <div
           style={{
             height: 1,
@@ -2313,6 +2885,11 @@ const Timetables = () => {
               </h2>
             </div>
             <div style={{display: "flex", alignItems: "center", gap: 10}}>
+              {/* Download button */}
+              <DownloadButton
+                timetables={timetables}
+                institutionName={institutionName}
+              />
               {/* Edit hint */}
               <div
                 style={{
