@@ -1,1272 +1,1325 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, {useState, useCallback, useEffect} from "react";
+import {useNavigate} from "react-router-dom";
 import {useGenStore} from "../store/generativeStore";
-import Timetable from "./components/timetable";
+import {Navigation} from "./components/navigation";
 import {useAuthStore} from "../store/authStore";
-import Navigation from "./components/navigation";
+import {
+  Settings,
+  Clock,
+  Coffee,
+  Zap,
+  BookOpen,
+  Users,
+  Calendar,
+  Plus,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  AlertCircle,
+  CheckCircle,
+  Loader2,
+  ArrowRight,
+  GraduationCap,
+  FlaskConical,
+  Sun,
+  Moon,
+  School,
+} from "lucide-react";
 
-// ─── Micro Icons ────────────────────────────────────────────────────────────
-const Icon = {
-  Clock: () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.25" />
-      <path
-        d="M8 4.5V8l2.5 1.5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-      />
-    </svg>
-  ),
-  Periods: () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <rect
-        x="1.5"
-        y="3.5"
-        width="13"
-        height="9"
-        rx="1.5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-      />
-      <path
-        d="M5.5 3.5V12.5M10.5 3.5V12.5M1.5 7.5H14.5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-      />
-    </svg>
-  ),
-  Duration: () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M3 8h10M8 3l5 5-5 5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
-  School: () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M8 2L14 5.5V7H2V5.5L8 2Z"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinejoin="round"
-      />
-      <rect
-        x="3.5"
-        y="7"
-        width="2.5"
-        height="5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-      />
-      <rect
-        x="6.75"
-        y="7"
-        width="2.5"
-        height="5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-      />
-      <rect
-        x="10"
-        y="7"
-        width="2.5"
-        height="5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-      />
-      <path
-        d="M1.5 12H14.5"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-      />
-    </svg>
-  ),
-  Add: () => (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path
-        d="M7 2V12M2 7H12"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  ),
-  Remove: () => (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path
-        d="M2 7H12"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  ),
-  Chevron: () => (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path
-        d="M3 5L7 9L11 5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
-  Sparkle: () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M8 2L9.2 6.8L14 8L9.2 9.2L8 14L6.8 9.2L2 8L6.8 6.8L8 2Z"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
-  Check: () => (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path
-        d="M2.5 7L5.5 10L11.5 4"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
-  Warning: () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M8 2L14.5 13H1.5L8 2Z"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M8 6V9"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="round"
-      />
-      <circle cx="8" cy="11" r="0.75" fill="currentColor" />
-    </svg>
-  ),
-  Loader: () => (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 18 18"
-      fill="none"
-      className="animate-spin"
-    >
-      <circle
-        cx="9"
-        cy="9"
-        r="7"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeOpacity="0.2"
-      />
-      <path
-        d="M9 2A7 7 0 0 1 16 9"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  ),
+// ─── Tokens ────────────────────────────────────────────────────────────────────
+const tk = {
+  bg0: "#F7F7F8",
+  bg1: "#FFFFFF",
+  bg2: "#F0F0F2",
+  bg3: "#E6E6EA",
+  border: "rgba(0,0,0,0.07)",
+  borderHov: "rgba(0,0,0,0.14)",
+  borderAccent: "rgba(79,110,247,0.3)",
+  text1: "#1A1A2E",
+  text2: "#6B6B80",
+  text3: "#9898A8",
+  accent: "#4F6EF7",
+  accentHov: "#3A58E0",
+  accentSubtle: "rgba(79,110,247,0.08)",
+  accentBorder: "rgba(79,110,247,0.22)",
+  violet: "#7C3AED",
+  violetSubtle: "rgba(124,58,237,0.08)",
+  violetBorder: "rgba(124,58,237,0.2)",
+  success: "#16A34A",
+  successSubtle: "rgba(22,163,74,0.08)",
+  successBorder: "rgba(22,163,74,0.2)",
+  warning: "#D97706",
+  warningSubtle: "rgba(217,119,6,0.08)",
+  warningBorder: "rgba(217,119,6,0.2)",
+  danger: "#DC2626",
+  dangerSubtle: "rgba(220,38,38,0.08)",
+  dangerBorder: "rgba(220,38,38,0.2)",
+  amber: "#F59E0B",
+  amberSubtle: "rgba(245,158,11,0.08)",
+  amberBorder: "rgba(245,158,11,0.2)",
 };
 
-// ─── Animated Counter ─────────────────────────────────────────────────────
-const StatPill = ({label, value, accent = false}) => (
-  <div className={`stat-pill ${accent ? "stat-pill--accent" : ""}`}>
-    <span className="stat-pill__value">{value}</span>
-    <span className="stat-pill__label">{label}</span>
-  </div>
-);
+// ─── Kenyan default config ──────────────────────────────────────────────────────
+const KENYAN_DEFAULTS = {
+  name: "",
+  school: "", // Added school field
+  periodsPerDay: 9,
+  periodDuration: 40,
+  startTime: "08:00",
+  maxTeacherPeriods: 30,
+  breaks: [
+    {name: "Tea Break", afterPeriod: 4, duration: 15},
+    {name: "Lunch Break", afterPeriod: 7, duration: 40},
+  ],
+  doublePeriods: [],
+  subjectWeeklyFrequency: [],
+};
 
-// ─── Section Header ──────────────────────────────────────────────────────
-const SectionHeader = ({title, description, action, actionLabel, count}) => (
-  <div className="section-header">
-    <div className="section-header__left">
-      <div className="section-header__title-row">
-        <h3 className="section-header__title">{title}</h3>
-        {count > 0 && <span className="section-header__badge">{count}</span>}
-      </div>
-      {description && <p className="section-header__desc">{description}</p>}
-    </div>
-    {action && (
-      <button type="button" onClick={action} className="btn-add">
-        <Icon.Add />
-        {actionLabel}
-      </button>
-    )}
-  </div>
-);
+const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
-// ─── Premium Input ───────────────────────────────────────────────────────
-const PremiumInput = ({
+// ─── Input component ──────────────────────────────────────────────────────────
+function Input({
   label,
-  icon: IconComp,
-  type = "text",
-  name,
-  placeholder,
-  required,
-  min,
-  max,
+  helper,
   value,
   onChange,
-  hint,
-}) => {
+  type = "text",
+  min,
+  max,
+  placeholder,
+  suffix,
+  required = false,
+}) {
   const [focused, setFocused] = useState(false);
-  const filled = value !== "" && value !== undefined;
-
   return (
-    <div
-      className={`field ${focused ? "field--focused" : ""} ${filled ? "field--filled" : ""}`}
-    >
-      <label className="field__label">
-        {label}
-        {required && <span className="field__required">*</span>}
-      </label>
-      <div className="field__control">
-        {IconComp && (
-          <span className="field__icon">
-            <IconComp />
-          </span>
-        )}
+    <div style={{display: "flex", flexDirection: "column", gap: 5}}>
+      {label && (
+        <label
+          style={{
+            fontSize: 12,
+            fontWeight: 600,
+            color: tk.text2,
+            letterSpacing: "0.01em",
+          }}
+        >
+          {label}
+          {required && <span style={{color: tk.danger, marginLeft: 2}}>*</span>}
+        </label>
+      )}
+      {helper && (
+        <p style={{fontSize: 11, color: tk.text3, marginTop: -2}}>{helper}</p>
+      )}
+      <div
+        style={{position: "relative", display: "flex", alignItems: "center"}}
+      >
         <input
           type={type}
-          name={name}
-          placeholder={placeholder}
-          required={required}
+          value={value}
           min={min}
           max={max}
-          value={value}
-          onChange={onChange}
+          placeholder={placeholder}
+          onChange={(e) =>
+            onChange(
+              type === "number" ? Number(e.target.value) : e.target.value,
+            )
+          }
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          className={`field__input ${IconComp ? "field__input--padded" : ""}`}
+          style={{
+            width: "100%",
+            padding: suffix ? "10px 40px 10px 12px" : "10px 12px",
+            fontSize: 13,
+            color: tk.text1,
+            background: tk.bg1,
+            fontFamily: "inherit",
+            border: `1px solid ${focused ? tk.accent : tk.border}`,
+            borderRadius: 9,
+            outline: "none",
+            transition: "border-color 0.15s",
+            boxShadow: focused ? `0 0 0 3px ${tk.accentSubtle}` : "none",
+          }}
         />
-      </div>
-      {hint && <p className="field__hint">{hint}</p>}
-    </div>
-  );
-};
-
-// ─── Premium Select ──────────────────────────────────────────────────────
-const PremiumSelect = ({label, name, options, required, value, onChange}) => {
-  const [focused, setFocused] = useState(false);
-  return (
-    <div
-      className={`field ${focused ? "field--focused" : ""} ${value ? "field--filled" : ""}`}
-    >
-      <label className="field__label">
-        {label}
-        {required && <span className="field__required">*</span>}
-      </label>
-      <div className="field__control field__control--select">
-        <select
-          name={name}
-          required={required}
-          value={value}
-          onChange={onChange}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          className="field__select"
-        >
-          <option value="">Select {label}</option>
-          {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-        <span className="field__chevron">
-          <Icon.Chevron />
-        </span>
-      </div>
-    </div>
-  );
-};
-
-// ─── Progress Steps ───────────────────────────────────────────────────────
-const steps = ["Basic Info", "Schedule Config", "Breaks", "Advanced"];
-const ProgressBar = ({current}) => (
-  <div className="progress-bar">
-    {steps.map((step, i) => (
-      <React.Fragment key={step}>
-        <div
-          className={`progress-step ${i < current ? "progress-step--done" : i === current ? "progress-step--active" : ""}`}
-        >
-          <div className="progress-step__dot">
-            {i < current ? <Icon.Check /> : <span>{i + 1}</span>}
-          </div>
-          <span className="progress-step__label">{step}</span>
-        </div>
-        {i < steps.length - 1 && (
-          <div
-            className={`progress-connector ${i < current ? "progress-connector--done" : ""}`}
-          />
-        )}
-      </React.Fragment>
-    ))}
-  </div>
-);
-
-// ─── Break Card ──────────────────────────────────────────────────────────
-const BreakCard = ({breakItem, index, onChange, onRemove, maxPeriods}) => {
-  const [expanded, setExpanded] = useState(true);
-  return (
-    <div
-      className={`card-item ${expanded ? "card-item--expanded" : ""}`}
-      style={{"--delay": `${index * 60}ms`}}
-    >
-      <div className="card-item__header" onClick={() => setExpanded((e) => !e)}>
-        <div className="card-item__header-left">
-          <div className="card-item__index">{index + 1}</div>
-          <span className="card-item__name">
-            {breakItem.name || "Unnamed Break"}
-          </span>
-          {breakItem.afterPeriod && (
-            <span className="card-item__meta">
-              after period {breakItem.afterPeriod}
-            </span>
-          )}
-          {breakItem.duration && (
-            <span className="card-item__meta">{breakItem.duration} min</span>
-          )}
-        </div>
-        <div className="card-item__actions">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove(breakItem.id);
-            }}
-            className="btn-ghost-danger"
-          >
-            <Icon.Remove />
-            Remove
-          </button>
+        {suffix && (
           <span
-            className={`card-item__chevron ${expanded ? "card-item__chevron--open" : ""}`}
+            style={{
+              position: "absolute",
+              right: 12,
+              fontSize: 12,
+              color: tk.text3,
+              pointerEvents: "none",
+            }}
           >
-            <Icon.Chevron />
+            {suffix}
           </span>
-        </div>
+        )}
       </div>
+    </div>
+  );
+}
 
-      {expanded && (
-        <div className="card-item__body">
-          <div className="card-item__grid card-item__grid--3">
-            <PremiumInput
-              label="Break Name"
-              name="name"
-              placeholder="e.g. Lunch Break"
-              required
-              value={breakItem.name}
-              onChange={(e) => onChange(breakItem.id, e)}
-            />
-            <PremiumInput
-              label="After Period"
-              type="number"
-              name="afterPeriod"
-              placeholder="2"
-              min="1"
-              max={maxPeriods || 12}
-              required
-              value={breakItem.afterPeriod}
-              onChange={(e) => onChange(breakItem.id, e)}
-              hint="Which period this follows"
-            />
-            <PremiumInput
-              label="Duration"
-              type="number"
-              name="duration"
-              placeholder="15"
-              min="1"
-              max="120"
-              required
-              value={breakItem.duration}
-              onChange={(e) => onChange(breakItem.id, e)}
-              hint="Minutes"
-            />
+// ─── Section card ──────────────────────────────────────────────────────────────
+function Section({
+  icon,
+  title,
+  subtitle,
+  children,
+  collapsible = false,
+  defaultOpen = true,
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div
+      style={{
+        background: tk.bg1,
+        border: `1px solid ${tk.border}`,
+        borderRadius: 14,
+        overflow: "hidden",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.03)",
+      }}
+    >
+      <div
+        style={{
+          padding: "18px 22px",
+          borderBottom: open ? `1px solid ${tk.border}` : "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          cursor: collapsible ? "pointer" : "default",
+        }}
+        onClick={() => collapsible && setOpen((o) => !o)}
+      >
+        <div style={{display: "flex", alignItems: "center", gap: 10}}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 9,
+              background: tk.accentSubtle,
+              border: `1px solid ${tk.accentBorder}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: tk.accent,
+            }}
+          >
+            {icon}
           </div>
+          <div>
+            <p
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: tk.text1,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {title}
+            </p>
+            {subtitle && (
+              <p style={{fontSize: 11, color: tk.text3, marginTop: 1}}>
+                {subtitle}
+              </p>
+            )}
+          </div>
+        </div>
+        {collapsible &&
+          (open ? (
+            <ChevronUp size={16} color={tk.text3} />
+          ) : (
+            <ChevronDown size={16} color={tk.text3} />
+          ))}
+      </div>
+      {open && <div style={{padding: "20px 22px"}}>{children}</div>}
+    </div>
+  );
+}
+
+// ─── Tag/pill toggle ───────────────────────────────────────────────────────────
+function TagToggle({label, active, onClick, color = "accent"}) {
+  const colors = {
+    accent: {bg: tk.accentSubtle, border: tk.accentBorder, text: tk.accent},
+    violet: {bg: tk.violetSubtle, border: tk.violetBorder, text: tk.violet},
+    amber: {bg: tk.amberSubtle, border: tk.amberBorder, text: tk.amber},
+  };
+  const c = active
+    ? colors[color]
+    : {bg: "transparent", border: tk.border, text: tk.text3};
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: "6px 14px",
+        fontSize: 12,
+        fontWeight: active ? 600 : 400,
+        color: c.text,
+        background: c.bg,
+        border: `1px solid ${c.border}`,
+        borderRadius: 20,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        transition: "all 0.15s",
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+// ─── Break editor ──────────────────────────────────────────────────────────────
+function BreakEditor({breaks, onChange, maxPeriod}) {
+  const add = () =>
+    onChange([...breaks, {name: "Break", afterPeriod: 4, duration: 15}]);
+  const remove = (i) => onChange(breaks.filter((_, idx) => idx !== i));
+  const update = (i, field, val) => {
+    const next = [...breaks];
+    next[i] = {...next[i], [field]: val};
+    onChange(next);
+  };
+  return (
+    <div style={{display: "flex", flexDirection: "column", gap: 12}}>
+      {breaks.map((brk, i) => (
+        <div
+          key={i}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr auto auto auto",
+            gap: 10,
+            alignItems: "end",
+            padding: "14px 16px",
+            background: tk.bg0,
+            border: `1px solid ${tk.border}`,
+            borderRadius: 10,
+          }}
+        >
+          <Input
+            label="Break name"
+            value={brk.name}
+            onChange={(v) => update(i, "name", v)}
+            placeholder="e.g. Tea Break"
+          />
+          <Input
+            label="After period"
+            type="number"
+            value={brk.afterPeriod}
+            onChange={(v) => update(i, "afterPeriod", v)}
+            min={1}
+            max={maxPeriod}
+            suffix="th"
+          />
+          <Input
+            label="Duration"
+            type="number"
+            value={brk.duration}
+            onChange={(v) => update(i, "duration", v)}
+            min={5}
+            max={120}
+            suffix="min"
+          />
+          <button
+            onClick={() => remove(i)}
+            style={{
+              padding: "10px",
+              background: tk.dangerSubtle,
+              border: `1px solid ${tk.dangerBorder}`,
+              borderRadius: 9,
+              cursor: "pointer",
+              color: tk.danger,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: 17,
+            }}
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      ))}
+      <button
+        onClick={add}
+        style={{
+          padding: "10px 16px",
+          background: "transparent",
+          border: `1px dashed ${tk.border}`,
+          borderRadius: 10,
+          cursor: "pointer",
+          color: tk.text3,
+          fontSize: 13,
+          fontFamily: "inherit",
+          display: "flex",
+          alignItems: "center",
+          gap: 7,
+          transition: "all 0.15s",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = tk.accent;
+          e.currentTarget.style.color = tk.accent;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = tk.border;
+          e.currentTarget.style.color = tk.text3;
+        }}
+      >
+        <Plus size={14} /> Add break
+      </button>
+    </div>
+  );
+}
+
+// ─── Double period editor ──────────────────────────────────────────────────────
+function DoublePeriodEditor({doubles, onChange, maxPeriod}) {
+  const add = () => onChange([...doubles, {day: "Monday", period: 1}]);
+  const remove = (i) => onChange(doubles.filter((_, idx) => idx !== i));
+  const update = (i, field, val) => {
+    const next = [...doubles];
+    next[i] = {...next[i], [field]: val};
+    onChange(next);
+  };
+  return (
+    <div style={{display: "flex", flexDirection: "column", gap: 12}}>
+      {doubles.map((dp, i) => (
+        <div
+          key={i}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr auto",
+            gap: 10,
+            alignItems: "end",
+            padding: "14px 16px",
+            background: tk.bg0,
+            border: `1px solid ${tk.border}`,
+            borderRadius: 10,
+          }}
+        >
+          <div>
+            <label
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: tk.text2,
+                display: "block",
+                marginBottom: 5,
+              }}
+            >
+              Day
+            </label>
+            <div style={{position: "relative"}}>
+              <select
+                value={dp.day}
+                onChange={(e) => update(i, "day", e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 28px 10px 12px",
+                  fontSize: 13,
+                  color: tk.text1,
+                  background: tk.bg1,
+                  border: `1px solid ${tk.border}`,
+                  borderRadius: 9,
+                  outline: "none",
+                  fontFamily: "inherit",
+                  appearance: "none",
+                  cursor: "pointer",
+                }}
+              >
+                {DAYS.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                size={13}
+                style={{
+                  position: "absolute",
+                  right: 10,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: tk.text3,
+                  pointerEvents: "none",
+                }}
+              />
+            </div>
+          </div>
+          <Input
+            label="Starting period"
+            type="number"
+            value={dp.period}
+            onChange={(v) => update(i, "period", v)}
+            min={1}
+            max={maxPeriod - 1}
+          />
+          <button
+            onClick={() => remove(i)}
+            style={{
+              padding: "10px",
+              background: tk.dangerSubtle,
+              border: `1px solid ${tk.dangerBorder}`,
+              borderRadius: 9,
+              cursor: "pointer",
+              color: tk.danger,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: 17,
+            }}
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      ))}
+      <button
+        onClick={add}
+        style={{
+          padding: "10px 16px",
+          background: "transparent",
+          border: `1px dashed ${tk.border}`,
+          borderRadius: 10,
+          cursor: "pointer",
+          color: tk.text3,
+          fontSize: 13,
+          fontFamily: "inherit",
+          display: "flex",
+          alignItems: "center",
+          gap: 7,
+          transition: "all 0.15s",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = tk.violet;
+          e.currentTarget.style.color = tk.violet;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = tk.border;
+          e.currentTarget.style.color = tk.text3;
+        }}
+      >
+        <Plus size={14} /> Add double period
+      </button>
+    </div>
+  );
+}
+
+// ─── Weekly frequency editor ───────────────────────────────────────────────────
+function FrequencyEditor({items, onChange, subjects}) {
+  const added = new Set(items.map((i) => i.subject));
+  const add = (subjectId) => {
+    if (!subjectId || added.has(subjectId)) return;
+    onChange([...items, {subject: subjectId, requiredPeriods: 4}]);
+  };
+  const remove = (i) => onChange(items.filter((_, idx) => idx !== i));
+  const update = (i, val) => {
+    const next = [...items];
+    next[i] = {...next[i], requiredPeriods: val};
+    onChange(next);
+  };
+  return (
+    <div style={{display: "flex", flexDirection: "column", gap: 12}}>
+      {items.map((item, i) => {
+        const subj = subjects.find(
+          (s) => s._id === item.subject || s._id?.toString() === item.subject,
+        );
+        return (
+          <div
+            key={i}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr auto auto",
+              gap: 10,
+              alignItems: "center",
+              padding: "12px 16px",
+              background: tk.bg0,
+              border: `1px solid ${tk.border}`,
+              borderRadius: 10,
+            }}
+          >
+            <div style={{display: "flex", alignItems: "center", gap: 9}}>
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: tk.accent,
+                  flexShrink: 0,
+                }}
+              />
+              <span style={{fontSize: 13, fontWeight: 500, color: tk.text1}}>
+                {subj?.name ?? item.subject}
+              </span>
+            </div>
+            <Input
+              type="number"
+              value={item.requiredPeriods}
+              onChange={(v) => update(i, v)}
+              min={1}
+              max={10}
+              suffix="x/wk"
+            />
+            <button
+              onClick={() => remove(i)}
+              style={{
+                padding: "8px",
+                background: tk.dangerSubtle,
+                border: `1px solid ${tk.dangerBorder}`,
+                borderRadius: 8,
+                cursor: "pointer",
+                color: tk.danger,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <Trash2 size={13} />
+            </button>
+          </div>
+        );
+      })}
+      {subjects.length > 0 && (
+        <div style={{position: "relative"}}>
+          <select
+            defaultValue=""
+            onChange={(e) => {
+              add(e.target.value);
+              e.target.value = "";
+            }}
+            style={{
+              width: "100%",
+              padding: "10px 28px 10px 12px",
+              fontSize: 13,
+              color: tk.text2,
+              background: "transparent",
+              border: `1px dashed ${tk.border}`,
+              borderRadius: 10,
+              outline: "none",
+              fontFamily: "inherit",
+              appearance: "none",
+              cursor: "pointer",
+            }}
+          >
+            <option value="">+ Set weekly frequency for a subject...</option>
+            {subjects
+              .filter((s) => !added.has(s._id?.toString() ?? s._id))
+              .map((s) => (
+                <option key={s._id} value={s._id}>
+                  {s.name}
+                </option>
+              ))}
+          </select>
+          <ChevronDown
+            size={13}
+            style={{
+              position: "absolute",
+              right: 12,
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: tk.text3,
+              pointerEvents: "none",
+            }}
+          />
         </div>
       )}
     </div>
   );
-};
+}
 
-// ─── Double Period Card ───────────────────────────────────────────────────
-const DoublePeriodCard = ({dpItem, index, daysOfWeek, onChange, onRemove}) => (
-  <div
-    className="card-item card-item--expanded"
-    style={{"--delay": `${index * 60}ms`}}
-  >
-    <div className="card-item__header">
-      <div className="card-item__header-left">
-        <div className="card-item__index">{index + 1}</div>
-        <span className="card-item__name">
-          {dpItem.day && dpItem.period
-            ? `${dpItem.day} — Period ${dpItem.period}`
-            : "New Double Period"}
-        </span>
-      </div>
-      <button
-        type="button"
-        onClick={() => onRemove(dpItem.id)}
-        className="btn-ghost-danger"
-      >
-        <Icon.Remove />
-        Remove
-      </button>
-    </div>
-    <div className="card-item__body">
-      <div className="card-item__grid card-item__grid--2">
-        <PremiumSelect
-          label="Day"
-          name="day"
-          options={daysOfWeek.map((d) => ({value: d, label: d}))}
-          required
-          value={dpItem.day}
-          onChange={(e) => onChange(dpItem.id, e)}
-        />
-        <PremiumInput
-          label="Period Number"
-          type="number"
-          name="period"
-          placeholder="1"
-          min="1"
-          max="12"
-          required
-          value={dpItem.period}
-          onChange={(e) => onChange(dpItem.id, e)}
-          hint="Starting period of double slot"
-        />
-      </div>
-    </div>
-  </div>
-);
+// ─── Preset cards ──────────────────────────────────────────────────────────────
+const PRESETS = [
+  {
+    id: "standard",
+    label: "Standard Day",
+    icon: <Clock size={16} />,
+    desc: "8 periods · 40 min · Tea + Lunch break",
+    color: "accent",
+    config: {
+      periodsPerDay: 8,
+      periodDuration: 40,
+      startTime: "08:00",
+      breaks: [
+        {name: "Tea Break", afterPeriod: 4, duration: 15},
+        {name: "Lunch Break", afterPeriod: 6, duration: 40},
+      ],
+      doublePeriods: [],
+    },
+  },
+  {
+    id: "boarding",
+    label: "Boarding School",
+    icon: <Moon size={16} />,
+    desc: "9 periods · 35 min · Three breaks",
+    color: "violet",
+    config: {
+      periodsPerDay: 9,
+      periodDuration: 35,
+      startTime: "07:30",
+      breaks: [
+        {name: "Morning Break", afterPeriod: 3, duration: 15},
+        {name: "Lunch", afterPeriod: 6, duration: 45},
+        {name: "Afternoon Break", afterPeriod: 8, duration: 10},
+      ],
+      doublePeriods: [],
+    },
+  },
+  {
+    id: "examprep",
+    label: "Exam Prep",
+    icon: <GraduationCap size={16} />,
+    desc: "10 periods · 35 min · Extended schedule",
+    color: "amber",
+    config: {
+      periodsPerDay: 10,
+      periodDuration: 35,
+      startTime: "08:00",
+      breaks: [
+        {name: "Tea Break", afterPeriod: 4, duration: 15},
+        {name: "Lunch Break", afterPeriod: 7, duration: 40},
+      ],
+      doublePeriods: [],
+    },
+  },
+];
 
-// ─── Empty State ──────────────────────────────────────────────────────────
-const EmptyState = ({icon, title, description, action, actionLabel}) => (
-  <div className="empty-state">
-    <div className="empty-state__icon">{icon}</div>
-    <p className="empty-state__title">{title}</p>
-    <p className="empty-state__desc">{description}</p>
-    {action && (
-      <button
-        type="button"
-        onClick={action}
-        className="btn-add btn-add--centered"
-      >
-        <Icon.Add />
-        {actionLabel}
-      </button>
-    )}
-  </div>
-);
-
-// ─── Completion Metric ────────────────────────────────────────────────────
-const useFormCompletion = (formData) => {
-  const fields = ["name", "startTime", "periodsPerDay", "periodDuration"];
-  const filled = fields.filter((f) => formData[f] !== "").length;
-  return Math.round((filled / fields.length) * 100);
-};
-
-// ─── Main Component ───────────────────────────────────────────────────────
+// ─── Main component ────────────────────────────────────────────────────────────
 const Generation = () => {
-  const {isloading, error, isCreated, generateTabel, idOfSchool, relValue} =
-    useGenStore();
-  const {user, logout} = useAuthStore();
+  const navigate = useNavigate();
+  const {generateTabel, isLoading, idOfSchool, relValue} = useGenStore();
+  const {user} = useAuthStore();
 
   const userName = user
-    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Guest"
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
     : "Guest";
-  const institutionName = "St. Mary's Academy";
-  const notificationCount = 3;
+  const institutionName = user?.institutionName || "Your Institution";
+
+  const [cfg, setCfg] = useState({...KENYAN_DEFAULTS});
+  const [subjects, setSubjects] = useState([]); // populated from school if available
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [activePreset, setActivePreset] = useState(null);
+
+  const set = useCallback(
+    (field, value) => setCfg((prev) => ({...prev, [field]: value})),
+    [],
+  );
+
+  const applyPreset = (preset) => {
+    setActivePreset(preset.id);
+    setCfg((prev) => ({...prev, ...preset.config}));
+  };
+
+  const validate = () => {
+    if (!cfg.name.trim()) return "Please enter a timetable name.";
+    if (!cfg.school && !idOfSchool) {
+      return "Please enter a School ID or ensure your account is linked to a school.";
+    }
+    if (cfg.periodsPerDay < 1) return "Periods per day must be at least 1.";
+    if (cfg.periodDuration < 10)
+      return "Period duration must be at least 10 minutes.";
+    if (!cfg.startTime) return "Please set a start time.";
+    for (const brk of cfg.breaks) {
+      if (brk.afterPeriod > cfg.periodsPerDay)
+        return `Break "${brk.name}" is set after period ${brk.afterPeriod} but you only have ${cfg.periodsPerDay} periods.`;
+    }
+    return null;
+  };
+
+  const handleGenerate = async () => {
+    const err = validate();
+    if (err) {
+      setError(err);
+      return;
+    }
+    setError(null);
+    try {
+      const config = {
+        periodsPerDay: cfg.periodsPerDay,
+        periodDuration: cfg.periodDuration,
+        startTime: cfg.startTime,
+        breaks: cfg.breaks,
+        doublePeriods: cfg.doublePeriods,
+        maxTeacherPeriods: cfg.maxTeacherPeriods,
+      };
+      const constraints = {
+        subjectWeeklyFrequency: cfg.subjectWeeklyFrequency,
+      };
+
+      // Use the school ID from form or from store
+      const schoolId = cfg.school || idOfSchool;
+
+      const data = await generateTabel(
+        cfg.name.trim(),
+        config,
+        constraints,
+        schoolId,
+      );
+      if (data?.success || data?.data) {
+        setSuccess(true);
+        setTimeout(() => navigate("/home/timetables"), 1200);
+      } else {
+        setError(
+          data?.message || "Generation failed. Please check your school data.",
+        );
+      }
+    } catch (e) {
+      setError(e.message || "An error occurred during generation.");
+    }
+  };
 
   const handleLogout = async () => {
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
-        {
-          method: "POST",
-          credentials: "include",
-        },
-      );
-      if (res.ok) {
-        window.location.href = "/login";
-      }
-    } catch (err) {
-      console.error("Logout error", err);
-    }
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      window.location.href = "/login";
+    } catch {}
   };
 
-  const initialFormData = {
-    name: "",
-    school: "",
-    startTime: "",
-    periodsPerDay: "",
-    periodDuration: "",
-    breaks: [],
-    doublePeriods: [],
-  };
-
-  const [formData, setFormData] = useState(initialFormData);
-  const [submitted, setSubmitted] = useState(false);
-  const completion = useFormCompletion(formData);
-
-  const daysOfWeek = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
-
-  const handleChange = (e) => {
-    const {name, value} = e.target;
-    setFormData((prev) => ({...prev, [name]: value}));
-  };
-
-  const addBreak = () =>
-    setFormData((prev) => ({
-      ...prev,
-      breaks: [
-        ...prev.breaks,
-        {id: crypto.randomUUID(), name: "", afterPeriod: "", duration: ""},
-      ],
-    }));
-
-  const handleBreakChange = (id, e) => {
-    const {name, value} = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      breaks: prev.breaks.map((b) => (b.id === id ? {...b, [name]: value} : b)),
-    }));
-  };
-
-  const removeBreak = (id) =>
-    setFormData((prev) => ({
-      ...prev,
-      breaks: prev.breaks.filter((b) => b.id !== id),
-    }));
-
-  const addDoublePeriod = () =>
-    setFormData((prev) => ({
-      ...prev,
-      doublePeriods: [
-        ...prev.doublePeriods,
-        {id: crypto.randomUUID(), day: "", period: ""},
-      ],
-    }));
-
-  const handleDoublePeriodChange = (id, e) => {
-    const {name, value} = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      doublePeriods: prev.doublePeriods.map((dp) =>
-        dp.id === id ? {...dp, [name]: value} : dp,
-      ),
-    }));
-  };
-
-  const removeDoublePeriod = (id) =>
-    setFormData((prev) => ({
-      ...prev,
-      doublePeriods: prev.doublePeriods.filter((dp) => dp.id !== id),
-    }));
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const config = {
-        periodsPerDay: formData.periodsPerDay
-          ? parseInt(formData.periodsPerDay)
-          : undefined,
-        periodDuration: formData.periodDuration
-          ? parseInt(formData.periodDuration)
-          : undefined,
-        startTime: formData.startTime || undefined,
-        breaks: formData.breaks
-          .filter((b) => b.name)
-          .map((b) => ({
-            name: b.name,
-            afterPeriod: b.afterPeriod ? parseInt(b.afterPeriod) : undefined,
-            duration: b.duration ? parseInt(b.duration) : undefined,
-          })),
-        doublePeriods: formData.doublePeriods
-          .filter((dp) => dp.day && dp.period)
-          .map((dp) => ({
-            day: dp.day,
-            period: dp.period ? parseInt(dp.period) : undefined,
-          })),
-      };
-      await generateTabel(formData.name, config, formData.school);
-      setSubmitted(true);
-    } catch (err) {
-      console.error("Submission error:", err);
-    }
-  };
-
+  // Auto-fill school ID from store if available
   useEffect(() => {
-    console.log("Effect run:", {isCreated, relValue});
-    if (isCreated && relValue?._id) {
-      localStorage.setItem("currentTimetableId", relValue._id);
+    if (idOfSchool && !cfg.school) {
+      setCfg((prev) => ({...prev, school: idOfSchool}));
     }
-  }, [isCreated, relValue]);
+  }, [idOfSchool]);
 
-  // Determine progress step
-  const currentStep = !formData.name
-    ? 0
-    : !formData.startTime || !formData.periodsPerDay || !formData.periodDuration
-      ? 1
-      : formData.breaks.length === 0
-        ? 2
-        : 3;
+  // Computed preview
+  const totalMins =
+    cfg.breaks.reduce((s, b) => s + b.duration, 0) +
+    cfg.periodsPerDay * cfg.periodDuration;
+  const endHour = cfg.startTime
+    ? (() => {
+        const [h, m] = cfg.startTime.split(":").map(Number);
+        const end = h * 60 + m + totalMins;
+        return `${String(Math.floor(end / 60)).padStart(2, "0")}:${String(end % 60).padStart(2, "0")}`;
+      })()
+    : "";
 
   return (
     <>
-      <style>{css}</style>
+      <style>{`
+        *{box-sizing:border-box;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+        .gen-anim{animation:fadeIn 0.4s ease forwards;}
+        @media(max-width:768px){
+          .gen-grid{grid-template-columns:1fr!important;}
+          .gen-main{padding:0 16px 80px!important;}
+        }
+      `}</style>
 
-      {/* Navigation bar */}
       <Navigation
         userName={userName}
         institutionName={institutionName}
-        notificationCount={notificationCount}
+        notificationCount={0}
         onLogout={handleLogout}
       />
 
-      <div className="gen-root" style={{paddingTop: "68px"}}>
-        {/* ── Page Header ── */}
-        <header className="gen-header">
-          <div className="gen-header__inner">
-            <div className="gen-header__left">
-              <div className="gen-header__eyebrow">
-                <span className="gen-header__dot" />
-                Academic Scheduling
+      <div
+        style={{
+          minHeight: "100vh",
+          background: tk.bg0,
+          paddingTop: 64,
+          fontFamily: "'Inter',system-ui,sans-serif",
+        }}
+      >
+        {/* Hero */}
+        <div
+          style={{maxWidth: 960, margin: "0 auto", padding: "52px 24px 36px"}}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 7,
+              fontSize: 11,
+              fontWeight: 600,
+              color: tk.accent,
+              textTransform: "uppercase",
+              letterSpacing: "0.07em",
+              background: tk.accentSubtle,
+              border: `1px solid ${tk.accentBorder}`,
+              borderRadius: 20,
+              padding: "5px 14px",
+              marginBottom: 18,
+            }}
+          >
+            <Zap size={12} /> Timetable Generator
+          </div>
+          <h1
+            style={{
+              fontSize: "clamp(24px,3.5vw,36px)",
+              fontWeight: 700,
+              color: tk.text1,
+              letterSpacing: "-0.03em",
+              marginBottom: 8,
+            }}
+          >
+            Configure your timetable
+          </h1>
+          <p
+            style={{
+              fontSize: 14,
+              color: tk.text2,
+              lineHeight: 1.7,
+              maxWidth: 580,
+            }}
+          >
+            Set up your institution's schedule. Protiba will generate a
+            conflict-free, Kenyan curriculum-compliant timetable automatically.
+          </p>
+        </div>
+
+        <div
+          className="gen-main"
+          style={{
+            maxWidth: 960,
+            margin: "0 auto",
+            padding: "0 24px 80px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 18,
+          }}
+        >
+          {/* Presets */}
+          <div
+            style={{
+              background: tk.bg1,
+              border: `1px solid ${tk.border}`,
+              borderRadius: 14,
+              padding: "20px 22px",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.03)",
+            }}
+          >
+            <p
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: tk.text2,
+                marginBottom: 14,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
+            >
+              Quick start presets
+            </p>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))",
+                gap: 10,
+              }}
+            >
+              {PRESETS.map((p) => (
+                <div
+                  key={p.id}
+                  onClick={() => applyPreset(p)}
+                  style={{
+                    padding: "14px 16px",
+                    borderRadius: 11,
+                    cursor: "pointer",
+                    transition: "all 0.18s",
+                    border: `1px solid ${activePreset === p.id ? tk.accent : tk.border}`,
+                    background:
+                      activePreset === p.id ? tk.accentSubtle : tk.bg0,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activePreset !== p.id) {
+                      e.currentTarget.style.borderColor = tk.borderHov;
+                      e.currentTarget.style.background = tk.bg2;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activePreset !== p.id) {
+                      e.currentTarget.style.borderColor = tk.border;
+                      e.currentTarget.style.background = tk.bg0;
+                    }
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      marginBottom: 6,
+                    }}
+                  >
+                    <div
+                      style={{
+                        color: activePreset === p.id ? tk.accent : tk.text3,
+                      }}
+                    >
+                      {p.icon}
+                    </div>
+                    <span
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: activePreset === p.id ? tk.accent : tk.text1,
+                      }}
+                    >
+                      {p.label}
+                    </span>
+                    {activePreset === p.id && (
+                      <CheckCircle
+                        size={13}
+                        color={tk.accent}
+                        style={{marginLeft: "auto"}}
+                      />
+                    )}
+                  </div>
+                  <p style={{fontSize: 12, color: tk.text3}}>{p.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Timetable Name and School ID - Combined Section */}
+          <Section
+            icon={<School size={15} />}
+            title="Institution & Timetable"
+            subtitle="Name your timetable and link it to your school"
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 14,
+              }}
+            >
+              <Input
+                label="Timetable Name"
+                value={cfg.name}
+                onChange={(v) => set("name", v)}
+                placeholder="e.g. Term 1 2026 — Form 2"
+                required
+                helper="This appears on all generated reports and exports"
+              />
+              <Input
+                label="School ID"
+                value={cfg.school}
+                onChange={(v) => set("school", v)}
+                placeholder={idOfSchool || "Enter school ID or auto-filled"}
+                helper="Auto-filled if you're logged into a school account"
+              />
+            </div>
+            {idOfSchool && !cfg.school && (
+              <div
+                style={{
+                  marginTop: 10,
+                  padding: "8px 12px",
+                  background: tk.successSubtle,
+                  border: `1px solid ${tk.successBorder}`,
+                  borderRadius: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <CheckCircle size={14} color={tk.success} />
+                <span style={{fontSize: 12, color: tk.success}}>
+                  Auto-linked to your school account (ID: {idOfSchool})
+                </span>
               </div>
-              <h1 className="gen-header__title">New Timetable</h1>
-              <p className="gen-header__subtitle">
-                Define your institution's schedule structure and let the engine
-                handle the rest.
+            )}
+            {!idOfSchool && !cfg.school && (
+              <div
+                style={{
+                  marginTop: 10,
+                  padding: "8px 12px",
+                  background: tk.warningSubtle,
+                  border: `1px solid ${tk.warningBorder}`,
+                  borderRadius: 8,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                <AlertCircle size={14} color={tk.warning} />
+                <span style={{fontSize: 12, color: tk.warning}}>
+                  No school linked. Please enter a School ID or create a school
+                  first.
+                </span>
+              </div>
+            )}
+          </Section>
+
+          {/* Timing */}
+          <Section
+            icon={<Clock size={15} />}
+            title="Schedule Timing"
+            subtitle="Configure periods, durations, and start time"
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))",
+                gap: 14,
+              }}
+            >
+              <Input
+                label="Periods per day"
+                type="number"
+                value={cfg.periodsPerDay}
+                onChange={(v) => set("periodsPerDay", v)}
+                min={1}
+                max={14}
+                required
+              />
+              <Input
+                label="Period duration"
+                type="number"
+                value={cfg.periodDuration}
+                onChange={(v) => set("periodDuration", v)}
+                min={10}
+                max={120}
+                suffix="min"
+                required
+              />
+              <Input
+                label="Start time"
+                type="time"
+                value={cfg.startTime}
+                onChange={(v) => set("startTime", v)}
+                required
+              />
+              <Input
+                label="Max teacher load"
+                helper="TSC guideline: 30"
+                type="number"
+                value={cfg.maxTeacherPeriods}
+                onChange={(v) => set("maxTeacherPeriods", v)}
+                min={10}
+                max={40}
+                suffix="periods/wk"
+              />
+            </div>
+
+            {/* Schedule preview */}
+            <div
+              style={{
+                marginTop: 16,
+                padding: "12px 16px",
+                background: tk.bg0,
+                border: `1px solid ${tk.border}`,
+                borderRadius: 10,
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+                flexWrap: "wrap",
+              }}
+            >
+              <div style={{display: "flex", alignItems: "center", gap: 6}}>
+                <Sun size={13} color={tk.amber} />
+                <span style={{fontSize: 12, color: tk.text2, fontWeight: 500}}>
+                  Start:{" "}
+                  <strong style={{color: tk.text1}}>{cfg.startTime}</strong>
+                </span>
+              </div>
+              <div style={{width: 1, height: 16, background: tk.border}} />
+              <div style={{display: "flex", alignItems: "center", gap: 6}}>
+                <Moon size={13} color={tk.violet} />
+                <span style={{fontSize: 12, color: tk.text2, fontWeight: 500}}>
+                  End: <strong style={{color: tk.text1}}>{endHour}</strong>
+                </span>
+              </div>
+              <div style={{width: 1, height: 16, background: tk.border}} />
+              <span style={{fontSize: 12, color: tk.text3}}>
+                {cfg.periodsPerDay} teaching periods ·{" "}
+                {cfg.breaks.reduce((s, b) => s + b.duration, 0)} min breaks
+              </span>
+            </div>
+          </Section>
+
+          {/* Breaks */}
+          <Section
+            icon={<Coffee size={15} />}
+            title="Breaks"
+            subtitle="Tea break, lunch, and any other intervals"
+            collapsible
+            defaultOpen
+          >
+            <BreakEditor
+              breaks={cfg.breaks}
+              onChange={(v) => set("breaks", v)}
+              maxPeriod={cfg.periodsPerDay}
+            />
+          </Section>
+
+          {/* Double periods */}
+          <Section
+            icon={<FlaskConical size={15} />}
+            title="Double Periods"
+            subtitle="Lab sessions for Sciences — scheduled in morning slots automatically"
+            collapsible
+            defaultOpen={false}
+          >
+            <div
+              style={{
+                padding: "10px 14px",
+                background: tk.accentSubtle,
+                border: `1px solid ${tk.accentBorder}`,
+                borderRadius: 9,
+                marginBottom: 14,
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 9,
+              }}
+            >
+              <AlertCircle
+                size={13}
+                color={tk.accent}
+                style={{flexShrink: 0, marginTop: 1}}
+              />
+              <p style={{fontSize: 12, color: tk.accent, lineHeight: 1.6}}>
+                Science doubles (Physics, Chemistry, Biology) are automatically
+                placed in morning slots. Define additional doubles for other
+                subjects here.
               </p>
             </div>
-            <div className="gen-header__stats">
-              <StatPill label="Breaks" value={formData.breaks.length} />
-              <StatPill
-                label="Double Periods"
-                value={formData.doublePeriods.length}
+            <DoublePeriodEditor
+              doubles={cfg.doublePeriods}
+              onChange={(v) => set("doublePeriods", v)}
+              maxPeriod={cfg.periodsPerDay}
+            />
+          </Section>
+
+          {/* Subject frequency */}
+          <Section
+            icon={<Calendar size={15} />}
+            title="Subject Weekly Frequency"
+            subtitle="Override how many times per week a subject appears — Kiswahili defaults to 5"
+            collapsible
+            defaultOpen={false}
+          >
+            <div
+              style={{
+                padding: "10px 14px",
+                background: tk.successSubtle,
+                border: `1px solid ${tk.successBorder}`,
+                borderRadius: 9,
+                marginBottom: 14,
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 9,
+              }}
+            >
+              <CheckCircle
+                size={13}
+                color={tk.success}
+                style={{flexShrink: 0, marginTop: 1}}
               />
-              <StatPill
-                label="Complete"
-                value={`${completion}%`}
-                accent={completion === 100}
-              />
+              <p style={{fontSize: 12, color: tk.success, lineHeight: 1.6}}>
+                Kiswahili is automatically set to 5x per week (KCSE
+                requirement). Science subjects default to 4x per week for lab
+                coverage.
+              </p>
             </div>
-          </div>
-          <ProgressBar current={currentStep} />
-        </header>
-
-        {/* ── Error Banner ── */}
-        {error && (
-          <div className="alert alert--error">
-            <Icon.Warning />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* ── Success Banner ── */}
-        {isCreated && submitted && (
-          <div className="alert alert--success">
-            <Icon.Check />
-            <span>
-              Timetable configuration saved — the schedule engine is now
-              running.
-            </span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="gen-form">
-          {/* ── Section 1: Identity ── */}
-          <section className="gen-section">
-            <SectionHeader
-              title="Institution"
-              description="Name your timetable for easy identification in the dashboard."
+            <FrequencyEditor
+              items={cfg.subjectWeeklyFrequency}
+              onChange={(v) => set("subjectWeeklyFrequency", v)}
+              subjects={subjects}
             />
-            <div className="gen-grid gen-grid--2">
-              <PremiumInput
-                label="Timetable Name"
-                icon={Icon.School}
-                name="name"
-                placeholder="e.g. St. Mary's 2025–26 Schedule"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                hint="This appears on all generated reports and exports"
+          </Section>
+
+          {/* Error */}
+          {error && (
+            <div
+              style={{
+                padding: "14px 16px",
+                background: tk.dangerSubtle,
+                border: `1px solid ${tk.dangerBorder}`,
+                borderRadius: 11,
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 10,
+              }}
+            >
+              <AlertCircle
+                size={16}
+                color={tk.danger}
+                style={{flexShrink: 0, marginTop: 1}}
               />
-              <PremiumInput
-                label="School ID"
-                name="school"
-                placeholder="Optional — links to existing institution"
-                value={formData.school}
-                onChange={handleChange}
-                hint="Leave blank to create a new institution profile"
-              />
-            </div>
-          </section>
-
-          <div className="gen-divider" />
-
-          {/* ── Section 2: Schedule Config ── */}
-          <section className="gen-section">
-            <SectionHeader
-              title="Schedule Configuration"
-              description="Core parameters that govern how periods and timing are structured."
-            />
-            <div className="gen-grid gen-grid--3">
-              <PremiumInput
-                label="Start Time"
-                icon={Icon.Clock}
-                type="time"
-                name="startTime"
-                required
-                value={formData.startTime}
-                onChange={handleChange}
-                hint="First period begins at"
-              />
-              <PremiumInput
-                label="Periods Per Day"
-                icon={Icon.Periods}
-                type="number"
-                name="periodsPerDay"
-                placeholder="7"
-                min="1"
-                max="12"
-                required
-                value={formData.periodsPerDay}
-                onChange={handleChange}
-                hint="Excluding break periods"
-              />
-              <PremiumInput
-                label="Period Duration"
-                icon={Icon.Duration}
-                type="number"
-                name="periodDuration"
-                placeholder="40"
-                min="5"
-                max="120"
-                required
-                value={formData.periodDuration}
-                onChange={handleChange}
-                hint="Minutes per standard period"
-              />
-            </div>
-
-            {formData.startTime &&
-              formData.periodsPerDay &&
-              formData.periodDuration && (
-                <div className="schedule-preview">
-                  <div className="schedule-preview__label">
-                    <Icon.Sparkle />
-                    Schedule Preview
-                  </div>
-                  <ScheduleTimeline
-                    startTime={formData.startTime}
-                    periodsPerDay={parseInt(formData.periodsPerDay)}
-                    periodDuration={parseInt(formData.periodDuration)}
-                    breaks={formData.breaks}
-                  />
-                </div>
-              )}
-          </section>
-
-          <div className="gen-divider" />
-
-          {/* ── Section 3: Breaks ── */}
-          <section className="gen-section">
-            <SectionHeader
-              title="Breaks"
-              description="Recesses, lunch periods, and transitions between instructional blocks."
-              action={addBreak}
-              actionLabel="Add Break"
-              count={formData.breaks.length}
-            />
-
-            {formData.breaks.length === 0 ? (
-              <EmptyState
-                icon={<Icon.Clock />}
-                title="No breaks configured"
-                description="Most institutions include at least one recess and a lunch period."
-                action={addBreak}
-                actionLabel="Add your first break"
-              />
-            ) : (
-              <div className="card-list">
-                {formData.breaks.map((b, i) => (
-                  <BreakCard
-                    key={b.id}
-                    breakItem={b}
-                    index={i}
-                    onChange={handleBreakChange}
-                    onRemove={removeBreak}
-                    maxPeriods={formData.periodsPerDay}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-
-          <div className="gen-divider" />
-
-          {/* ── Section 4: Double Periods ── */}
-          <section className="gen-section">
-            <SectionHeader
-              title="Double Periods"
-              description="Extended consecutive slots for subjects requiring longer instructional time."
-              action={addDoublePeriod}
-              actionLabel="Add Double Period"
-              count={formData.doublePeriods.length}
-            />
-
-            {formData.doublePeriods.length === 0 ? (
-              <EmptyState
-                icon={<Icon.Periods />}
-                title="No double periods defined"
-                description="Common for labs, physical education, or arts subjects."
-                action={addDoublePeriod}
-                actionLabel="Add a double period"
-              />
-            ) : (
-              <div className="card-list">
-                {formData.doublePeriods.map((dp, i) => (
-                  <DoublePeriodCard
-                    key={dp.id}
-                    dpItem={dp}
-                    index={i}
-                    daysOfWeek={daysOfWeek}
-                    onChange={handleDoublePeriodChange}
-                    onRemove={removeDoublePeriod}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-
-          {/* ── Submit ── */}
-          <div className="gen-submit">
-            <div className="gen-submit__meta">
-              <div
-                className={`completion-ring ${completion === 100 ? "completion-ring--complete" : ""}`}
-              >
-                <svg viewBox="0 0 36 36" width="36" height="36">
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="15"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeOpacity="0.12"
-                  />
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="15"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeDasharray={`${(completion / 100) * 94.2} 94.2`}
-                    strokeLinecap="round"
-                    transform="rotate(-90 18 18)"
-                  />
-                </svg>
-                <span>{completion}%</span>
-              </div>
               <div>
-                <p className="gen-submit__title">Ready to generate</p>
-                <p className="gen-submit__desc">
-                  {completion < 100
-                    ? "Complete required fields to generate the timetable"
-                    : `${formData.breaks.length} break${formData.breaks.length !== 1 ? "s" : ""} · ${formData.doublePeriods.length} double period${formData.doublePeriods.length !== 1 ? "s" : ""} configured`}
+                <p
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: tk.danger,
+                    marginBottom: 3,
+                  }}
+                >
+                  Cannot generate timetable
+                </p>
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: tk.danger,
+                    opacity: 0.85,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {error}
                 </p>
               </div>
             </div>
+          )}
 
+          {/* Generate button */}
+          <div
+            style={{display: "flex", justifyContent: "flex-end", paddingTop: 4}}
+          >
             <button
-              type="submit"
-              className={`btn-generate ${isloading ? "btn-generate--loading" : ""}`}
-              disabled={isloading || completion < 100}
+              onClick={handleGenerate}
+              disabled={isLoading || success}
+              style={{
+                padding: "13px 28px",
+                fontSize: 14,
+                fontWeight: 600,
+                color: "#fff",
+                fontFamily: "inherit",
+                cursor: isLoading || success ? "default" : "pointer",
+                background: success
+                  ? "#16A34A"
+                  : isLoading
+                    ? "rgba(79,110,247,0.7)"
+                    : tk.accent,
+                border: "none",
+                borderRadius: 11,
+                transition: "all 0.2s",
+                display: "flex",
+                alignItems: "center",
+                gap: 9,
+                boxShadow:
+                  isLoading || success
+                    ? "none"
+                    : `0 4px 16px rgba(79,110,247,0.35)`,
+              }}
+              onMouseEnter={(e) => {
+                if (!isLoading && !success)
+                  e.currentTarget.style.background = tk.accentHov;
+              }}
+              onMouseLeave={(e) => {
+                if (!isLoading && !success)
+                  e.currentTarget.style.background = tk.accent;
+              }}
             >
-              {isloading ? (
+              {isLoading ? (
                 <>
-                  <Icon.Loader />
-                  Generating Schedule…
+                  <Loader2
+                    size={15}
+                    style={{animation: "spin 0.7s linear infinite"}}
+                  />{" "}
+                  Generating...
+                </>
+              ) : success ? (
+                <>
+                  <CheckCircle size={15} /> Timetable ready!
                 </>
               ) : (
                 <>
-                  <Icon.Sparkle />
-                  Generate Timetable
+                  Generate timetable <ArrowRight size={15} />
                 </>
               )}
             </button>
           </div>
-        </form>
-
-        {/* ── Output ── */}
-        {relValue && (
-          <div className="gen-output">
-            <div className="gen-output__header">
-              <div className="gen-output__badge">
-                <Icon.Check />
-                Generated
-              </div>
-              <h2 className="gen-output__title">Timetable Output</h2>
-            </div>
-            <Timetable
-              timetableResponse={{
-                success: true,
-                message: "Timetable loaded",
-                data: {
-                  ...relValue,
-                  config: {
-                    periodDuration: parseInt(formData.periodDuration) || 40,
-                    periodsPerDay: parseInt(formData.periodsPerDay) || 7,
-                    startTime: formData.startTime || "08:00",
-                    ...(relValue.config || {}),
-                  },
-                },
-              }}
-            />
-          </div>
-        )}
+        </div>
       </div>
     </>
   );
 };
-
-// ─── Schedule Timeline Preview ───
-const ScheduleTimeline = ({
-  startTime,
-  periodsPerDay,
-  periodDuration,
-  breaks,
-}) => {
-  const parseTime = (t) => {
-    const [h, m] = t.split(":").map(Number);
-    return h * 60 + m;
-  };
-  const formatTime = (mins) => {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    const ampm = h >= 12 ? "PM" : "AM";
-    return `${h > 12 ? h - 12 : h || 12}:${m.toString().padStart(2, "0")} ${ampm}`;
-  };
-
-  let cursor = parseTime(startTime);
-  const slots = [];
-
-  for (let p = 1; p <= Math.min(periodsPerDay, 8); p++) {
-    slots.push({
-      type: "period",
-      label: `P${p}`,
-      start: formatTime(cursor),
-      duration: periodDuration,
-    });
-    cursor += periodDuration;
-    const brk = breaks.find((b) => parseInt(b.afterPeriod) === p && b.duration);
-    if (brk) {
-      slots.push({
-        type: "break",
-        label: brk.name || "Break",
-        start: formatTime(cursor),
-        duration: parseInt(brk.duration),
-      });
-      cursor += parseInt(brk.duration);
-    }
-  }
-
-  if (periodsPerDay > 8) {
-    slots.push({
-      type: "more",
-      label: `+${periodsPerDay - 8} more`,
-      duration: 0,
-    });
-  }
-
-  return (
-    <div className="timeline">
-      {slots.map((slot, i) => (
-        <div
-          key={i}
-          className={`timeline__slot timeline__slot--${slot.type}`}
-          style={{
-            "--w": slot.duration
-              ? `${Math.max(slot.duration / 1.5, 48)}px`
-              : "60px",
-          }}
-          title={`${slot.label}${slot.start ? " · " + slot.start : ""}${slot.duration ? " · " + slot.duration + "min" : ""}`}
-        >
-          <span className="timeline__label">{slot.label}</span>
-          {slot.start && <span className="timeline__time">{slot.start}</span>}
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// ─── Styles (light theme, semantic colours preserved) ───────────────
-const css = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #F8F8F8;
-    --surface: #FFFFFF;
-    --surface-2: #F0F0F0;
-    --surface-3: #E8E8E8;
-    --border: rgba(0,0,0,0.06);
-    --border-focus: rgba(124,58,237,0.5);
-    --text: #2B2B2B;
-    --text-2: #898989;
-    --text-3: #A0A0A0;
-    --accent: #7c3aed;
-    --accent-light: #a78bfa;
-    --accent-glow: rgba(124,58,237,0.06);
-    --green: #10b981;
-    --red: #f43f5e;
-    --amber: #f59e0b;
-    --radius: 10px;
-    --radius-lg: 14px;
-    --radius-xl: 18px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.04);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.06);
-    --font: 'Inter', -apple-system, sans-serif;
-    --transition: 180ms cubic-bezier(0.4,0,0.2,1);
-  }
-
-  .gen-root {
-    font-family: var(--font);
-    background: var(--bg);
-    min-height: 100vh;
-    color: var(--text);
-    padding: 0 0 80px;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ── Header ── */
-  .gen-header {
-    background: linear-gradient(180deg, rgba(124,58,237,0.04) 0%, transparent 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 40px 48px 0;
-    margin-bottom: 8px;
-  }
-  .gen-header__inner {
-    max-width: 900px;
-    margin: 0 auto;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 24px;
-    flex-wrap: wrap;
-    margin-bottom: 32px;
-  }
-  .gen-header__eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--accent-light);
-    margin-bottom: 10px;
-  }
-  .gen-header__dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 8px rgba(124,58,237,0.4);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100%{ opacity: 1; } 50%{ opacity: 0.4; } }
-  .gen-header__title {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--text);
-    line-height: 1.15;
-  }
-  .gen-header__subtitle {
-    font-size: 14px;
-    color: var(--text-2);
-    margin-top: 6px;
-    line-height: 1.5;
-  }
-  .gen-header__stats {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    padding-top: 4px;
-  }
-  .stat-pill {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 14px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 64px;
-    transition: var(--transition);
-  }
-  .stat-pill:hover { border-color: rgba(0,0,0,0.12); }
-  .stat-pill--accent { border-color: var(--border-focus); background: var(--accent-glow); }
-  .stat-pill__value { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
-  .stat-pill__label { font-size: 10px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 1px; }
-
-  /* ── Progress ── */
-  .progress-bar { max-width: 900px; margin: 0 auto; display: flex; align-items: center; padding: 0 0 24px; }
-  .progress-step { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .progress-step__dot {
-    width: 26px; height: 26px; border-radius: 50%;
-    border: 1.5px solid var(--border); background: var(--surface-2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 600; color: var(--text-3); transition: var(--transition);
-  }
-  .progress-step--active .progress-step__dot {
-    border-color: var(--accent); background: var(--accent-glow); color: var(--accent); box-shadow: 0 0 12px var(--accent-glow);
-  }
-  .progress-step--done .progress-step__dot { border-color: var(--green); background: rgba(16,185,129,0.06); color: var(--green); }
-  .progress-step__label { font-size: 12px; font-weight: 500; color: var(--text-3); white-space: nowrap; }
-  .progress-step--active .progress-step__label { color: var(--text-2); }
-  .progress-step--done .progress-step__label { color: var(--text-3); }
-  .progress-connector { flex: 1; height: 1px; background: var(--border); margin: 0 10px; min-width: 20px; transition: var(--transition); }
-  .progress-connector--done { background: rgba(16,185,129,0.3); }
-
-  /* ── Form ── */
-  .gen-form { max-width: 900px; margin: 0 auto; padding: 0 48px; }
-
-  .gen-section { padding: 32px 0; }
-  .gen-divider { height: 1px; background: var(--border); max-width: 900px; margin: 0 auto; }
-  .gen-grid { display: grid; gap: 16px; }
-  .gen-grid--2 { grid-template-columns: repeat(2, 1fr); }
-  .gen-grid--3 { grid-template-columns: repeat(3, 1fr); }
-  @media (max-width: 720px) { .gen-grid--2, .gen-grid--3 { grid-template-columns: 1fr; } .gen-form, .gen-header { padding-left: 20px; padding-right: 20px; } .gen-header__inner { flex-direction: column; } }
-
-  .section-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-  .section-header__title-row { display: flex; align-items: center; gap: 10px; }
-  .section-header__title { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
-  .section-header__badge { background: var(--accent-glow); border: 1px solid var(--border-focus); color: var(--accent); font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 20px; }
-  .section-header__desc { font-size: 13px; color: var(--text-3); margin-top: 3px; line-height: 1.5; }
-
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field__label { font-size: 12px; font-weight: 500; color: var(--text-2); letter-spacing: 0.01em; display: flex; align-items: center; gap: 4px; }
-  .field__required { color: var(--red); font-size: 11px; }
-  .field__control { position: relative; display: flex; align-items: center; }
-  .field__control--select::after { display: none; }
-  .field__icon { position: absolute; left: 12px; color: var(--text-3); display: flex; align-items: center; pointer-events: none; transition: color var(--transition); }
-  .field--focused .field__icon { color: var(--accent-light); }
-  .field__input {
-    width: 100%; background: var(--surface-2); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 10px 12px; font-size: 14px;
-    font-family: var(--font); color: var(--text); outline: none;
-    transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
-    -webkit-appearance: none;
-  }
-  .field__input--padded { padding-left: 36px; }
-  .field__input::placeholder { color: var(--text-3); }
-  .field__input:focus { border-color: var(--border-focus); background: var(--surface-3); box-shadow: 0 0 0 3px var(--accent-glow); }
-  .field__input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.4); cursor: pointer; }
-  .field__select {
-    width: 100%; appearance: none; background: var(--surface-2); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 10px 36px 10px 12px; font-size: 14px;
-    font-family: var(--font); color: var(--text); outline: none; cursor: pointer;
-    transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
-  }
-  .field__select:focus { border-color: var(--border-focus); background: var(--surface-3); box-shadow: 0 0 0 3px var(--accent-glow); }
-  .field__select option { background: #fff; color: var(--text); }
-  .field__chevron { position: absolute; right: 10px; color: var(--text-3); pointer-events: none; display: flex; }
-  .field__hint { font-size: 11px; color: var(--text-3); }
-
-  .btn-add { display: inline-flex; align-items: center; gap: 6px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 13px; font-size: 12px; font-weight: 500; color: var(--text-2); cursor: pointer; transition: all var(--transition); white-space: nowrap; font-family: var(--font); }
-  .btn-add:hover { background: var(--surface-3); border-color: var(--border-focus); color: var(--accent); }
-  .btn-add--centered { margin: 0 auto; display: flex; }
-  .btn-ghost-danger { display: inline-flex; align-items: center; gap: 5px; background: transparent; border: 1px solid transparent; border-radius: 7px; padding: 5px 10px; font-size: 12px; font-weight: 500; color: var(--text-3); cursor: pointer; transition: all var(--transition); font-family: var(--font); }
-  .btn-ghost-danger:hover { color: var(--red); border-color: rgba(244,63,94,0.2); background: rgba(244,63,94,0.06); }
-
-  .card-list { display: flex; flex-direction: column; gap: 8px; }
-  .card-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color var(--transition), box-shadow var(--transition); animation: slideIn var(--transition) both; animation-delay: var(--delay, 0ms); }
-  .card-item:hover { border-color: rgba(0,0,0,0.1); box-shadow: var(--shadow); }
-  @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-  .card-item__header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; cursor: pointer; gap: 12px; }
-  .card-item__header-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; overflow: hidden; }
-  .card-item__index { width: 22px; height: 22px; border-radius: 6px; background: var(--surface-3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--text-3); flex-shrink: 0; }
-  .card-item__name { font-size: 14px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .card-item__meta { font-size: 11px; color: var(--text-3); background: var(--surface-2); border: 1px solid var(--border); border-radius: 5px; padding: 2px 7px; white-space: nowrap; flex-shrink: 0; }
-  .card-item__actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .card-item__chevron { color: var(--text-3); display: flex; transition: transform var(--transition); }
-  .card-item__chevron--open { transform: rotate(180deg); }
-  .card-item__body { padding: 0 16px 16px; }
-  .card-item__grid { display: grid; gap: 12px; }
-  .card-item__grid--3 { grid-template-columns: repeat(3, 1fr); }
-  .card-item__grid--2 { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 600px) { .card-item__grid--3, .card-item__grid--2 { grid-template-columns: 1fr; } }
-
-  .empty-state { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px 24px; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-lg); text-align: center; }
-  .empty-state__icon { color: var(--text-3); opacity: 0.6; margin-bottom: 4px; }
-  .empty-state__title { font-size: 14px; font-weight: 500; color: var(--text-2); }
-  .empty-state__desc { font-size: 13px; color: var(--text-3); max-width: 320px; line-height: 1.5; }
-
-  .schedule-preview { margin-top: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; animation: slideIn 200ms both; }
-  .schedule-preview__label { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--accent); margin-bottom: 14px; }
-  .timeline { display: flex; align-items: stretch; gap: 6px; overflow-x: auto; padding-bottom: 6px; }
-  .timeline::-webkit-scrollbar { height: 5px; } .timeline::-webkit-scrollbar-track { background: transparent; } .timeline::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-  .timeline__slot { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: var(--w, 56px); width: var(--w, 56px); padding: 10px 6px; border-radius: 8px; flex-shrink: 0; gap: 4px; }
-  .timeline__slot--period { background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.2); }
-  .timeline__slot--break { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); }
-  .timeline__slot--more { background: var(--surface-2); border: 1px dashed var(--border); }
-  .timeline__label { font-size: 12px; font-weight: 600; color: var(--text-2); white-space: nowrap; }
-  .timeline__slot--period .timeline__label { color: var(--accent); }
-  .timeline__slot--break .timeline__label { color: var(--amber); }
-  .timeline__time { font-size: 10px; color: var(--text-2); white-space: nowrap; font-weight: 500; background: rgba(0,0,0,0.04); padding: 2px 5px; border-radius: 12px; }
-
-  .gen-submit { margin-top: 40px; padding: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-  .gen-submit__meta { display: flex; align-items: center; gap: 16px; }
-  .completion-ring { position: relative; display: flex; align-items: center; justify-content: center; color: var(--accent); }
-  .completion-ring--complete { color: var(--green); }
-  .completion-ring span { position: absolute; font-size: 9px; font-weight: 700; color: var(--text-2); }
-  .gen-submit__title { font-size: 14px; font-weight: 600; color: var(--text); }
-  .gen-submit__desc { font-size: 12px; color: var(--text-3); margin-top: 2px; }
-  .btn-generate { display: inline-flex; align-items: center; gap: 8px; background: var(--accent); border: none; border-radius: var(--radius); padding: 12px 24px; font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; transition: all var(--transition); font-family: var(--font); box-shadow: 0 4px 16px rgba(124,58,237,0.3); white-space: nowrap; }
-  .btn-generate:hover:not(:disabled) { background: #6d28d9; box-shadow: 0 6px 24px rgba(124,58,237,0.4); transform: translateY(-1px); }
-  .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
-  .btn-generate--loading { pointer-events: none; }
-  .animate-spin { animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .alert { max-width: 900px; margin: 16px auto 0; padding: 12px 16px; border-radius: var(--radius); display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; }
-  .alert--error { background: rgba(244,63,94,0.06); border: 1px solid rgba(244,63,94,0.2); color: #e11d48; }
-  .alert--success { background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2); color: #059669; }
-
-  .gen-output { max-width: none; margin: 40px 0 0; padding: 0 20px; }
-  .gen-output__header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; }
-  .gen-output__badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 600; color: var(--green); text-transform: uppercase; letter-spacing: 0.06em; }
-  .gen-output__title { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
-
-  @media (max-width: 720px) { .gen-output { padding: 0 12px; } }
-  @media (min-width: 1200px) { .gen-output { padding: 0 60px; } }
-`;
 
 export default Generation;
