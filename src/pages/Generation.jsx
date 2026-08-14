@@ -967,7 +967,7 @@ const Generation = () => {
             </div>
           </div>
 
-          {/* Timetable Name and School ID - Combined Section */}
+          {/* Institution & Timetable Name - Combined Section */}
           <Section
             icon={<School size={15} />}
             title="Institution & Timetable"

@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import {useAuthStore} from "../store/authStore";
 import {useNavigate, Link} from "react-router-dom";
 import {Navigation} from "./components/navigation";
+import {GoogleButton} from "./components/GoogleButton";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const Icons = {
@@ -205,6 +206,17 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused] = useState(null);
+  const [oauthError, setOauthError] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("error");
+    const map = {
+      google_denied: "Google sign-in was cancelled.",
+      token_exchange_failed: "Google sign-in failed. Please try again.",
+      no_email: "Could not retrieve your email from Google.",
+      server_error: "A server error occurred. Please try again.",
+    };
+    return map[err] || null;
+  });
   const [rememberMe, setRememberMe] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 

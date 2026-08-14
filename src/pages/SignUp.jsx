@@ -2,6 +2,7 @@ import React, {useState, useEffect} from "react";
 import {useAuthStore} from "../store/authStore";
 import {useNavigate, Link} from "react-router-dom";
 import {Navigation} from "./components/navigation";
+import {GoogleButton} from "./components/GoogleButton";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const Icons = {
@@ -696,6 +697,34 @@ const SignUp = () => {
                 )}
               </button>
             </form>
+
+            {/* ── Google OAuth ── */}
+            <div
+              style={{
+                margin: "20px 0",
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+              }}
+            >
+              <div
+                style={{flex: 1, height: 1, background: "rgba(43,43,43,0.08)"}}
+              />
+              <span
+                style={{
+                  fontSize: 12,
+                  color: "var(--text-3)",
+                  fontWeight: 500,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                or continue with
+              </span>
+              <div
+                style={{flex: 1, height: 1, background: "rgba(43,43,43,0.08)"}}
+              />
+            </div>
+            <GoogleButton label="Sign up with Google" />
 
             <p className="su-footer-note">
               Protected by industry-standard encryption. We never sell your
