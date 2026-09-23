@@ -1035,9 +1035,9 @@ const Home = () => {
               <Link to="/signup" className="btn-primary">
                 Start for free <Ic.arrow />
               </Link>
-              <a href="#how-it-works" className="btn-ghost">
+              <Link to="/home/demo" className="btn-ghost">
                 <Ic.play /> See how it works
-              </a>
+              </Link>
             </div>
 
             <div className="hero__status hp-anim hp-anim--5">
