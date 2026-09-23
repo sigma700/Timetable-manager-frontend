@@ -19,5 +19,6 @@ const Shell = ({children, user, onLogout}) => {
     </div>
   );
 };
+//this is the only way out fam its
 
 export default Shell;
