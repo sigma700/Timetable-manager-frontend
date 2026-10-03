@@ -43,11 +43,10 @@ import {
   useTimetableHealth,
 } from "../hooks/useAnalytics.js";
 import {useRecentActivity} from "../hooks/useActivity.js";
-import HealthScoreCard from "./components/ui/HealthScoreCard.jsx";
-import Table from "./components/ui/Table.jsx";
-import Badge, {HealthBadge} from "./components/ui/Badge.jsx";
-import {MetricGridSkeleton} from "./components/ui/Skeleton.jsx";
-import EmptyState from "./components/ui/EmptyState.jsx";
+// import Table from "./components/ui/Table.jsx";
+// import Badge, {HealthBadge} from "./components/ui/Badge.jsx";
+// import {MetricGridSkeleton} from "./components/ui/Skeleton.jsx";
+// import EmptyState from "./components/ui/EmptyState.jsx";
 import Footer from "./components/footer.jsx";
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1506,14 +1505,12 @@ const Analytics = () => {
             </div>
           </div>
         )}
+        <Footer/>
       </div>
     </>
   );
 };
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   CSS
-   ═══════════════════════════════════════════════════════════════════════════ */
 const analyticsCSS = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -1523,9 +1520,11 @@ const analyticsCSS = `
     background: #F8F8F8;
     color: #2B2B2B;
     min-height: 100vh;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 32px 24px 64px;
+    min-height: 100dvh;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 88px clamp(16px, 3vw, 48px) 48px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -1568,16 +1567,17 @@ const analyticsCSS = `
   /* ── Metrics ── */
   .analytics-metrics {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
     gap: 14px;
   }
-  .analytics-metrics--3col { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .analytics-metrics--3col { grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); }
 
   /* ── Cards ── */
   .analytics-card {
     background: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 16px;
     padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
+    min-width: 0;
   }
   .analytics-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
   .analytics-card__icon {
@@ -1607,11 +1607,11 @@ const analyticsCSS = `
   }
 
   /* ── Health Row ── */
-  .analytics-health-row { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; }
+  .analytics-health-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 14px; }
   .analytics-health-row--mobile { grid-template-columns: 1fr; }
 
   /* ── Charts Row ── */
-  .analytics-charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .analytics-charts-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
   .analytics-charts-row--mobile { grid-template-columns: 1fr; }
 
   /* ── Issues Grid ── */
@@ -1824,10 +1824,13 @@ const analyticsCSS = `
   .analytics-skeleton-card { animation: pulse 1.5s ease-in-out infinite; background: #E8E8E8; border: none; }
 
   @media (max-width: 767px) {
-    .analytics-page { padding: 24px 16px 48px; }
+    .analytics-page { padding: 80px 12px 32px; }
     .analytics-card { padding: 18px; border-radius: 14px; }
     .analytics-card__value { font-size: 26px; }
     .analytics-card__icon { width: 34px; height: 34px; border-radius: 9px; }
+    .analytics-health-row, .analytics-charts-row { grid-template-columns: minmax(0, 1fr); }
+    .analytics-tabs { margin-bottom: 20px; }
+    .analytics-tab { padding: 10px 13px; }
   }
 
   @media (prefers-reduced-motion: reduce) {

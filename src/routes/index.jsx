@@ -31,18 +31,6 @@ const Settings = lazy(() => import("../pages/Settings"));
 
 const to = (path) => <Navigate to={path} replace />;
 
-/**
- * ROUTE DOMAINS
- *   marketing   open to everyone, any stage
- *   auth        signed-out only
- *   verify      signed in, email not yet verified
- *   onboarding  verified, no school yet
- *   app         verified + school  (the product)
- *
- * Case: React Router matches paths case-insensitively, so the old /logIn and
- * /signUp URLs keep working at /login and /signup.
- */
-
 
 export const router = createBrowserRouter([
   // ── Marketing ─────────────────────────────────

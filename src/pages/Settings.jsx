@@ -81,60 +81,15 @@ const tk = {
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
-  {
-    id: "institution",
-    icon: Building2,
-    label: "Institution",
-    desc: "Profile and identity",
-  },
-  {
-    id: "academic",
-    icon: GraduationCap,
-    label: "Academic Configuration",
-    desc: "Calendar and schedule",
-  },
-  {
-    id: "timetable",
-    icon: CalendarDays,
-    label: "Timetable Preferences",
-    desc: "Generation rules",
-  },
-  {
-    id: "notifications",
-    icon: Bell,
-    label: "Notifications",
-    desc: "Alerts and updates",
-  },
-  {
-    id: "appearance",
-    icon: Palette,
-    label: "Appearance",
-    desc: "Theme and display",
-  },
-  {
-    id: "ai",
-    icon: Brain,
-    label: "AI Preferences",
-    desc: "Scheduling intelligence",
-  },
-  {
-    id: "user",
-    icon: Users,
-    label: "User Preferences",
-    desc: "Personal settings",
-  },
-  {
-    id: "security",
-    icon: ShieldCheck,
-    label: "Security",
-    desc: "Access and permissions",
-  },
-  {
-    id: "data",
-    icon: Database,
-    label: "Data & Backup",
-    desc: "Export and recovery",
-  },
+  {id: "institution", icon: Building2, label: "Institution", desc: "Profile and identity"},
+  {id: "academic", icon: GraduationCap, label: "Academic Configuration", desc: "Calendar and schedule"},
+  {id: "timetable", icon: CalendarDays, label: "Timetable Preferences", desc: "Generation rules"},
+  {id: "notifications", icon: Bell, label: "Notifications", desc: "Alerts and updates"},
+  {id: "appearance", icon: Palette, label: "Appearance", desc: "Theme and display"},
+  {id: "ai", icon: Brain, label: "AI Preferences", desc: "Scheduling intelligence"},
+  {id: "user", icon: Users, label: "User Preferences", desc: "Personal settings"},
+  {id: "security", icon: ShieldCheck, label: "Security", desc: "Access and permissions"},
+  {id: "data", icon: Database, label: "Data & Backup", desc: "Export and recovery"},
   {id: "support", icon: LifeBuoy, label: "Support", desc: "Help and resources"},
   {id: "about", icon: Info, label: "About", desc: "Version and credits"},
 ];
@@ -259,11 +214,7 @@ function SelectInput({value, onChange, options, style = {}}) {
         }}
       >
         {options.map((o) => (
-          <option
-            key={o.value}
-            value={o.value}
-            style={{background: "#fff", color: tk.text1}}
-          >
+          <option key={o.value} value={o.value} style={{background: "#fff", color: tk.text1}}>
             {o.label}
           </option>
         ))}
@@ -310,14 +261,7 @@ function TextInput({value, onChange, placeholder, type = "text"}) {
   );
 }
 
-function SliderInput({
-  value,
-  onChange,
-  min = 0,
-  max = 100,
-  step = 1,
-  unit = "",
-}) {
+function SliderInput({value, onChange, min = 0, max = 100, step = 1, unit = ""}) {
   return (
     <div style={{display: "flex", alignItems: "center", gap: 12}}>
       <input
@@ -347,14 +291,7 @@ function SliderInput({
 }
 
 // ─── Setting row ──────────────────────────────────────────────────────────────
-function SettingRowUI({
-  label,
-  description,
-  helper,
-  children,
-  border = true,
-  visible = true,
-}) {
+function SettingRowUI({label, description, helper, children, border = true, visible = true}) {
   if (!visible) return null;
   return (
     <div
@@ -368,25 +305,11 @@ function SettingRowUI({
       }}
     >
       <div style={{flex: 1, minWidth: 0}}>
-        <div
-          style={{
-            fontSize: 14,
-            fontWeight: 500,
-            color: tk.text1,
-            marginBottom: 2,
-          }}
-        >
+        <div style={{fontSize: 14, fontWeight: 500, color: tk.text1, marginBottom: 2}}>
           {label}
         </div>
         {description && (
-          <div
-            style={{
-              fontSize: 12,
-              color: tk.text3,
-              lineHeight: 1.6,
-              marginTop: 2,
-            }}
-          >
+          <div style={{fontSize: 12, color: tk.text3, lineHeight: 1.6, marginTop: 2}}>
             {description}
           </div>
         )}
@@ -414,14 +337,7 @@ function SettingRowUI({
 }
 
 // ─── Settings card ────────────────────────────────────────────────────────────
-function SettingsCard({
-  title,
-  description,
-  icon: Icon,
-  children,
-  iconColor,
-  delay = 0,
-}) {
+function SettingsCard({title, description, icon: Icon, children, iconColor, delay = 0}) {
   const [ref, inView] = useInView(0.06);
   return (
     <div
@@ -467,13 +383,9 @@ function SettingsCard({
           </div>
         )}
         <div>
-          <div style={{fontSize: 13, fontWeight: 600, color: tk.text1}}>
-            {title}
-          </div>
+          <div style={{fontSize: 13, fontWeight: 600, color: tk.text1}}>{title}</div>
           {description && (
-            <div style={{fontSize: 11, color: tk.text3, marginTop: 2}}>
-              {description}
-            </div>
+            <div style={{fontSize: 11, color: tk.text3, marginTop: 2}}>{description}</div>
           )}
         </div>
       </div>
@@ -519,14 +431,7 @@ function SectionHeader({label, title, description}) {
         {title}
       </h2>
       {description && (
-        <p
-          style={{
-            fontSize: 14,
-            color: tk.text2,
-            lineHeight: 1.7,
-            maxWidth: 540,
-          }}
-        >
+        <p style={{fontSize: 14, color: tk.text2, lineHeight: 1.7, maxWidth: 540}}>
           {description}
         </p>
       )}
@@ -588,9 +493,12 @@ function SearchBar({value, onChange}) {
   );
 }
 
-// ─── Save bar ─────────────────────────────────────────────────────────────────
-function SaveBar({dirty, onSave, onDiscard, saving, lastSaved}) {
-  if (!dirty && !saving) return null;
+// ─── Save bar (now shows success and error) ──────────────────────────────────
+function SaveBar({dirty, onSave, onDiscard, saving, lastSaved, success, error}) {
+  const showSuccess = success && !dirty && !saving;
+  const showError = !!error;
+  if (!dirty && !saving && !showSuccess && !showError) return null;
+
   return (
     <div
       style={{
@@ -610,29 +518,44 @@ function SaveBar({dirty, onSave, onDiscard, saving, lastSaved}) {
         flexWrap: "wrap",
       }}
     >
-      <div style={{display: "flex", alignItems: "center", gap: 10}}>
-        <div
-          style={{
-            width: 7,
-            height: 7,
-            borderRadius: "50%",
-            background: tk.amber,
-            flexShrink: 0,
-            boxShadow: `0 0 8px ${tk.amber}`,
-          }}
-        />
-        <span style={{fontSize: 13, color: tk.text2}}>
-          You have unsaved changes
-        </span>
-        {lastSaved && (
-          <span style={{fontSize: 11, color: tk.text3}}>
-            Last saved {lastSaved}
-          </span>
+      <div style={{display: "flex", alignItems: "center", gap: 10, minWidth: 0}}>
+        {showError ? (
+          <>
+            <AlertCircle size={15} color={tk.danger} style={{flexShrink: 0}} />
+            <span style={{fontSize: 13, color: tk.danger, fontWeight: 500}}>
+              {error}
+            </span>
+          </>
+        ) : showSuccess ? (
+          <>
+            <CheckCircle2 size={15} color={tk.success} style={{flexShrink: 0}} />
+            <span style={{fontSize: 13, color: tk.success, fontWeight: 500}}>
+              Settings saved successfully
+            </span>
+          </>
+        ) : (
+          <>
+            <div
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                background: tk.amber,
+                flexShrink: 0,
+                boxShadow: `0 0 8px ${tk.amber}`,
+              }}
+            />
+            <span style={{fontSize: 13, color: tk.text2}}>You have unsaved changes</span>
+            {lastSaved && (
+              <span style={{fontSize: 11, color: tk.text3}}>Last saved {lastSaved}</span>
+            )}
+          </>
         )}
       </div>
       <div style={{display: "flex", gap: 10}}>
         <button
           onClick={onDiscard}
+          disabled={saving}
           style={{
             padding: "8px 18px",
             background: "transparent",
@@ -641,11 +564,13 @@ function SaveBar({dirty, onSave, onDiscard, saving, lastSaved}) {
             borderRadius: 8,
             fontSize: 13,
             fontWeight: 500,
-            cursor: "pointer",
+            cursor: saving ? "not-allowed" : "pointer",
             fontFamily: "inherit",
+            opacity: saving ? 0.6 : 1,
             transition: "border-color 0.18s, color 0.18s",
           }}
           onMouseEnter={(e) => {
+            if (saving) return;
             e.currentTarget.style.borderColor = tk.borderHov;
             e.currentTarget.style.color = tk.text1;
           }}
@@ -677,10 +602,7 @@ function SaveBar({dirty, onSave, onDiscard, saving, lastSaved}) {
           }}
         >
           {saving ? (
-            <RefreshCw
-              size={13}
-              style={{animation: "spin 0.75s linear infinite"}}
-            />
+            <RefreshCw size={13} style={{animation: "spin 0.75s linear infinite"}} />
           ) : (
             <Save size={13} />
           )}
@@ -691,7 +613,7 @@ function SaveBar({dirty, onSave, onDiscard, saving, lastSaved}) {
   );
 }
 
-// ─── Sidebar – fully responsive with overlay on mobile ────────────────────────
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
 function Sidebar({active, onChange, isMobile, mobileOpen, onClose}) {
   return (
     <>
@@ -724,11 +646,8 @@ function Sidebar({active, onChange, isMobile, mobileOpen, onClose}) {
           display: "flex",
           flexDirection: "column",
           gap: 2,
-          transition: isMobile
-            ? "left 0.28s cubic-bezier(0.22,1,0.36,1)"
-            : "none",
-          boxShadow:
-            isMobile && mobileOpen ? "4px 0 40px rgba(0,0,0,0.1)" : "none",
+          transition: isMobile ? "left 0.28s cubic-bezier(0.22,1,0.36,1)" : "none",
+          boxShadow: isMobile && mobileOpen ? "4px 0 40px rgba(0,0,0,0.1)" : "none",
         }}
       >
         {isMobile && (
@@ -775,9 +694,7 @@ function Sidebar({active, onChange, isMobile, mobileOpen, onClose}) {
                 textAlign: "left",
                 width: "100%",
                 transition: "all 0.18s",
-                boxShadow: isActive
-                  ? `inset 0 0 0 1px ${tk.accentBorder}`
-                  : "none",
+                boxShadow: isActive ? `inset 0 0 0 1px ${tk.accentBorder}` : "none",
               }}
               onMouseEnter={(e) => {
                 if (!isActive) {
@@ -794,31 +711,15 @@ function Sidebar({active, onChange, isMobile, mobileOpen, onClose}) {
             >
               <Icon size={16} strokeWidth={1.8} style={{flexShrink: 0}} />
               <div style={{minWidth: 0}}>
-                <div
-                  style={{
-                    fontSize: 13,
-                    fontWeight: isActive ? 600 : 400,
-                    lineHeight: 1.2,
-                  }}
-                >
+                <div style={{fontSize: 13, fontWeight: isActive ? 600 : 400, lineHeight: 1.2}}>
                   {item.label}
                 </div>
-                <div
-                  style={{
-                    fontSize: 10,
-                    color: isActive ? tk.accent : tk.text3,
-                    marginTop: 1,
-                    opacity: 0.8,
-                  }}
-                >
+                <div style={{fontSize: 10, color: isActive ? tk.accent : tk.text3, marginTop: 1, opacity: 0.8}}>
                   {item.desc}
                 </div>
               </div>
               {isActive && (
-                <ChevronRight
-                  size={13}
-                  style={{marginLeft: "auto", flexShrink: 0}}
-                />
+                <ChevronRight size={13} style={{marginLeft: "auto", flexShrink: 0}} />
               )}
             </button>
           );
@@ -834,8 +735,7 @@ function InstitutionSection({settings, onChange, search}) {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
-      label.toLowerCase().includes(q) ||
-      tags.some((t) => t.toLowerCase().includes(q))
+      label.toLowerCase().includes(q) || tags.some((t) => t.toLowerCase().includes(q))
     );
   };
 
@@ -898,11 +798,7 @@ function InstitutionSection({settings, onChange, search}) {
         title="Basic Information"
         icon={School}
         delay={60}
-        iconColor={{
-          bg: tk.violetSubtle,
-          border: tk.violetBorder,
-          text: tk.violet,
-        }}
+        iconColor={{bg: tk.violetSubtle, border: tk.violetBorder, text: tk.violet}}
       >
         {visible("Institution Name", ["school", "name"]) && (
           <SettingRowUI
@@ -978,8 +874,7 @@ function AcademicSection({settings, onChange, search}) {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
-      label.toLowerCase().includes(q) ||
-      tags.some((t) => t.toLowerCase().includes(q))
+      label.toLowerCase().includes(q) || tags.some((t) => t.toLowerCase().includes(q))
     );
   };
 
@@ -995,11 +890,7 @@ function AcademicSection({settings, onChange, search}) {
         title="Academic Calendar"
         icon={CalendarDays}
         delay={0}
-        iconColor={{
-          bg: tk.accentSubtle,
-          border: tk.accentBorder,
-          text: tk.accent,
-        }}
+        iconColor={{bg: tk.accentSubtle, border: tk.accentBorder, text: tk.accent}}
       >
         {visible("Academic Year", ["year", "calendar"]) && (
           <SettingRowUI
@@ -1080,11 +971,7 @@ function AcademicSection({settings, onChange, search}) {
         title="School Schedule"
         icon={Clock3}
         delay={80}
-        iconColor={{
-          bg: tk.successSubtle,
-          border: tk.successBorder,
-          text: tk.success,
-        }}
+        iconColor={{bg: tk.successSubtle, border: tk.successBorder, text: tk.success}}
       >
         {visible("Morning Start Time", ["start", "time", "morning"]) && (
           <SettingRowUI
@@ -1125,12 +1012,7 @@ function AcademicSection({settings, onChange, search}) {
             />
           </SettingRowUI>
         )}
-        {visible("Lesson Duration", [
-          "duration",
-          "lesson",
-          "period",
-          "minutes",
-        ]) && (
+        {visible("Lesson Duration", ["duration", "lesson", "period", "minutes"]) && (
           <SettingRowUI
             label="Lesson Duration"
             description="Standard duration of a single teaching period"
@@ -1205,18 +1087,9 @@ function AcademicSection({settings, onChange, search}) {
         title="Timetable Generation Defaults"
         icon={Settings2}
         delay={160}
-        iconColor={{
-          bg: tk.violetSubtle,
-          border: tk.violetBorder,
-          text: tk.violet,
-        }}
+        iconColor={{bg: tk.violetSubtle, border: tk.violetBorder, text: tk.violet}}
       >
-        {visible("Generation Strategy", [
-          "strategy",
-          "generate",
-          "ai",
-          "algorithm",
-        ]) && (
+        {visible("Generation Strategy", ["strategy", "generate", "ai", "algorithm"]) && (
           <SettingRowUI
             label="Generation Strategy"
             description="How Protiba's AI approaches schedule building"
@@ -1249,11 +1122,7 @@ function AcademicSection({settings, onChange, search}) {
             />
           </SettingRowUI>
         )}
-        {visible("Automatic Regeneration", [
-          "auto",
-          "regenerate",
-          "conflict",
-        ]) && (
+        {visible("Automatic Regeneration", ["auto", "regenerate", "conflict"]) && (
           <SettingRowUI
             label="Automatic Regeneration"
             description="Automatically regenerate when configuration changes are detected"
@@ -1293,8 +1162,7 @@ function TimetableSection({settings, onChange, search}) {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
-      label.toLowerCase().includes(q) ||
-      tags.some((t) => t.toLowerCase().includes(q))
+      label.toLowerCase().includes(q) || tags.some((t) => t.toLowerCase().includes(q))
     );
   };
 
@@ -1310,11 +1178,7 @@ function TimetableSection({settings, onChange, search}) {
         title="Teacher Preferences"
         icon={Users}
         delay={0}
-        iconColor={{
-          bg: "rgba(245,158,11,0.09)",
-          border: "rgba(245,158,11,0.24)",
-          text: tk.amber,
-        }}
+        iconColor={{bg: "rgba(245,158,11,0.09)", border: "rgba(245,158,11,0.24)", text: tk.amber}}
       >
         {visible("Maximum Daily Lessons", ["teacher", "max", "daily"]) && (
           <SettingRowUI
@@ -1344,12 +1208,7 @@ function TimetableSection({settings, onChange, search}) {
             />
           </SettingRowUI>
         )}
-        {visible("Minimum Break Between Lessons", [
-          "break",
-          "gap",
-          "rest",
-          "teacher",
-        ]) && (
+        {visible("Minimum Break Between Lessons", ["break", "gap", "rest", "teacher"]) && (
           <SettingRowUI
             label="Minimum Break Between Lessons"
             description="Required gap between consecutive teaching periods"
@@ -1366,18 +1225,14 @@ function TimetableSection({settings, onChange, search}) {
             />
           </SettingRowUI>
         )}
-        {visible("Avoid Consecutive Double Lessons", [
-          "double",
-          "consecutive",
-          "teacher",
-        ]) && (
+        {visible("Avoid Consecutive Double Lessons", ["double", "consecutive", "teacher"]) && (
           <SettingRowUI
             label="Avoid Consecutive Double Lessons"
             description="Prevent the same teacher from taking back-to-back double periods"
             border={false}
           >
             <Toggle
-              value={settings.avoidConsecutiveDouble || true}
+              value={settings.avoidConsecutiveDouble ?? true}
               onChange={(v) => onChange("avoidConsecutiveDouble", v)}
             />
           </SettingRowUI>
@@ -1388,32 +1243,20 @@ function TimetableSection({settings, onChange, search}) {
         title="Subject Rules"
         icon={BookOpen}
         delay={80}
-        iconColor={{
-          bg: tk.successSubtle,
-          border: tk.successBorder,
-          text: tk.success,
-        }}
+        iconColor={{bg: tk.successSubtle, border: tk.successBorder, text: tk.success}}
       >
-        {visible("Double Lessons Allowed", [
-          "double",
-          "lessons",
-          "subject",
-        ]) && (
+        {visible("Double Lessons Allowed", ["double", "lessons", "subject"]) && (
           <SettingRowUI
             label="Double Lessons Allowed"
             description="Permit consecutive periods for the same subject"
           >
             <Toggle
-              value={settings.doubleAllowed || true}
+              value={settings.doubleAllowed ?? true}
               onChange={(v) => onChange("doubleAllowed", v)}
             />
           </SettingRowUI>
         )}
-        {visible("Maximum Double Lessons Per Subject", [
-          "double",
-          "max",
-          "subject",
-        ]) && (
+        {visible("Maximum Double Lessons Per Subject", ["double", "max", "subject"]) && (
           <SettingRowUI
             label="Maximum Doubles Per Subject Per Week"
             description="Cap on double period allocations per subject"
@@ -1433,7 +1276,7 @@ function TimetableSection({settings, onChange, search}) {
             description="Schedule lab-requiring subjects in available lab periods first"
           >
             <Toggle
-              value={settings.labPriority || true}
+              value={settings.labPriority ?? true}
               onChange={(v) => onChange("labPriority", v)}
             />
           </SettingRowUI>
@@ -1445,7 +1288,7 @@ function TimetableSection({settings, onChange, search}) {
             border={false}
           >
             <Toggle
-              value={settings.sportsPriority || true}
+              value={settings.sportsPriority ?? true}
               onChange={(v) => onChange("sportsPriority", v)}
             />
           </SettingRowUI>
@@ -1456,25 +1299,16 @@ function TimetableSection({settings, onChange, search}) {
         title="AI Scheduling Engine"
         icon={Brain}
         delay={160}
-        iconColor={{
-          bg: tk.violetSubtle,
-          border: tk.violetBorder,
-          text: tk.violet,
-        }}
+        iconColor={{bg: tk.violetSubtle, border: tk.violetBorder, text: tk.violet}}
       >
-        {visible("Automatic Conflict Resolution", [
-          "ai",
-          "conflict",
-          "auto",
-          "resolve",
-        ]) && (
+        {visible("Automatic Conflict Resolution", ["ai", "conflict", "auto", "resolve"]) && (
           <SettingRowUI
             label="Automatic Conflict Resolution"
             description="Let the AI engine automatically resolve scheduling conflicts without manual intervention"
             helper="Protiba's AI resolves 98% of conflicts automatically"
           >
             <Toggle
-              value={settings.aiAutoResolve || true}
+              value={settings.aiAutoResolve ?? true}
               onChange={(v) => onChange("aiAutoResolve", v)}
             />
           </SettingRowUI>
@@ -1495,12 +1329,7 @@ function TimetableSection({settings, onChange, search}) {
             />
           </SettingRowUI>
         )}
-        {visible("Confidence Threshold", [
-          "confidence",
-          "threshold",
-          "ai",
-          "accuracy",
-        ]) && (
+        {visible("Confidence Threshold", ["confidence", "threshold", "ai", "accuracy"]) && (
           <SettingRowUI
             label="Confidence Threshold"
             description="Minimum AI confidence score required before accepting a generated schedule"
@@ -1515,28 +1344,18 @@ function TimetableSection({settings, onChange, search}) {
             />
           </SettingRowUI>
         )}
-        {visible("Smart Suggestions", [
-          "suggestions",
-          "ai",
-          "smart",
-          "predict",
-        ]) && (
+        {visible("Smart Suggestions", ["suggestions", "ai", "smart", "predict"]) && (
           <SettingRowUI
             label="Smart Suggestions"
             description="Receive AI-powered recommendations for improving your timetable"
           >
             <Toggle
-              value={settings.smartSuggestions || true}
+              value={settings.smartSuggestions ?? true}
               onChange={(v) => onChange("smartSuggestions", v)}
             />
           </SettingRowUI>
         )}
-        {visible("Predictive Improvements", [
-          "predictive",
-          "ai",
-          "improve",
-          "learn",
-        ]) && (
+        {visible("Predictive Improvements", ["predictive", "ai", "improve", "learn"]) && (
           <SettingRowUI
             label="Predictive Improvements"
             description="Allow Protiba to learn from your adjustments and improve future generations"
@@ -1565,18 +1384,9 @@ function TimetableSection({settings, onChange, search}) {
         title="Regeneration Behaviour"
         icon={RefreshCw}
         delay={240}
-        iconColor={{
-          bg: tk.accentSubtle,
-          border: tk.accentBorder,
-          text: tk.accent,
-        }}
+        iconColor={{bg: tk.accentSubtle, border: tk.accentBorder, text: tk.accent}}
       >
-        {visible("Regeneration Strategy", [
-          "regenerate",
-          "partial",
-          "full",
-          "strategy",
-        ]) && (
+        {visible("Regeneration Strategy", ["regenerate", "partial", "full", "strategy"]) && (
           <SettingRowUI
             label="Regeneration Strategy"
             description="How the system handles timetable regeneration after changes"
@@ -1599,7 +1409,7 @@ function TimetableSection({settings, onChange, search}) {
             description="Permit the AI to move existing lessons to resolve new conflicts"
           >
             <Toggle
-              value={settings.allowRearrangement || true}
+              value={settings.allowRearrangement ?? true}
               onChange={(v) => onChange("allowRearrangement", v)}
             />
           </SettingRowUI>
@@ -1611,7 +1421,7 @@ function TimetableSection({settings, onChange, search}) {
             helper="Stores up to 20 previous versions"
           >
             <Toggle
-              value={settings.versionHistory || true}
+              value={settings.versionHistory ?? true}
               onChange={(v) => onChange("versionHistory", v)}
             />
           </SettingRowUI>
@@ -1623,7 +1433,7 @@ function TimetableSection({settings, onChange, search}) {
             border={false}
           >
             <Toggle
-              value={settings.rollbackSupport || true}
+              value={settings.rollbackSupport ?? true}
               onChange={(v) => onChange("rollbackSupport", v)}
             />
           </SettingRowUI>
@@ -1639,8 +1449,7 @@ function NotificationsSection({settings, onChange, search}) {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
-      label.toLowerCase().includes(q) ||
-      tags.some((t) => t.toLowerCase().includes(q))
+      label.toLowerCase().includes(q) || tags.some((t) => t.toLowerCase().includes(q))
     );
   };
   return (
@@ -1662,7 +1471,7 @@ function NotificationsSection({settings, onChange, search}) {
             description="Receive scheduling alerts and reports via email"
           >
             <Toggle
-              value={settings.emailNotifs || true}
+              value={settings.emailNotifs ?? true}
               onChange={(v) => onChange("emailNotifs", v)}
             />
           </SettingRowUI>
@@ -1673,7 +1482,7 @@ function NotificationsSection({settings, onChange, search}) {
             description="Notify immediately when scheduling conflicts are detected"
           >
             <Toggle
-              value={settings.conflictAlerts || true}
+              value={settings.conflictAlerts ?? true}
               onChange={(v) => onChange("conflictAlerts", v)}
             />
           </SettingRowUI>
@@ -1684,7 +1493,7 @@ function NotificationsSection({settings, onChange, search}) {
             description="Notify when a timetable generation finishes"
           >
             <Toggle
-              value={settings.generationNotif || true}
+              value={settings.generationNotif ?? true}
               onChange={(v) => onChange("generationNotif", v)}
             />
           </SettingRowUI>
@@ -1712,8 +1521,7 @@ function AppearanceSection({settings, onChange, search}) {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
-      label.toLowerCase().includes(q) ||
-      tags.some((t) => t.toLowerCase().includes(q))
+      label.toLowerCase().includes(q) || tags.some((t) => t.toLowerCase().includes(q))
     );
   };
   const themes = [
@@ -1732,11 +1540,7 @@ function AppearanceSection({settings, onChange, search}) {
         title="Interface Theme"
         icon={Palette}
         delay={0}
-        iconColor={{
-          bg: tk.violetSubtle,
-          border: tk.violetBorder,
-          text: tk.violet,
-        }}
+        iconColor={{bg: tk.violetSubtle, border: tk.violetBorder, text: tk.violet}}
       >
         {visible("Theme", ["theme", "dark", "light", "mode"]) && (
           <SettingRowUI
@@ -1809,8 +1613,7 @@ function SecuritySection({settings, onChange, search}) {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
-      label.toLowerCase().includes(q) ||
-      tags.some((t) => t.toLowerCase().includes(q))
+      label.toLowerCase().includes(q) || tags.some((t) => t.toLowerCase().includes(q))
     );
   };
   return (
@@ -1824,18 +1627,9 @@ function SecuritySection({settings, onChange, search}) {
         title="Authentication"
         icon={ShieldCheck}
         delay={0}
-        iconColor={{
-          bg: tk.dangerSubtle,
-          border: tk.dangerBorder,
-          text: tk.danger,
-        }}
+        iconColor={{bg: tk.dangerSubtle, border: tk.dangerBorder, text: tk.danger}}
       >
-        {visible("Two-Factor Authentication", [
-          "2fa",
-          "two factor",
-          "security",
-          "auth",
-        ]) && (
+        {visible("Two-Factor Authentication", ["2fa", "two factor", "security", "auth"]) && (
           <SettingRowUI
             label="Two-Factor Authentication"
             description="Require a second verification step when signing in"
@@ -1872,7 +1666,7 @@ function SecuritySection({settings, onChange, search}) {
             border={false}
           >
             <Toggle
-              value={settings.loginNotifs || true}
+              value={settings.loginNotifs ?? true}
               onChange={(v) => onChange("loginNotifs", v)}
             />
           </SettingRowUI>
@@ -1902,7 +1696,7 @@ function DataSection({settings, onChange, search}) {
           description="Automatically back up timetable data daily"
         >
           <Toggle
-            value={settings.autoBackup || true}
+            value={settings.autoBackup ?? true}
             onChange={(v) => onChange("autoBackup", v)}
           />
         </SettingRowUI>
@@ -1964,14 +1758,7 @@ function AboutSection() {
           transition: "opacity 0.5s ease, transform 0.5s ease",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            marginBottom: 24,
-          }}
-        >
+        <div style={{display: "flex", alignItems: "center", gap: 16, marginBottom: 24}}>
           <div
             style={{
               width: 48,
@@ -1987,9 +1774,7 @@ function AboutSection() {
             <Sparkles size={22} color={tk.accent} />
           </div>
           <div>
-            <div style={{fontSize: 17, fontWeight: 600, color: tk.text1}}>
-              Protiba
-            </div>
+            <div style={{fontSize: 17, fontWeight: 600, color: tk.text1}}>Protiba</div>
             <div style={{fontSize: 12, color: tk.text3}}>
               Academic Scheduling Infrastructure
             </div>
@@ -2007,8 +1792,7 @@ function AboutSection() {
               display: "flex",
               justifyContent: "space-between",
               padding: "12px 0",
-              borderBottom:
-                i < arr.length - 1 ? `1px solid ${tk.border}` : "none",
+              borderBottom: i < arr.length - 1 ? `1px solid ${tk.border}` : "none",
               fontSize: 13,
             }}
           >
@@ -2061,14 +1845,7 @@ function PlaceholderSection({id}) {
         >
           <Icon size={22} color={tk.accent} strokeWidth={1.6} />
         </div>
-        <h3
-          style={{
-            fontSize: 16,
-            fontWeight: 600,
-            color: tk.text1,
-            marginBottom: 8,
-          }}
-        >
+        <h3 style={{fontSize: 16, fontWeight: 600, color: tk.text1, marginBottom: 8}}>
           {item?.label} Settings
         </h3>
         <p
@@ -2080,8 +1857,7 @@ function PlaceholderSection({id}) {
             margin: "0 auto",
           }}
         >
-          These settings are being configured. Check back soon or contact
-          support for assistance.
+          These settings are being configured. Check back soon or contact support for assistance.
         </p>
       </div>
     </div>
@@ -2097,13 +1873,15 @@ const Settings = () => {
   const [search, setSearch] = useState("");
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState(null);
   const [lastSaved, setLastSaved] = useState(null);
   const [mounted, setMounted] = useState(false);
 
   const [settings, setSettings] = useState({
-    name: "Nyeri High School",
+    name: "",
     schoolType: "secondary",
-    location: "Nyeri, Kenya",
+    location: "",
     website: "",
     academicYear: "2024/2025",
     currentTerm: "term2",
@@ -2144,7 +1922,7 @@ const Settings = () => {
     conflictAlerts: true,
     generationNotif: true,
     weeklySummary: false,
-    theme: "dark",
+    theme: "light",
     compactMode: false,
     twoFactor: false,
     sessionTimeout: "24h",
@@ -2154,54 +1932,117 @@ const Settings = () => {
     exportFormat: "pdf",
   });
 
-  const userName = user
-    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
-    : "Guest";
-
-  const handleLogout = async () => {
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
-        {method: "POST", credentials: "include"},
-      );
-      if (res.ok) window.location.href = "/login";
-    } catch (err) {
-      console.error("Logout error", err);
-    }
-  };
-
+  // Responsive
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 900);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // Mount reveal
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 60);
     return () => clearTimeout(t);
   }, []);
 
+  // Close mobile nav when section changes or on desktop
   useEffect(() => {
     setMobileNavOpen(false);
   }, [activeSection, isMobile]);
 
+  // ── Load settings from backend on mount ─────────────────────────────────────
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/settings`,
+          {method: "GET", credentials: "include"},
+        );
+        if (!res.ok) throw new Error(`Load failed (${res.status})`);
+        const data = await res.json();
+        if (!cancelled && data?.data) {
+          setSettings((prev) => ({...prev, ...data.data}));
+        }
+      } catch (err) {
+        if (!cancelled) console.error("Failed to load settings:", err);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Clear save success/error feedback after a few seconds
+  useEffect(() => {
+    if (!saveSuccess) return;
+    const t = setTimeout(() => setSaveSuccess(false), 3000);
+    return () => clearTimeout(t);
+  }, [saveSuccess]);
+
+  useEffect(() => {
+    if (!saveError) return;
+    const t = setTimeout(() => setSaveError(null), 5000);
+    return () => clearTimeout(t);
+  }, [saveError]);
+
+  const userName = user
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+    : "Guest";
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (res.ok) window.location.href = "/login";
+    } catch (err) {
+      console.error("Logout error", err);
+    }
+  };
+
   const handleChange = useCallback((key, value) => {
     setSettings((prev) => ({...prev, [key]: value}));
     setDirty(true);
+    setSaveSuccess(false);
+    setSaveError(null);
   }, []);
 
+  // ── Save to backend ─────────────────────────────────────────────────────────
   const handleSave = async () => {
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setSaving(false);
-    setDirty(false);
-    const now = new Date();
-    setLastSaved(
-      `${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}`,
-    );
+    setSaveError(null);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/settings`, {
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
+        credentials: "include",
+        body: JSON.stringify(settings),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || `Save failed (${res.status})`);
+
+      setDirty(false);
+      setSaveSuccess(true);
+      const now = new Date();
+      setLastSaved(
+        `${now.getHours()}:${String(now.getMinutes()).padStart(2, "0")}`,
+      );
+    } catch (err) {
+      console.error("Failed to save settings:", err);
+      setSaveError(err.message || "Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDiscard = () => setDirty(false);
+  const handleDiscard = () => {
+    setDirty(false);
+    setSaveError(null);
+    setSaveSuccess(false);
+  };
 
   const renderSection = () => {
     const props = {settings, onChange: handleChange, search};
@@ -2264,26 +2105,17 @@ const Settings = () => {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
-        @keyframes shimmer {
-          0%{background-position:200% center}
-          100%{background-position:-200% center}
-        }
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 3px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
-
-        input[type="date"], input[type="time"] {
-          color-scheme: light;
-        }
+        input[type="date"], input[type="time"] { color-scheme: light; }
         select option { background: #fff; color: #2B2B2B; }
-
         @media (max-width: 600px) {
           .settings-hero { padding: 32px 16px 24px !important; }
           .settings-content { padding: 24px 16px 100px !important; }
           .settings-search-wrap { padding: 0 16px 16px !important; }
         }
-
         @media (prefers-reduced-motion: reduce) {
           *, *::before, *::after {
             animation-duration: 0.01ms !important;
@@ -2291,8 +2123,6 @@ const Settings = () => {
           }
         }
       `}</style>
-
-      
 
       <div
         style={{
@@ -2377,9 +2207,7 @@ const Settings = () => {
                   maxWidth: 480,
                 }}
               >
-                Control how Protiba works for{" "}
-                {settings.name || "your institution"}. Configure your academic
-                infrastructure, scheduling intelligence, and preferences.
+                Control how Protiba works for {settings.name || "your institution"}. Configure your academic infrastructure, scheduling intelligence, and preferences.
               </p>
             </div>
 
@@ -2490,8 +2318,7 @@ const Settings = () => {
               }}
             >
               <Menu size={15} />
-              {NAV_ITEMS.find((n) => n.id === activeSection)?.label ||
-                "Settings"}
+              {NAV_ITEMS.find((n) => n.id === activeSection)?.label || "Settings"}
             </button>
             {dirty && (
               <span
@@ -2586,6 +2413,8 @@ const Settings = () => {
           onDiscard={handleDiscard}
           saving={saving}
           lastSaved={lastSaved}
+          success={saveSuccess}
+          error={saveError}
         />
       </div>
     </>

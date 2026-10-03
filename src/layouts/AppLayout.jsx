@@ -3,11 +3,7 @@ import {Outlet} from "react-router-dom";
 import AppNav from "./nav/AppNav";
 import LoadingSpinner from "../pages/components/spinner";
 
-/**
- * The product workspace. Pages are lazy-loaded (see routes/index.jsx), so
- * public visitors never download Timetables / Analytics / charts.
- * No marketing footer inside the product.
- */
+
 export default function AppLayout() {
   return (
     <div className="flex flex-col min-h-screen">

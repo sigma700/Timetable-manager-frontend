@@ -1,7 +1,7 @@
 import React, {useState, useRef} from "react";
 import {Link} from "react-router-dom";
 
-// ── Brand tokens (unchanged) ─────────────────────────────────────────────────
+// ── Brand tokens ─────────────────────────────────────────────────────────────
 const C = {
   bg: "#F8F8F8",
   bg1: "#F5F5F5",
@@ -39,16 +39,15 @@ const ColumnDot = ({color}) => (
   />
 );
 
-// ── Newsletter form (simulated subscribe – replace with Resend later) ─────────
+// ── Newsletter form ──────────────────────────────────────────────────────────
 function NewsletterForm() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState("idle"); // idle | loading | success | error
+  const [status, setStatus] = useState("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const timeoutRef = useRef(null);
 
   const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
-  // TODO: Replace with real Resend API call when ready
   const fakeSubscribe = (value) =>
     new Promise((resolve, reject) => {
       timeoutRef.current = setTimeout(() => {
@@ -226,7 +225,7 @@ function NewsletterForm() {
   );
 }
 
-// ── Social link (restrained) ──────────────────────────────────────────────────
+// ── Social link ──────────────────────────────────────────────────────────────
 function SocialLink({href, label, children, external = true, color}) {
   const [hovered, setHovered] = useState(false);
   return (
@@ -255,7 +254,7 @@ function SocialLink({href, label, children, external = true, color}) {
   );
 }
 
-// ── Footer link (simple, clean) ───────────────────────────────────────────────
+// ── Footer link ──────────────────────────────────────────────────────────────
 function FooterLink({to, children}) {
   const [hovered, setHovered] = useState(false);
   return (
@@ -279,7 +278,7 @@ function FooterLink({to, children}) {
   );
 }
 
-// ── Trust badge (subtle) ──────────────────────────────────────────────────────
+// ── Trust badge ──────────────────────────────────────────────────────────────
 function TrustBadge({icon, label}) {
   return (
     <div
@@ -302,7 +301,7 @@ function TrustBadge({icon, label}) {
   );
 }
 
-// ── Simple SVG trust icons ───────────────────────────────────────────────────
+// ── Trust icons ──────────────────────────────────────────────────────────────
 const trustIcons = {
   enterprise: (
     <svg
@@ -386,7 +385,7 @@ const trustIcons = {
   ),
 };
 
-// ── Main Footer ────────────────────────────────────────────────────────────────
+// ── Main Footer ──────────────────────────────────────────────────────────────
 const Footer = () => {
   const year = new Date().getFullYear();
 
@@ -399,6 +398,15 @@ const Footer = () => {
         borderTop: `1px solid ${C.border}`,
         marginTop: "auto",
         padding: "80px 24px 32px",
+
+        // ✅ Full-bleed: escape any parent padding / max-width
+        width: "100vw",
+        maxWidth: "100vw",
+        marginLeft: "calc(50% - 50vw)",
+        marginRight: "calc(50% - 50vw)",
+        boxSizing: "border-box",
+        position: "relative",
+        left: 0,
       }}
     >
       <style>{`
@@ -475,7 +483,7 @@ const Footer = () => {
           <NewsletterForm />
         </div>
 
-        {/* ── Link columns (only pages that exist in navigation) ── */}
+        {/* ── Link columns ── */}
         <div
           style={{
             display: "grid",
