@@ -1,34 +1,18 @@
-import React, {useState, useEffect, useRef, useMemo} from "react";
-import {useAuthStore} from "../store/authStore";
-import {Link} from "react-router-dom";
-import {Calendar, ClipboardList, Clock, Users, Check} from "lucide-react";
+// pages/MainPg.jsx
+import React, { useState, useEffect, useMemo } from "react";
+import { useAuthStore } from "../store/authStore";
+import { Link } from "react-router-dom";
+import { Calendar, ClipboardList, Clock, Users, Check } from "lucide-react";
 
-import HoverDevCards from "./components/gridOPtions";
-import {useTimetable} from "../hooks/useTimetable";
+// ⚠️ DOUBLE-CHECK this path + filename — "gridOPtions" looks like a typo.
+import HoverDevCards from "./components/gridOptions";
+import { useTimetable } from "../hooks/useTimetable";
 
-// ─── Subject color palette ────────────────────────────────────────────────────
+// ─── Subject color palette ────────────────────────────────────────────────
 const SUBJECT_COLORS = [
-  "#EA580C",
-  "#DC2626",
-  "#2563EB",
-  "#16A34A",
-  "#0D9488",
-  "#7C3AED",
-  "#D97706",
-  "#059669",
-  "#4F46E5",
-  "#DB2777",
-  "#9333EA",
-  "#0891B2",
-  "#B45309",
-  "#B91C1C",
-  "#E11D48",
-  "#6D28D9",
-  "#0369A1",
-  "#0F766E",
-  "#B45309",
-  "#92400E",
-  "#78350F",
+  "#EA580C","#DC2626","#2563EB","#16A34A","#0D9488","#7C3AED","#D97706",
+  "#059669","#4F46E5","#DB2777","#9333EA","#0891B2","#B45309","#B91C1C",
+  "#E11D48","#6D28D9","#0369A1","#0F766E","#B45309","#92400E","#78350F",
   "#44403C",
 ];
 
@@ -38,24 +22,23 @@ function getSubjectColor(name) {
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const index = Math.abs(hash) % SUBJECT_COLORS.length;
-  return SUBJECT_COLORS[index];
+  return SUBJECT_COLORS[Math.abs(hash) % SUBJECT_COLORS.length];
 }
 
-// ─── Animation hook ───────────────────────────────────────────────────────────
+// ─── Animation hook ───────────────────────────────────────────────────────
 function useStaggeredReveal(count, delay = 60) {
   const [visible, setVisible] = useState([]);
   useEffect(() => {
-    const timers = Array.from({length: count}, (_, i) =>
-      setTimeout(() => setVisible((v) => [...v, i]), 120 + i * delay),
+    const timers = Array.from({ length: count }, (_, i) =>
+      setTimeout(() => setVisible((v) => [...v, i]), 120 + i * delay)
     );
     return () => timers.forEach(clearTimeout);
   }, [count, delay]);
   return (i) => visible.includes(i);
 }
 
-// ─── Metric card ─────────────────────────────────────────────────────────────
-function MetricCard({label, value, sub, subColor = "#2B2B2B", icon, delay}) {
+// ─── Metric card ──────────────────────────────────────────────────────────
+function MetricCard({ label, value, sub, subColor = "#2B2B2B", icon, delay }) {
   const [show, setShow] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setShow(true), delay);
@@ -70,7 +53,7 @@ function MetricCard({label, value, sub, subColor = "#2B2B2B", icon, delay}) {
         borderRadius: 14,
         padding: "18px 20px",
         transition:
-          "border-color 0.2s, background 0.2s, transform 0.2s, opacity 0.38s, transform 0.38s",
+          "border-color 0.2s, background 0.2s, transform 0.2s, opacity 0.38s",
         opacity: show ? 1 : 0,
         transform: show ? "translateY(0)" : "translateY(12px)",
         cursor: "default",
@@ -106,7 +89,7 @@ function MetricCard({label, value, sub, subColor = "#2B2B2B", icon, delay}) {
         >
           {label}
         </span>
-        <span style={{color: "#898989", display: "flex", alignItems: "center"}}>
+        <span style={{ color: "#898989", display: "flex", alignItems: "center" }}>
           {icon}
         </span>
       </div>
@@ -121,14 +104,14 @@ function MetricCard({label, value, sub, subColor = "#2B2B2B", icon, delay}) {
       >
         {value}
       </div>
-      <div style={{fontSize: 11, color: subColor, letterSpacing: "0.2px"}}>
+      <div style={{ fontSize: 11, color: subColor, letterSpacing: "0.2px" }}>
         {sub}
       </div>
     </div>
   );
 }
 
-// ─── Action card ─────────────────────────────────────────────────────────────
+// ─── Action card ──────────────────────────────────────────────────────────
 function ActionCard({
   icon,
   iconBg,
@@ -215,7 +198,7 @@ function ActionCard({
         >
           {title}
         </div>
-        <div style={{fontSize: 12, color: "#898989", lineHeight: 1.6}}>
+        <div style={{ fontSize: 12, color: "#898989", lineHeight: 1.6 }}>
           {description}
         </div>
       </div>
@@ -225,7 +208,7 @@ function ActionCard({
   return to ? (
     <Link
       to={to}
-      style={{textDecoration: "none", color: "inherit", display: "block"}}
+      style={{ textDecoration: "none", color: "inherit", display: "block" }}
     >
       {inner}
     </Link>
@@ -234,18 +217,16 @@ function ActionCard({
   );
 }
 
-// ─── Timetable cell (colored) ──────────────────────────────────────────────
-function TimetableCell({period, isDouble, color}) {
+// ─── Timetable cell ───────────────────────────────────────────────────────
+function TimetableCell({ period, isDouble, color }) {
   const [hovered, setHovered] = useState(false);
-  if (!period) return <div style={{height: 34}} />;
+  if (!period) return <div style={{ height: 34 }} />;
 
   const isBreak = period.isBreak;
   const hasSubject = !isBreak && period.subject;
   const isFree = !isBreak && !period.subject;
 
-  // Determine styles based on cell type
   let bg, borderColor, textColor;
-
   if (isBreak) {
     bg = hovered ? "#E8E8E8" : "#F0F0F0";
     textColor = "#2B2B2B";
@@ -255,12 +236,10 @@ function TimetableCell({period, isDouble, color}) {
     textColor = "#898989";
     borderColor = "#E8E8E8";
   } else if (hasSubject && color) {
-    // Subject cell with a color
     bg = hovered ? `${color}30` : `${color}20`;
     textColor = color;
     borderColor = hovered ? `${color}60` : `${color}40`;
   } else {
-    // Fallback for subject without color (should not happen)
     bg = hovered ? "#E8E8E8" : "#FFFFFF";
     textColor = "#2B2B2B";
     borderColor = "#E8E8E8";
@@ -268,8 +247,6 @@ function TimetableCell({period, isDouble, color}) {
 
   const label =
     period.subject?.name?.substring(0, 4) || (isBreak ? "Break" : "");
-
-  // Double period: override left border color
   const leftBorderColor =
     isDouble && hasSubject && color ? color : isDouble ? "#2B2B2B" : "none";
 
@@ -312,10 +289,10 @@ function TimetableCell({period, isDouble, color}) {
   );
 }
 
-// ─── Empty state ──────────────────────────────────────────────────────────────
+// ─── Empty state ──────────────────────────────────────────────────────────
 function EmptyTimetableState() {
   return (
-    <div style={{padding: "56px 24px", textAlign: "center"}}>
+    <div style={{ padding: "56px 24px", textAlign: "center" }}>
       <div
         style={{
           width: 52,
@@ -381,13 +358,13 @@ function EmptyTimetableState() {
         }}
       >
         <span>Generate timetable</span>
-        <span style={{fontSize: 15}}>→</span>
+        <span style={{ fontSize: 15 }}>→</span>
       </Link>
     </div>
   );
 }
 
-// ─── Status badge ─────────────────────────────────────────────────────────────
+// ─── Status badge ─────────────────────────────────────────────────────────
 function StatusBadge({
   label,
   color = "#2B2B2B",
@@ -412,18 +389,17 @@ function StatusBadge({
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+// ─── Main page ────────────────────────────────────────────────────────────
 const MainPg = () => {
-  const {user, logout, isLoading: authLoading} = useAuthStore();
+  const { user, isLoading: authLoading } = useAuthStore();
 
   const [timetableId, setTimetableId] = useState(() =>
-    localStorage.getItem("currentTimetableId"),
+    localStorage.getItem("currentTimetableId")
   );
 
   useEffect(() => {
-    const handleStorageChange = () => {
+    const handleStorageChange = () =>
       setTimetableId(localStorage.getItem("currentTimetableId"));
-    };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
@@ -432,7 +408,6 @@ const MainPg = () => {
     data: timetableData,
     isLoading: timetableLoading,
     isError,
-    error: timetableError,
   } = useTimetable(timetableId);
 
   useEffect(() => {
@@ -443,36 +418,7 @@ const MainPg = () => {
   }, [isError, timetableId]);
 
   const [selectedClass, setSelectedClass] = useState(null);
-  const [pageReady, setPageReady] = useState(false);
   const isVisible = useStaggeredReveal(8, 55);
-
-  const userName = user
-    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
-    : "Guest";
-  const institutionName = "St. Mary's Academy";
-  const notificationCount = 3;
-
-  const handleLogout = async () => {
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
-        {
-          method: "POST",
-          credentials: "include",
-        },
-      );
-      if (res.ok) {
-        window.location.href = "/login";
-      }
-    } catch (err) {
-      console.error("Logout error", err);
-    }
-  };
-
-  useEffect(() => {
-    const t = setTimeout(() => setPageReady(true), 60);
-    return () => clearTimeout(t);
-  }, []);
 
   useEffect(() => {
     if (timetableData?.timetables?.length > 0 && !selectedClass) {
@@ -505,16 +451,13 @@ const MainPg = () => {
     timetableData?.timetables?.find((t) => t.name === selectedClass) ||
     timetableData?.timetables?.[0];
 
-  // ─── Build color map for subjects ────────────────────────────────────────
   const subjectColorMap = useMemo(() => {
     if (!selectedTimetable) return {};
     const map = {};
     selectedTimetable.schedule?.forEach((day) => {
       day.periods?.forEach((period) => {
-        if (period?.subject?.name) {
-          if (!map[period.subject.name]) {
-            map[period.subject.name] = getSubjectColor(period.subject.name);
-          }
+        if (period?.subject?.name && !map[period.subject.name]) {
+          map[period.subject.name] = getSubjectColor(period.subject.name);
         }
       });
     });
@@ -537,57 +480,66 @@ const MainPg = () => {
     ...extra,
   });
 
+  // Style block defined once — safe to render in every return branch.
+  const spinnerStyles = (
+    <style>
+      {`
+        .main-loading-spinner {
+          width: 40px;
+          height: 40px;
+          border: 3px solid #E8E8E8;
+          border-top-color: #2B2B2B;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}
+    </style>
+  );
+
   if (authLoading) {
     return (
-      <div
-        style={{
-          background: "#F8F8F8",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div className="main-loading-spinner" />
-      </div>
+      <>
+        {spinnerStyles}
+        <div
+          style={{
+            background: "#F8F8F8",
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div className="main-loading-spinner" />
+        </div>
+      </>
     );
   }
 
   if (timetableLoading) {
     return (
-      <div
-        style={{
-          background: "#F8F8F8",
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div className="main-loading-spinner" />
-      </div>
+      <>
+        {spinnerStyles}
+        <div
+          style={{
+            background: "#F8F8F8",
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div className="main-loading-spinner" />
+        </div>
+      </>
     );
   }
 
   return (
     <>
-      <style>
-        {`
-          .main-loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #E8E8E8;
-            border-top-color: #2B2B2B;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-          }
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}
-      </style>
-
-      
+      {spinnerStyles}
 
       <main
         style={{
@@ -596,10 +548,9 @@ const MainPg = () => {
           color: "#2B2B2B",
           overflowX: "hidden",
           position: "relative",
-          paddingTop: "88px", // increased from 68px for more breathing room
+          paddingTop: "88px",
         }}
       >
-        {/* Ambient glows removed – replaced with light empty space */}
         <div
           style={{
             position: "fixed",
@@ -635,7 +586,7 @@ const MainPg = () => {
           }}
         >
           {/* ── Welcome ── */}
-          <div style={{...reveal(0), marginBottom: 40}}>
+          <div style={{ ...reveal(0), marginBottom: 40 }}>
             <div
               style={{
                 display: "flex",
@@ -669,9 +620,11 @@ const MainPg = () => {
                   }}
                 >
                   {getGreeting()},{" "}
-                  <span style={{color: "#2B2B2B"}}>{user?.firstName}</span>
+                  <span style={{ color: "#2B2B2B" }}>
+                    {user?.firstName ?? "there"}
+                  </span>
                 </h1>
-                <p style={{fontSize: 14, color: "#898989", lineHeight: 1.6}}>
+                <p style={{ fontSize: 14, color: "#898989", lineHeight: 1.6 }}>
                   {timetableCount > 0
                     ? `${timetableCount} active schedule${
                         timetableCount > 1 ? "s" : ""
@@ -703,7 +656,7 @@ const MainPg = () => {
           />
 
           {/* ── Metrics row ── */}
-          <div style={{...reveal(1), marginBottom: 36}}>
+          <div style={{ ...reveal(1), marginBottom: 36 }}>
             <div
               style={{
                 fontSize: 11,
@@ -762,8 +715,8 @@ const MainPg = () => {
             </div>
           </div>
 
-          {/* ── Section: Quick actions ── */}
-          <div style={{...reveal(2), marginBottom: 36}}>
+          {/* ── Quick actions ── */}
+          <div style={{ ...reveal(2), marginBottom: 36 }}>
             <div
               style={{
                 display: "flex",
@@ -798,8 +751,8 @@ const MainPg = () => {
             </div>
           </div>
 
-          {/* ── CTA: View timetables ── */}
-          <div style={{...reveal(3), marginBottom: 36}}>
+          {/* ── CTA ── */}
+          <div style={{ ...reveal(3), marginBottom: 36 }}>
             <Link
               to="/app/timetables"
               style={{
@@ -832,7 +785,7 @@ const MainPg = () => {
                   e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
-                <div style={{display: "flex", alignItems: "center", gap: 14}}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <div
                     style={{
                       width: 42,
@@ -849,24 +802,26 @@ const MainPg = () => {
                   </div>
                   <div>
                     <div
-                      style={{fontSize: 15, fontWeight: 500, color: "#FFFFFF"}}
+                      style={{ fontSize: 15, fontWeight: 500, color: "#FFFFFF" }}
                     >
                       Full schedule view
                     </div>
-                    <div style={{fontSize: 12, color: "#D0D0D0", marginTop: 2}}>
+                    <div
+                      style={{ fontSize: 12, color: "#D0D0D0", marginTop: 2 }}
+                    >
                       Detailed timetables with export, print, and sharing
                       options
                     </div>
                   </div>
                 </div>
-                <div style={{fontSize: 20, color: "#FFFFFF", flexShrink: 0}}>
+                <div style={{ fontSize: 20, color: "#FFFFFF", flexShrink: 0 }}>
                   →
                 </div>
               </div>
             </Link>
           </div>
 
-          {/* ── Timetable preview section ── */}
+          {/* ── Schedule preview ── */}
           <div style={reveal(4)}>
             <div
               style={{
@@ -919,7 +874,7 @@ const MainPg = () => {
                 overflow: "hidden",
               }}
             >
-              {timetableCount > 0 ? (
+              {timetableCount > 0 && selectedTimetable ? (
                 <>
                   {/* Tab bar */}
                   <div
@@ -975,8 +930,8 @@ const MainPg = () => {
                   </div>
 
                   {/* Timetable grid */}
-                  <div style={{padding: "16px 16px 0", overflowX: "auto"}}>
-                    <div style={{minWidth: 480}}>
+                  <div style={{ padding: "16px 16px 0", overflowX: "auto" }}>
+                    <div style={{ minWidth: 480 }}>
                       {/* Days header */}
                       <div
                         style={{
@@ -987,7 +942,7 @@ const MainPg = () => {
                         }}
                       >
                         <div />
-                        {(selectedTimetable?.schedule?.slice(0, 5) || []).map(
+                        {(selectedTimetable.schedule?.slice(0, 5) || []).map(
                           (day) => (
                             <div
                               key={day.day}
@@ -1003,23 +958,15 @@ const MainPg = () => {
                             >
                               {day.day.substring(0, 3)}
                             </div>
-                          ),
+                          )
                         )}
-                        {Array.from({
-                          length: Math.max(
-                            0,
-                            5 - (selectedTimetable?.schedule?.length || 0),
-                          ),
-                        }).map((_, i) => (
-                          <div key={`filler-h-${i}`} />
-                        ))}
                       </div>
 
                       {/* Period rows */}
                       {(
-                        selectedTimetable?.schedule?.[0]?.periods?.slice(
+                        selectedTimetable.schedule?.[0]?.periods?.slice(
                           0,
-                          6,
+                          6
                         ) || []
                       ).map((_, periodIdx) => (
                         <div
@@ -1042,11 +989,12 @@ const MainPg = () => {
                             }}
                           >
                             {formatTime(
-                              selectedTimetable.schedule[0].periods[periodIdx]
-                                ?.startTime,
+                              selectedTimetable.schedule?.[0]?.periods?.[
+                                periodIdx
+                              ]?.startTime
                             )}
                           </div>
-                          {(selectedTimetable?.schedule?.slice(0, 5) || []).map(
+                          {(selectedTimetable.schedule?.slice(0, 5) || []).map(
                             (day) => {
                               const period = day.periods?.[periodIdx];
                               const color = period?.subject?.name
@@ -1060,16 +1008,8 @@ const MainPg = () => {
                                   color={color}
                                 />
                               );
-                            },
+                            }
                           )}
-                          {Array.from({
-                            length: Math.max(
-                              0,
-                              5 - (selectedTimetable?.schedule?.length || 0),
-                            ),
-                          }).map((_, i) => (
-                            <div key={`filler-${i}`} style={{height: 34}} />
-                          ))}
                         </div>
                       ))}
                     </div>
@@ -1087,7 +1027,7 @@ const MainPg = () => {
                     }}
                   >
                     <div
-                      style={{display: "flex", alignItems: "center", gap: 16}}
+                      style={{ display: "flex", alignItems: "center", gap: 16 }}
                     >
                       <span
                         style={{

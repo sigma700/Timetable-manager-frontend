@@ -1,32 +1,34 @@
-// components/LoadingSpinner.jsx
+// pages/components/spinner.jsx
+import React from "react";
+
 export default function LoadingSpinner() {
   return (
-    <div className="spinner-container">
-      <div className="loading-spinner"></div>
-      <style jsx>{`
-        .spinner-container {
+    <>
+      <div className="route-spinner">
+        <div className="main-loading-spinner" />
+      </div>
+
+      <style>{`
+        .route-spinner {
           display: flex;
-          justify-content: center;
           align-items: center;
+          justify-content: center;
           height: 100vh;
+          width: 100%;
+          background: #F8F8F8;
         }
-        .loading-spinner {
-          width: 50px;
-          height: 50px;
-          border: 5px solid #f3f3f3;
-          border-top: 5px solid #3498db;
+        .main-loading-spinner {
+          width: 40px;
+          height: 40px;
+          border: 3px solid #E8E8E8;
+          border-top-color: #2B2B2B;
           border-radius: 50%;
-          animation: spin 1s linear infinite;
+          animation: spin 0.8s linear infinite;
         }
         @keyframes spin {
-          0% {
-            transform: rotate(0deg);
-          }
-          100% {
-            transform: rotate(360deg);
-          }
+          to { transform: rotate(360deg); }
         }
       `}</style>
-    </div>
+    </>
   );
 }

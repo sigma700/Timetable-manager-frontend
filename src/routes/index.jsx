@@ -42,6 +42,8 @@ const to = (path) => <Navigate to={path} replace />;
  * Case: React Router matches paths case-insensitively, so the old /logIn and
  * /signUp URLs keep working at /login and /signup.
  */
+
+
 export const router = createBrowserRouter([
   // ── Marketing ─────────────────────────────────
   {
@@ -95,37 +97,30 @@ export const router = createBrowserRouter([
         element: <AppLayout />,
         children: [
           {path: "/app", element: <MainPg />},
-          {path: "/timetables", element: <Timetables />},
-          {path: "/create", element: <Generation />},
-          {
-            path: "/reports",
-            element: (
-              <div style={{paddingTop: 64}}>
-                <Analytics />
-              </div>
-            ),
-          },
-          {path: "/invite", element: <Invite />},
-          {path: "/settings/account", element: <AccountSettings />},
-          {path: "/settings/preferences", element: <Settings />},
+          {path: "/app/timetables", element: <Timetables />},
+          {path: "/app/create", element: <Generation />},
+          {path: "/app/reports", element: <div style={{paddingTop: 64}}><Analytics /></div>},
+          {path: "/app/invite", element: <Invite />},
+          {path: "/app/settings/account", element: <AccountSettings />},
+          {path: "/app/settings/preferences", element: <Settings />},
         ],
       },
     ],
   },
 
   // ── Backward-compatible URLs (old → new) ──────
-  {path: "/home", element: to("/")},
-  {path: "/home/timetables", element: to("/timetables")},
-  {path: "/home/gentable", element: to("/create")},
+  {path: "/home", element: to("/app")},
+  {path: "/home/timetables", element: to("/app/timetables")},
+  {path: "/home/gentable", element: to("/app/create")},
   {path: "/home/create-table", element: to("/onboarding")},
-  {path: "/home/invite", element: to("/invite")},
+  {path: "/home/invite", element: to("/app/invite")},
   {path: "/home/manual", element: to("/resources")},
   {path: "/home/story", element: to("/our-story")},
   {path: "/home/contacts", element: to("/contact")},
   {path: "/home/demo", element: to("/demo")},
-  {path: "/analytics", element: to("/reports")},
-  {path: "/settings/account", element: to("//settings/account")},
-  {path: "/settings/preferences", element: to("/settings/preferences")},
+  {path: "/analytics", element: to("/app/reports")},
+  {path: "/settings/account", element: to("/app/settings/account")},
+  {path: "/settings/preferences", element: to("/app/settings/preferences")},
 
   {path: "*", element: <NotFound />},
 ]);
