@@ -1,728 +1,605 @@
-import React, {useState, useEffect, useRef} from "react";
+// pages/Create.jsx
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
+import {AnimatePresence, motion} from "framer-motion";
+import {Plus} from "lucide-react";
 import {useAuthStore} from "../store/authStore";
-import {motion, AnimatePresence} from "framer-motion";
-
 import Notification from "./components/notification";
+import {
+  CREATE_CSS,
+  ChipPicker,
+  ChoiceGroup,
+  ClassPreview,
+  ContinueButton,
+  GeneratingState,
+  IntroOverview,
+  LargeInput,
+  ProgressCompact,
+  ProgressRail,
+  QuestionStep,
+  ReviewSummary,
+  StepTransition,
+  TagInput,
+  TeacherCard,
+  splitList as list,
+} from "./createUi";
 
-// ─── Design tokens (light theme) ─────────────────────────────────────────────
-const t = {
-  bg: "#F8F8F8",
-  surface: "#FFFFFF",
-  surfaceHov: "#F0F0F0",
-  border: "rgba(0,0,0,0.06)",
-  borderHov: "rgba(0,0,0,0.12)",
-  accent: "#6366f1",
-  accentMid: "#818cf8",
-  muted: "#898989",
-  dimmed: "#A0A0A0",
-  text: "#2B2B2B",
-  textSub: "#555555",
+/* ═════════════════════════════════════════════════════════════════════════
+   COPY — every user-facing string lives here so it's easy to replace.
+   ═════════════════════════════════════════════════════════════════════════ */
+const COPY = {
+  railTitle: "Configure timetable",
+  railSubtitle: "New schedule",
+  intro: {
+    title: "Let's set up your timetable.",
+    lead: "A few short questions about your school. Protiba uses your answers to generate the schedule.",
+    why: "Your progress is saved on this device as you go, so you can leave and come back.",
+    items: [
+      {label: "Institution", desc: "Your school's name"},
+      {label: "Subjects", desc: "What your school teaches"},
+      {label: "Classes", desc: "How your classes are structured"},
+      {label: "Teachers", desc: "Who teaches what, and where"},
+    ],
+    button: "Get started",
+  },
+  institution: {
+    title: "What's your institution called?",
+    lead: "Tell us the name of the school you're creating this timetable for.",
+    why: "Protiba uses your institution name to identify the timetable you're creating.",
+    placeholder: "e.g. Nyeri High School",
+    button: "Save & continue",
+  },
+  subjects: {
+    title: "What subjects are taught at your institution?",
+    lead: "Type a subject and press Enter. Add as many as you need.",
+    why: "Protiba needs your subjects to know which teaching resources the generated schedule has to cover.",
+    placeholder: "e.g. Mathematics",
+    hint: "You can also paste a comma-separated list.",
+    button: "Continue to classes",
+  },
+  classType: {
+    title: "What do you call your classes?",
+    lead: "Pick the word your school uses for a year group.",
+    why: "Your class structure tells Protiba which student groups need to be scheduled.",
+    button: "Continue",
+  },
+  minLevel: {
+    title: "What's the lowest level?",
+    lead: (type) => `The first level you teach. For example, ${type || "Form"} 1.`,
+    why: "Protiba creates one class for every level between your lowest and highest.",
+    placeholder: "1",
+    button: "Continue",
+  },
+  maxLevel: {
+    title: "And the highest level?",
+    lead: "The last level you teach.",
+    why: "Together with the lowest level, this sets how many classes Protiba schedules.",
+    placeholder: "6",
+    button: "Continue",
+  },
+  sections: {
+    title: "Do your classes have sections?",
+    lead: "Sections or streams, like A, B and C. Leave this blank if each level is a single class.",
+    why: "Each section becomes its own class, so Protiba can schedule them separately.",
+    placeholder: "e.g. A",
+    hint: "Letters are converted to uppercase.",
+    buttonWith: "Continue to teachers",
+    buttonWithout: "Continue without sections",
+  },
+  teacherName: {
+    titleFirst: "Let's add your first teacher.",
+    titleNext: (n) => `Now teacher ${n}.`,
+    lead: "What's their name?",
+    why: "Teacher assignments help Protiba avoid conflicting schedules by keeping each teacher to the subjects and classes you assign.",
+    placeholder: "e.g. Mr. Kamau",
+    button: "Continue",
+  },
+  teacherSubjects: {
+    title: (name) => `What does ${name} teach?`,
+    lead: "Choose every subject they teach.",
+    why: "Protiba only places a teacher in lessons for the subjects you select here.",
+    empty: "There are no subjects yet. Go back and add some first.",
+    button: "Continue",
+  },
+  teacherClasses: {
+    title: (name) => `Which classes does ${name} teach?`,
+    lead: "Choose every class they're responsible for.",
+    why: "Protiba only schedules a teacher for the classes you select here.",
+    empty: "There are no classes yet. Go back and set up your classes first.",
+    button: "Add teacher",
+  },
+  another: {
+    title: "Add another teacher?",
+    lead: (n) => `You've added ${n} ${n === 1 ? "teacher" : "teachers"} so far.`,
+    why: "Add everyone who teaches at your school. You can edit or remove anyone from this list.",
+    addButton: "Add another teacher",
+    button: "Review configuration",
+  },
+  review: {
+    title: "Review your timetable setup",
+    lead: "Check everything below. You can edit any section before generating.",
+    why: "Generating sends your full setup to Protiba in one go and creates your timetable.",
+    button: "Generate timetable",
+  },
+  saveAndReview: "Save & review",
+  resumed: "Welcome back. We've restored your progress from this device.",
+  startOverConfirm:
+    "Start over? This clears the progress saved on this device.",
 };
 
-// ─── Step indicator ───────────────────────────────────────────────────────────
-const steps = [
-  {id: 1, label: "Institution"},
-  {id: 2, label: "Subjects"},
-  {id: 3, label: "Classes"},
-  {id: 4, label: "Teachers"},
+const SAVED = {
+  institution: "Institution saved",
+  subjects: "Subjects saved",
+  classType: "Class type saved",
+  minLevel: "Lowest level saved",
+  maxLevel: "Highest level saved",
+  sections: "Class sections saved",
+  teacherName: "Name saved",
+  teacherSubjects: "Subjects saved",
+  teacherClasses: "Teacher added",
+};
+
+/* ═════════════════════════════════════════════════════════════════════════
+   Wizard definition
+   ═════════════════════════════════════════════════════════════════════════ */
+const STEP_ORDER = [
+  "intro",
+  "institution",
+  "subjects",
+  "classType",
+  "minLevel",
+  "maxLevel",
+  "sections",
+  "teacherName",
+  "teacherSubjects",
+  "teacherClasses",
+  "another",
+  "review",
+  "generate",
 ];
 
-function StepIndicator({current}) {
-  return (
-    <div
-      style={{display: "flex", alignItems: "center", gap: 0, marginBottom: 36}}
-    >
-      {steps.map((step, i) => {
-        const done = current > step.id;
-        const active = current === step.id;
-        return (
-          <React.Fragment key={step.id}>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  background: done
-                    ? t.accent
-                    : active
-                      ? "rgba(99,102,241,0.2)"
-                      : t.surface,
-                  border: `1px solid ${done || active ? t.accent : t.border}`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 11,
-                  fontWeight: 500,
-                  color: done ? "#fff" : active ? t.accentMid : t.muted,
-                  transition: "all 0.3s",
-                  flexShrink: 0,
-                }}
-              >
-                {done ? "✓" : step.id}
-              </div>
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 500,
-                  color: active ? t.accentMid : done ? t.textSub : t.dimmed,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.4px",
-                  whiteSpace: "nowrap",
-                  transition: "color 0.3s",
-                }}
-              >
-                {step.label}
-              </span>
-            </div>
-            {i < steps.length - 1 && (
-              <div
-                style={{
-                  flex: 1,
-                  height: "1px",
-                  margin: "0 4px",
-                  marginBottom: 20,
-                  background: done ? t.accent : t.border,
-                  transition: "background 0.3s",
-                }}
-              />
-            )}
-          </React.Fragment>
-        );
-      })}
-    </div>
-  );
+const PHASES = [
+  {id: "institution", label: "Institution", steps: ["institution"], doneOn: "institution"},
+  {id: "subjects", label: "Subjects", steps: ["subjects"], doneOn: "subjects"},
+  {
+    id: "classes",
+    label: "Classes",
+    steps: ["classType", "minLevel", "maxLevel", "sections"],
+    doneOn: "sections",
+  },
+  {
+    id: "teachers",
+    label: "Teachers",
+    steps: ["teacherName", "teacherSubjects", "teacherClasses", "another"],
+    doneOn: "another",
+  },
+  {id: "review", label: "Review", steps: ["review", "generate"], doneOn: null},
+];
+
+const TEACHER_STEPS = new Set(["teacherName", "teacherSubjects", "teacherClasses"]);
+const REVIEW_SHORTCUT = new Set(["institution", "subjects", "sections"]);
+const EDIT_ENTRY = new Set(["institution", "subjects", "classType", "another"]);
+const CLASS_TYPE_OPTIONS = ["Grade", "Class", "Form"];
+
+function getNext(step, fromReview) {
+  if (fromReview && REVIEW_SHORTCUT.has(step)) return "review";
+  return STEP_ORDER[STEP_ORDER.indexOf(step) + 1];
 }
 
-// ─── Primitive: Input ─────────────────────────────────────────────────────────
-const Input = ({label, hint, type = "text", ...props}) => {
-  const [focused, setFocused] = useState(false);
+function getPrev(step, state) {
+  if (state.fromReview && EDIT_ENTRY.has(step)) return "review";
+  if (step === "teacherName") {
+    return state.completed.includes("teacherClasses") ? "another" : "sections";
+  }
+  return STEP_ORDER[STEP_ORDER.indexOf(step) - 1];
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   Data helpers
+   ═════════════════════════════════════════════════════════════════════════ */
+const uid = () => Math.random().toString(36).slice(2, 9);
+const newTeacher = () => ({id: uid(), name: "", subjects: "", classes: ""});
+const emptyForm = () => ({
+  schoolName: "",
+  subjectName: "",
+  minLevel: "",
+  maxLevel: "",
+  classTypes: "",
+  classLabels: "",
+  teachers: [newTeacher()],
+});
+const initState = () => ({
+  step: "intro",
+  direction: 1,
+  completed: [],
+  teacherIndex: 0,
+  fromReview: false,
+  formData: emptyForm(),
+});
+
+function generateClassOptions(form) {
+  const options = [];
+  const min = parseInt(form.minLevel) || 0;
+  const max = parseInt(form.maxLevel) || 0;
+  const labels = form.classLabels
+    .split(",")
+    .map((l) => l.trim().toUpperCase())
+    .filter(Boolean);
+  if (min && max && min <= max && form.classTypes) {
+    for (let level = min; level <= max; level++) {
+      if (labels.length > 0)
+        labels.forEach((label) => options.push(`${form.classTypes} ${level}${label}`));
+      else options.push(`${form.classTypes} ${level}`);
+    }
+  }
+  return options;
+}
+
+function reconcile(form) {
+  const subjects = list(form.subjectName);
+  const classes = generateClassOptions(form);
+  return {
+    ...form,
+    teachers: form.teachers.map((t) => ({
+      ...t,
+      subjects: list(t.subjects).filter((s) => subjects.includes(s)).join(", "),
+      classes: list(t.classes).filter((c) => classes.includes(c)).join(", "),
+    })),
+  };
+}
+
+const isLevel = (v) => /^\d+$/.test(String(v)) && parseInt(v, 10) >= 1;
+const LEVEL_MESSAGE = "Enter a whole number, 1 or higher.";
+
+function validateStep(step, form, teacherIndex) {
+  const teacher = form.teachers[teacherIndex];
+  switch (step) {
+    case "institution":
+      return form.schoolName.trim() ? null : "Enter your school's name to continue.";
+    case "subjects":
+      return list(form.subjectName).length ? null : "Add at least one subject to continue.";
+    case "classType":
+      return CLASS_TYPE_OPTIONS.includes(form.classTypes)
+        ? null
+        : "Choose how your classes are named.";
+    case "minLevel":
+      return isLevel(form.minLevel) ? null : LEVEL_MESSAGE;
+    case "maxLevel":
+      if (!isLevel(form.maxLevel)) return LEVEL_MESSAGE;
+      if (parseInt(form.maxLevel, 10) < parseInt(form.minLevel, 10))
+        return `The highest level can't be lower than ${form.minLevel}.`;
+      return null;
+    case "teacherName":
+      return teacher?.name.trim() ? null : "Enter the teacher's name to continue.";
+    case "teacherSubjects":
+      return list(teacher?.subjects).length ? null : "Choose at least one subject.";
+    case "teacherClasses":
+      return list(teacher?.classes).length ? null : "Choose at least one class.";
+    default:
+      return null;
+  }
+}
+
+const STEP_LABEL = {
+  institution: "Institution",
+  subjects: "Subjects",
+  classType: "Class type",
+  minLevel: "Lowest level",
+  maxLevel: "Highest level",
+};
+
+function collectIssues(form) {
+  const issues = [];
+  ["institution", "subjects", "classType", "minLevel", "maxLevel"].forEach((step) => {
+    const message = validateStep(step, form, 0);
+    if (message) issues.push({step, teacherIndex: 0, message: `${STEP_LABEL[step]}: ${message}`});
+  });
+  const real = form.teachers
+    .map((t, i) => ({t, i}))
+    .filter(({t}) => t.name.trim() || t.subjects.trim() || t.classes.trim());
+  if (real.length === 0) {
+    issues.push({step: "teacherName", teacherIndex: 0, message: "Add at least one teacher."});
+  }
+  real.forEach(({t, i}) => {
+    const who = t.name.trim() || `Teacher ${i + 1}`;
+    ["teacherName", "teacherSubjects", "teacherClasses"].forEach((step) => {
+      const message = validateStep(step, form, i);
+      if (message) issues.push({step, teacherIndex: i, message: `${who}: ${message}`});
+    });
+  });
+  return issues;
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+   Draft persistence
+   Browser-local only (localStorage). The server is only contacted by the
+   final completeOnboarding() call, so "saved" always means "on this device".
+   ═════════════════════════════════════════════════════════════════════════ */
+const DRAFT_KEY = "protiba:timetable-draft";
+const DRAFT_VERSION = 1;
+
+const isPristine = (s) => {
+  const f = s.formData;
   return (
-    <div style={{display: "flex", flexDirection: "column", gap: 6}}>
-      {label && (
-        <label
-          style={{
-            fontSize: 12,
-            fontWeight: 500,
-            color: t.textSub,
-            letterSpacing: "0.2px",
-          }}
-        >
-          {label}
-        </label>
-      )}
-      <input
-        type={type}
-        {...props}
-        onFocus={(e) => {
-          setFocused(true);
-          props.onFocus?.(e);
-        }}
-        onBlur={(e) => {
-          setFocused(false);
-          props.onBlur?.(e);
-        }}
-        style={{
-          background: focused ? "rgba(0,0,0,0.02)" : t.surface,
-          border: `1px solid ${focused ? t.accent : t.border}`,
-          borderRadius: 8,
-          padding: "10px 13px",
-          fontSize: 13,
-          color: t.text,
-          outline: "none",
-          width: "100%",
-          transition: "all 0.18s",
-          boxSizing: "border-box",
-          boxShadow: focused ? `0 0 0 3px rgba(99,102,241,0.12)` : "none",
-          ...(props.style || {}),
-        }}
-        placeholder={props.placeholder}
-      />
-      {hint && <p style={{fontSize: 11, color: t.muted, margin: 0}}>{hint}</p>}
-    </div>
+    s.step === "intro" &&
+    !f.schoolName &&
+    !f.subjectName &&
+    !f.minLevel &&
+    !f.maxLevel &&
+    !f.classTypes &&
+    !f.classLabels &&
+    f.teachers.every((t) => !t.name && !t.subjects && !t.classes)
   );
 };
 
-// ─── Primitive: Select dropdown ───────────────────────────────────────────────
-function Select({
-  label,
-  value,
-  placeholder,
-  options,
-  onSelect,
-  isOpen,
-  onToggle,
-  emptyMsg,
-}) {
-  const ref = useRef(null);
+function saveDraft(s) {
+  if (isPristine(s)) return true;
+  try {
+    window.localStorage.setItem(
+      DRAFT_KEY,
+      JSON.stringify({
+        v: DRAFT_VERSION,
+        step: s.step === "generate" ? "review" : s.step,
+        completed: s.completed,
+        teacherIndex: s.teacherIndex,
+        fromReview: s.fromReview,
+        formData: s.formData,
+        savedAt: Date.now(),
+      }),
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) onToggle();
+function clearDraft() {
+  try {
+    window.localStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* nothing to clear */
+  }
+}
+
+function loadDraft() {
+  const fresh = {state: initState(), restored: false};
+  try {
+    const raw = window.localStorage.getItem(DRAFT_KEY);
+    if (!raw) return fresh;
+    const d = JSON.parse(raw);
+    if (!d || d.v !== DRAFT_VERSION || typeof d.formData !== "object") return fresh;
+
+    const str = (v) => (typeof v === "string" ? v : "");
+    const teachers =
+      Array.isArray(d.formData.teachers) && d.formData.teachers.length
+        ? d.formData.teachers.map((t) => ({
+            id: str(t?.id) || uid(),
+            name: str(t?.name),
+            subjects: str(t?.subjects),
+            classes: str(t?.classes),
+          }))
+        : [newTeacher()];
+    const formData = {
+      schoolName: str(d.formData.schoolName),
+      subjectName: str(d.formData.subjectName),
+      minLevel: str(d.formData.minLevel),
+      maxLevel: str(d.formData.maxLevel),
+      classTypes: str(d.formData.classTypes),
+      classLabels: str(d.formData.classLabels),
+      teachers,
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [isOpen, onToggle]);
 
-  return (
-    <div style={{position: "relative"}} ref={ref}>
-      {label && (
-        <label
-          style={{
-            fontSize: 12,
-            fontWeight: 500,
-            color: t.textSub,
-            display: "block",
-            marginBottom: 6,
-          }}
-        >
-          {label}
-        </label>
-      )}
-      <div
-        onClick={onToggle}
-        style={{
-          background: isOpen ? "rgba(0,0,0,0.02)" : t.surface,
-          border: `1px solid ${isOpen ? t.accent : t.border}`,
-          borderRadius: 8,
-          padding: "10px 13px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          cursor: "pointer",
-          fontSize: 13,
-          color: value ? t.text : t.muted,
-          transition: "all 0.18s",
-          userSelect: "none",
-          boxShadow: isOpen ? `0 0 0 3px rgba(99,102,241,0.12)` : "none",
-        }}
-      >
-        <span
-          style={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            maxWidth: "calc(100% - 20px)",
-          }}
-        >
-          {value || placeholder}
-        </span>
-        <motion.span
-          animate={{rotate: isOpen ? 180 : 0}}
-          transition={{duration: 0.2}}
-          style={{fontSize: 10, color: t.muted, flexShrink: 0}}
-        >
-          ▾
-        </motion.span>
-      </div>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{opacity: 0, y: -6, scale: 0.98}}
-            animate={{opacity: 1, y: 0, scale: 1}}
-            exit={{opacity: 0, y: -6, scale: 0.98}}
-            transition={{duration: 0.15}}
-            style={{
-              position: "absolute",
-              zIndex: 50,
-              top: "calc(100% + 4px)",
-              left: 0,
-              right: 0,
-              background: "#fff",
-              border: `1px solid ${t.border}`,
-              borderRadius: 10,
-              overflow: "hidden",
-              boxShadow: "0 16px 40px rgba(0,0,0,0.15)",
-              maxHeight: 220,
-              overflowY: "auto",
-            }}
-          >
-            {options.length > 0 ? (
-              options.map((opt, i) => {
-                const isSelected = Array.isArray(value)
-                  ? value.includes(opt)
-                  : value === opt;
-                return (
-                  <div
-                    key={i}
-                    onClick={() => onSelect(opt)}
-                    style={{
-                      padding: "9px 13px",
-                      fontSize: 13,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      background: isSelected
-                        ? "rgba(99,102,241,0.1)"
-                        : "transparent",
-                      color: isSelected ? t.accent : t.text,
-                      transition: "background 0.12s",
-                      borderBottom:
-                        i < options.length - 1
-                          ? `1px solid ${t.border}`
-                          : "none",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected)
-                        e.currentTarget.style.background = "rgba(0,0,0,0.04)";
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected)
-                        e.currentTarget.style.background = "transparent";
-                    }}
-                  >
-                    <span>{opt}</span>
-                    {isSelected && (
-                      <span style={{fontSize: 12, color: t.accent}}>✓</span>
-                    )}
-                  </div>
-                );
-              })
-            ) : (
-              <div style={{padding: "12px 13px", fontSize: 12, color: t.muted}}>
-                {emptyMsg}
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
+    let step = STEP_ORDER.includes(d.step) ? d.step : "intro";
+    if (step === "generate") step = "review";
+    const state = {
+      step,
+      direction: 1,
+      completed: Array.isArray(d.completed)
+        ? d.completed.filter((s) => STEP_ORDER.includes(s))
+        : [],
+      teacherIndex: Math.min(Math.max(Number(d.teacherIndex) || 0, 0), teachers.length - 1),
+      fromReview: Boolean(d.fromReview),
+      formData,
+    };
+    return {state, restored: !isPristine(state)};
+  } catch {
+    return fresh;
+  }
 }
 
-// ─── Section card (overflow visible for dropdowns) ────────────────────────────
-function SectionCard({step, title, subtitle, children, active}) {
-  return (
-    <motion.div
-      initial={{opacity: 0, y: 12}}
-      animate={{opacity: 1, y: 0}}
-      transition={{duration: 0.35, ease: "easeOut"}}
-      style={{
-        background: t.surface,
-        border: `1px solid ${active ? "rgba(99,102,241,0.25)" : t.border}`,
-        borderRadius: 14,
-        overflow: "visible",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
-        transition: "border-color 0.3s",
-      }}
-    >
-      <div
-        style={{
-          padding: "16px 20px",
-          borderBottom: `1px solid ${t.border}`,
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          background: "rgba(0,0,0,0.01)",
-        }}
-      >
-        <div
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: "50%",
-            background: "rgba(99,102,241,0.12)",
-            border: `1px solid rgba(99,102,241,0.25)`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 10,
-            fontWeight: 500,
-            color: t.accentMid,
-            flexShrink: 0,
-          }}
-        >
-          {step}
-        </div>
-        <div>
-          <div style={{fontSize: 13, fontWeight: 500, color: t.text}}>
-            {title}
-          </div>
-          {subtitle && (
-            <div style={{fontSize: 11, color: t.muted, marginTop: 1}}>
-              {subtitle}
-            </div>
-          )}
-        </div>
-      </div>
-      <div style={{padding: "20px"}}>{children}</div>
-    </motion.div>
-  );
+/* ═════════════════════════════════════════════════════════════════════════
+   Reducer: typing only. Step transitions replace the whole state explicitly.
+   ═════════════════════════════════════════════════════════════════════════ */
+function reducer(state, action) {
+  switch (action.type) {
+    case "replace":
+      return action.state;
+    case "field":
+      return {...state, formData: {...state.formData, [action.name]: action.value}};
+    case "teacherField":
+      return {
+        ...state,
+        formData: {
+          ...state.formData,
+          teachers: state.formData.teachers.map((t, i) =>
+            i === action.index ? {...t, [action.field]: action.value} : t,
+          ),
+        },
+      };
+    default:
+      return state;
+  }
 }
 
-// ─── Teacher row ──────────────────────────────────────────────────────────────
-function TeacherRow({
-  teacher,
-  index,
-  dropdownsOpen,
-  toggleDropdown,
-  handleTeacherChange,
-  handleSubjectSelect,
-  handleClassSelect,
-  subjectOptions,
-  classOptions,
-  onRemove,
-  canRemove,
-}) {
-  const subjectValue = teacher.subjects
-    ? teacher.subjects
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-    : [];
-  const classValue = teacher.classes
-    ? teacher.classes
-        .split(",")
-        .map((c) => c.trim())
-        .filter(Boolean)
-    : [];
-
-  return (
-    <motion.div
-      initial={{opacity: 0, y: 8}}
-      animate={{opacity: 1, y: 0}}
-      exit={{opacity: 0, y: -8, scale: 0.98}}
-      transition={{duration: 0.25}}
-      style={{
-        background: "rgba(0,0,0,0.02)",
-        border: `1px solid ${t.border}`,
-        borderRadius: 10,
-        padding: "16px",
-        overflow: "visible",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 12,
-        }}
-      >
-        <div style={{display: "flex", alignItems: "center", gap: 8}}>
-          <div
-            style={{
-              width: 26,
-              height: 26,
-              borderRadius: "50%",
-              background: "rgba(139,92,246,0.12)",
-              border: "1px solid rgba(139,92,246,0.2)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 11,
-              fontWeight: 500,
-              color: "#7c3aed",
-            }}
-          >
-            {index + 1}
-          </div>
-          <span style={{fontSize: 12, fontWeight: 500, color: t.textSub}}>
-            {teacher.name || `Teacher ${index + 1}`}
-          </span>
-        </div>
-        {canRemove && (
-          <button
-            type="button"
-            onClick={onRemove}
-            style={{
-              background: "transparent",
-              border: "none",
-              fontSize: 11,
-              color: "#f87171",
-              cursor: "pointer",
-              padding: "3px 8px",
-              borderRadius: 6,
-              transition: "background 0.15s",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "rgba(248,113,113,0.1)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "transparent")
-            }
-          >
-            Remove
-          </button>
-        )}
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-          gap: 12,
-        }}
-      >
-        <Input
-          label="Name"
-          value={teacher.name}
-          onChange={(e) => handleTeacherChange(index, "name", e.target.value)}
-          placeholder="Mr. Smith"
-          required
-        />
-        <Select
-          label="Subjects"
-          value={subjectValue.join(", ") || ""}
-          placeholder="Select subjects"
-          options={subjectOptions}
-          isOpen={dropdownsOpen.subject[index]}
-          onToggle={() => toggleDropdown("subject", index)}
-          onSelect={(s) => handleSubjectSelect(index, s)}
-          emptyMsg="Define subjects above first"
-        />
-        <Select
-          label="Classes"
-          value={classValue.join(", ") || ""}
-          placeholder="Select classes"
-          options={classOptions}
-          isOpen={dropdownsOpen.class[index]}
-          onToggle={() => toggleDropdown("class", index)}
-          onSelect={(c) => handleClassSelect(index, c)}
-          emptyMsg="Define classes above first"
-        />
-      </div>
-    </motion.div>
-  );
-}
-
-// ─── Submit button ────────────────────────────────────────────────────────────
-function SubmitButton({isLoading}) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <motion.button
-      type="submit"
-      disabled={isLoading}
-      whileTap={{scale: 0.98}}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        width: "100%",
-        padding: "13px",
-        background: isLoading
-          ? "rgba(99,102,241,0.3)"
-          : hovered
-            ? "#4f46e5"
-            : "#6366f1",
-        border: `1px solid ${isLoading ? "rgba(99,102,241,0.2)" : "rgba(99,102,241,0.6)"}`,
-        borderRadius: 10,
-        fontSize: 14,
-        fontWeight: 500,
-        color: isLoading ? "rgba(255,255,255,0.5)" : "#fff",
-        cursor: isLoading ? "not-allowed" : "pointer",
-        transition: "all 0.2s",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 8,
-        transform: hovered && !isLoading ? "translateY(-1px)" : "translateY(0)",
-        boxShadow:
-          hovered && !isLoading ? "0 4px 20px rgba(99,102,241,0.3)" : "none",
-        letterSpacing: "0.2px",
-      }}
-    >
-      {isLoading ? (
-        <>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            style={{animation: "spin 1s linear infinite"}}
-          >
-            <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
-            <path d="M12 2a10 10 0 0 1 10 10" />
-          </svg>
-          Generating timetable…
-        </>
-      ) : (
-        <>
-          Generate timetable
-          <span style={{fontSize: 16}}>→</span>
-        </>
-      )}
-    </motion.button>
-  );
-}
-
-// ─── Main page ────────────────────────────────────────────────────────────────
+/* ═════════════════════════════════════════════════════════════════════════
+   Page
+   ═════════════════════════════════════════════════════════════════════════ */
 const Create = () => {
   const {isLoading: authLoading, completeOnboarding} = useAuthStore();
-  const [formData, setFormData] = useState({
-    schoolName: "",
-    subjectName: "",
-    minLevel: "",
-    maxLevel: "",
-    classTypes: "",
-    classLabels: "",
-    teachers: [{name: "", subjects: "", classes: ""}],
-  });
 
-  const [dropdownsOpen, setDropdownsOpen] = useState({
-    classType: false,
-    subject: [false],
-    class: [false],
-  });
-
+  const [initial] = useState(loadDraft);
+  const [state, dispatch] = useReducer(reducer, initial.state);
+  const [error, setError] = useState(null);
+  const [errorToken, setErrorToken] = useState(0);
+  const [confirmation, setConfirmation] = useState(null);
+  const [draftStatus, setDraftStatus] = useState("idle"); // idle | saved | error
+  const [resumed, setResumed] = useState(initial.restored);
+  const [gen, setGen] = useState("idle"); // idle | working | done | error
   const [localError, setLocalError] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-  const isLoading = submitting;
 
-  const currentStep = (() => {
-    if (formData.teachers.some((t) => t.name)) return 4;
-    if (formData.classTypes && formData.minLevel) return 3;
-    if (formData.subjectName) return 2;
-    return 1;
-  })();
+  const primaryRef = useRef(null);
+  const tagRef = useRef(null);
+  const mounted = useRef(true);
+  const firstRender = useRef(true);
 
-  const handleChange = (e) => {
-    const {name, value} = e.target;
-    setFormData((prev) => ({...prev, [name]: value}));
+  const {step, formData, teacherIndex, direction} = state;
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  // ── Derived data ───────────────────────────────────────────────────────
+  const subjectOptions = useMemo(() => list(formData.subjectName), [formData.subjectName]);
+  const classOptions = useMemo(() => generateClassOptions(formData), [formData]);
+  const teacher = formData.teachers[teacherIndex] || formData.teachers[0];
+  const teacherLabel = teacher?.name.trim() || "this teacher";
+  const issues = useMemo(() => collectIssues(formData), [formData]);
+
+  // ── Persistence ────────────────────────────────────────────────────────
+  const persist = useCallback((s) => {
+    const ok = saveDraft(s);
+    if (!isPristine(s)) setDraftStatus(ok ? "saved" : "error");
+    return ok;
+  }, []);
+
+  // Autosave shortly after typing stops.
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    const id = setTimeout(() => persist(state), 500);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.formData]);
+
+  // Confirmation + resume notices fade on their own.
+  useEffect(() => {
+    if (!confirmation) return;
+    const id = setTimeout(() => setConfirmation(null), 2600);
+    return () => clearTimeout(id);
+  }, [confirmation]);
+  useEffect(() => {
+    if (!resumed) return;
+    const id = setTimeout(() => setResumed(false), 6000);
+    return () => clearTimeout(id);
+  }, [resumed]);
+
+  // ── Transitions ────────────────────────────────────────────────────────
+  const transition = (partial, savedMessage) => {
+    const next = {...state, ...partial};
+    dispatch({type: "replace", state: next});
+    const ok = persist(next);
+    setConfirmation(savedMessage && ok ? {text: savedMessage, id: Date.now()} : null);
+    setError(null);
+    setResumed(false);
   };
 
-  const handleTeacherChange = (index, field, value) => {
-    const updated = [...formData.teachers];
-    updated[index][field] = value;
-    setFormData((prev) => ({...prev, teachers: updated}));
+  const advance = (patchForm = {}) => {
+    const form = {...formData, ...patchForm};
+    const message = validateStep(step, form, teacherIndex);
+    if (message) {
+      setError(message);
+      setErrorToken((n) => n + 1);
+      return;
+    }
+    const nextStep = getNext(step, state.fromReview);
+    transition(
+      {
+        formData: reconcile(form),
+        step: nextStep,
+        direction: 1,
+        completed: state.completed.includes(step) ? state.completed : [...state.completed, step],
+        fromReview: nextStep === "review" ? false : state.fromReview,
+      },
+      SAVED[step],
+    );
+  };
+
+  const goBack = () => {
+    const partial = {step: getPrev(step, state), direction: -1};
+    if (step === "another") partial.teacherIndex = formData.teachers.length - 1;
+    if (step === "teacherName" && teacherIndex > 0) {
+      // Backing out of a brand-new, still-empty teacher discards it.
+      const t = formData.teachers[teacherIndex];
+      const blank = t && !t.name.trim() && !t.subjects.trim() && !t.classes.trim();
+      if (blank && teacherIndex === formData.teachers.length - 1) {
+        partial.formData = {...formData, teachers: formData.teachers.slice(0, -1)};
+        partial.teacherIndex = teacherIndex - 1;
+      }
+    }
+    transition(partial);
   };
 
   const addTeacher = () => {
-    setFormData((prev) => ({
-      ...prev,
-      teachers: [...prev.teachers, {name: "", subjects: "", classes: ""}],
-    }));
-    setDropdownsOpen((prev) => ({
-      ...prev,
-      subject: [...prev.subject, false],
-      class: [...prev.class, false],
-    }));
+    const form = reconcile(formData);
+    transition({
+      formData: {...form, teachers: [...form.teachers, newTeacher()]},
+      teacherIndex: form.teachers.length,
+      step: "teacherName",
+      direction: 1,
+    });
   };
+
+  const editTeacher = (index) =>
+    transition({step: "teacherName", teacherIndex: index, direction: 1});
 
   const removeTeacher = (index) => {
-    if (formData.teachers.length > 1) {
-      setFormData((prev) => ({
-        ...prev,
-        teachers: prev.teachers.filter((_, i) => i !== index),
-      }));
-      setDropdownsOpen((prev) => ({
-        ...prev,
-        subject: prev.subject.filter((_, i) => i !== index),
-        class: prev.class.filter((_, i) => i !== index),
-      }));
-    }
+    if (formData.teachers.length < 2) return;
+    transition({
+      formData: {...formData, teachers: formData.teachers.filter((_, i) => i !== index)},
+      teacherIndex: 0,
+    });
   };
 
-  const toggleDropdown = (type, index = null) => {
-    if (type === "classType") {
-      setDropdownsOpen((prev) => ({
-        ...prev,
-        classType: !prev.classType,
-        subject: prev.subject.map(() => false),
-        class: prev.class.map(() => false),
-      }));
-    } else if (type === "subject") {
-      setDropdownsOpen((prev) => {
-        const s = [...prev.subject];
-        s[index] = !s[index];
-        const c = [...prev.class];
-        c[index] = false;
-        return {...prev, subject: s, class: c, classType: false};
-      });
-    } else {
-      setDropdownsOpen((prev) => {
-        const c = [...prev.class];
-        c[index] = !c[index];
-        const s = [...prev.subject];
-        s[index] = false;
-        return {...prev, class: c, subject: s, classType: false};
-      });
-    }
+  const jumpEdit = (target) =>
+    transition({step: target, direction: -1, fromReview: true, teacherIndex: 0});
+
+  const fixIssue = (issue) =>
+    transition({
+      step: issue.step,
+      teacherIndex: issue.teacherIndex,
+      direction: -1,
+      fromReview: true,
+    });
+
+  const startOver = () => {
+    if (!window.confirm(COPY.startOverConfirm)) return;
+    clearDraft();
+    dispatch({type: "replace", state: {...initState(), direction: -1}});
+    setDraftStatus("idle");
+    setConfirmation(null);
+    setError(null);
+    setResumed(false);
+    setGen("idle");
   };
 
-  const handleClassTypeSelect = (type) => {
-    setFormData((prev) => ({...prev, classTypes: type}));
-    setDropdownsOpen((prev) => ({...prev, classType: false}));
-  };
-
-  const handleSubjectSelect = (index, subject) => {
-    const arr = formData.teachers[index].subjects
-      ? formData.teachers[index].subjects
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [];
-    const updated = arr.includes(subject)
-      ? arr.filter((s) => s !== subject).join(", ")
-      : [...arr, subject].join(", ");
-    handleTeacherChange(index, "subjects", updated);
-  };
-
-  const handleClassSelect = (index, cls) => {
-    const arr = formData.teachers[index].classes
-      ? formData.teachers[index].classes
-          .split(",")
-          .map((c) => c.trim())
-          .filter(Boolean)
-      : [];
-    const updated = arr.includes(cls)
-      ? arr.filter((c) => c !== cls).join(", ")
-      : [...arr, cls].join(", ");
-    handleTeacherChange(index, "classes", updated);
-  };
-
-  const generateClassOptions = () => {
-    const options = [];
-    const min = parseInt(formData.minLevel) || 0;
-    const max = parseInt(formData.maxLevel) || 0;
-    const labels = formData.classLabels
-      .split(",")
-      .map((l) => l.trim().toUpperCase())
-      .filter(Boolean);
-    if (min && max && min <= max && formData.classTypes) {
-      for (let level = min; level <= max; level++) {
-        if (labels.length > 0)
-          labels.forEach((label) =>
-            options.push(`${formData.classTypes} ${level}${label}`),
-          );
-        else options.push(`${formData.classTypes} ${level}`);
-      }
-    }
-    return options;
-  };
-
-  const subjectOptions = formData.subjectName
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const classOptions = generateClassOptions();
-  const classTypeOptions = ["Grade", "Class", "Form"];
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (submitting) return;
+  // ── Final submission ───────────────────────────────────────────────────
+  const runGenerate = async (form) => {
     setLocalError(null);
+    setGen("working");
 
-    const list = (value) =>
-      String(value || "")
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean);
-
-    // Skip the untouched blank teacher row; a half-filled row IS sent so the
-    // server can tell the person exactly what is missing.
-    const teachers = formData.teachers
+    // Skip an untouched blank teacher; everything else is sent as entered.
+    const teachers = form.teachers
       .filter((t) => t.name.trim() || t.subjects.trim() || t.classes.trim())
       .map((t) => ({
         name: t.name,
@@ -730,393 +607,577 @@ const Create = () => {
         classes: list(t.classes),
       }));
 
-    setSubmitting(true);
     try {
-      // ONE request. The server validates everything first and then saves the
-      // school, subjects, classes and teachers together — all or nothing. On
-      // success the store receives the updated user (it now has a school) and
-      // the router moves the person from /onboarding into the product.
+      // ONE request. The server validates everything and saves the school,
+      // subjects, classes and teachers together — all or nothing.
       await completeOnboarding({
-        school: {name: formData.schoolName},
-        subjects: list(formData.subjectName),
+        school: {name: form.schoolName},
+        subjects: list(form.subjectName),
         classes: {
-          type: formData.classTypes,
-          minLevel: formData.minLevel,
-          maxLevel: formData.maxLevel,
-          labels: list(formData.classLabels),
+          type: form.classTypes,
+          minLevel: form.minLevel,
+          maxLevel: form.maxLevel,
+          labels: list(form.classLabels),
         },
         teachers,
       });
+      clearDraft();
+      if (mounted.current) setGen("done");
     } catch (err) {
       console.error("School setup failed:", err);
-      setLocalError(err.message);
-    } finally {
-      setSubmitting(false);
+      if (mounted.current) {
+        setLocalError(err.message || "Something went wrong. Please try again.");
+        setGen("error");
+      }
     }
   };
 
+  const generate = () => {
+    if (gen === "working" || collectIssues(formData).length > 0) return;
+    transition({step: "generate", direction: 1});
+    runGenerate(formData);
+  };
+
+  // ── Field handlers ─────────────────────────────────────────────────────
+  const setField = (name, value) => {
+    dispatch({type: "field", name, value});
+    if (error) setError(null);
+  };
+
+  const setTeacherList = (field, options, values) => {
+    dispatch({
+      type: "teacherField",
+      index: teacherIndex,
+      field,
+      value: options.filter((o) => values.includes(o)).join(", "),
+    });
+    if (error) setError(null);
+  };
+
+  const toggleTeacherItem = (field, options, item) => {
+    const current = list(teacher?.[field]);
+    const next = current.includes(item)
+      ? current.filter((x) => x !== item)
+      : [...current, item];
+    setTeacherList(field, options, next);
+  };
+
+  // ── Progress ───────────────────────────────────────────────────────────
+  const phaseIndex = PHASES.findIndex((p) => p.steps.includes(step));
+  const phases = PHASES.map((p, i) => ({
+    id: p.id,
+    label: p.label,
+    state:
+      (p.doneOn && state.completed.includes(p.doneOn)) || i < phaseIndex
+        ? "done"
+        : i === phaseIndex
+          ? "current"
+          : "upcoming",
+  }));
+  const reviewAt = STEP_ORDER.indexOf("review");
+  const fraction = Math.min(1, STEP_ORDER.indexOf(step) / reviewAt);
+  const eyebrow =
+    phaseIndex < 0
+      ? "Welcome"
+      : `Step ${phaseIndex + 1} of ${PHASES.length} · ${PHASES[phaseIndex].label}` +
+        (TEACHER_STEPS.has(step) ? ` · Teacher ${teacherIndex + 1}` : "");
+
+  const nextIsReview = getNext(step, state.fromReview) === "review";
+  const saved = confirmation?.text;
+
+  // ── Steps ──────────────────────────────────────────────────────────────
+  const base = {
+    eyebrow,
+    saved,
+    errorToken,
+    onBack: step === "intro" ? undefined : goBack,
+  };
+
+  const renderStep = () => {
+    switch (step) {
+      case "intro":
+        return (
+          <QuestionStep
+            {...base}
+            title={COPY.intro.title}
+            lead={COPY.intro.lead}
+            why={COPY.intro.why}
+            onSubmit={() => advance()}
+            actions={<ContinueButton>{COPY.intro.button}</ContinueButton>}
+          >
+            <IntroOverview items={COPY.intro.items} />
+          </QuestionStep>
+        );
+
+      case "institution":
+        return (
+          <QuestionStep
+            {...base}
+            title={COPY.institution.title}
+            lead={COPY.institution.lead}
+            why={COPY.institution.why}
+            focusRef={primaryRef}
+            autoFocus
+            onSubmit={() => advance()}
+            actions={
+              <ContinueButton>
+                {nextIsReview ? COPY.saveAndReview : COPY.institution.button}
+              </ContinueButton>
+            }
+          >
+            <LargeInput
+              ref={primaryRef}
+              id="cr-school"
+              label="School name"
+              value={formData.schoolName}
+              onChange={(e) => setField("schoolName", e.target.value)}
+              placeholder={COPY.institution.placeholder}
+              error={error}
+              autoCapitalize="words"
+            />
+          </QuestionStep>
+        );
+
+      case "subjects":
+        return (
+          <QuestionStep
+            {...base}
+            title={COPY.subjects.title}
+            lead={COPY.subjects.lead}
+            why={COPY.subjects.why}
+            focusRef={tagRef}
+            autoFocus
+            onSubmit={() =>
+              advance({subjectName: tagRef.current?.commit() ?? formData.subjectName})
+            }
+            actions={
+              <ContinueButton>
+                {nextIsReview ? COPY.saveAndReview : COPY.subjects.button}
+              </ContinueButton>
+            }
+          >
+            <TagInput
+              ref={tagRef}
+              id="cr-subjects"
+              label="Subjects"
+              value={formData.subjectName}
+              onChange={(v) => setField("subjectName", v)}
+              placeholder={COPY.subjects.placeholder}
+              hint={COPY.subjects.hint}
+              error={error}
+            />
+          </QuestionStep>
+        );
+
+      case "classType":
+        return (
+          <QuestionStep
+            {...base}
+            title={COPY.classType.title}
+            lead={COPY.classType.lead}
+            why={COPY.classType.why}
+            focusRef={primaryRef}
+            onSubmit={() => advance()}
+            actions={<ContinueButton>{COPY.classType.button}</ContinueButton>}
+          >
+            <ChoiceGroup
+              ref={primaryRef}
+              name="cr-class-type"
+              legend="Class type"
+              options={CLASS_TYPE_OPTIONS}
+              value={formData.classTypes}
+              onChange={(v) => setField("classTypes", v)}
+              describe={(o) => `e.g. ${o} 1`}
+              error={error}
+            />
+          </QuestionStep>
+        );
+
+      case "minLevel":
+        return (
+          <QuestionStep
+            {...base}
+            title={COPY.minLevel.title}
+            lead={COPY.minLevel.lead(formData.classTypes)}
+            why={COPY.minLevel.why}
+            focusRef={primaryRef}
+            autoFocus
+            onSubmit={() => advance()}
+            actions={<ContinueButton>{COPY.minLevel.button}</ContinueButton>}
+          >
+            <LargeInput
+              ref={primaryRef}
+              id="cr-min"
+              label="Lowest level"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={2}
+              value={formData.minLevel}
+              onChange={(e) => setField("minLevel", e.target.value.replace(/\D/g, ""))}
+              placeholder={COPY.minLevel.placeholder}
+              error={error}
+            />
+          </QuestionStep>
+        );
+
+      case "maxLevel":
+        return (
+          <QuestionStep
+            {...base}
+            title={COPY.maxLevel.title}
+            lead={COPY.maxLevel.lead}
+            why={COPY.maxLevel.why}
+            focusRef={primaryRef}
+            autoFocus
+            onSubmit={() => advance()}
+            actions={<ContinueButton>{COPY.maxLevel.button}</ContinueButton>}
+          >
+            <LargeInput
+              ref={primaryRef}
+              id="cr-max"
+              label="Highest level"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={2}
+              value={formData.maxLevel}
+              onChange={(e) => setField("maxLevel", e.target.value.replace(/\D/g, ""))}
+              placeholder={COPY.maxLevel.placeholder}
+              error={error}
+            />
+            <ClassPreview classes={classOptions} />
+          </QuestionStep>
+        );
+
+      case "sections": {
+        const hasLabels = list(formData.classLabels).length > 0;
+        return (
+          <QuestionStep
+            {...base}
+            optional
+            title={COPY.sections.title}
+            lead={COPY.sections.lead}
+            why={COPY.sections.why}
+            focusRef={tagRef}
+            autoFocus
+            onSubmit={() =>
+              advance({classLabels: tagRef.current?.commit() ?? formData.classLabels})
+            }
+            actions={
+              <ContinueButton>
+                {nextIsReview
+                  ? COPY.saveAndReview
+                  : hasLabels
+                    ? COPY.sections.buttonWith
+                    : COPY.sections.buttonWithout}
+              </ContinueButton>
+            }
+          >
+            <TagInput
+              ref={tagRef}
+              id="cr-sections"
+              label="Section labels"
+              value={formData.classLabels}
+              onChange={(v) => setField("classLabels", v)}
+              transform={(s) => s.toUpperCase()}
+              placeholder={COPY.sections.placeholder}
+              hint={COPY.sections.hint}
+              error={error}
+            />
+            <ClassPreview classes={classOptions} />
+          </QuestionStep>
+        );
+      }
+
+      case "teacherName":
+        return (
+          <QuestionStep
+            {...base}
+            title={
+              teacherIndex === 0
+                ? COPY.teacherName.titleFirst
+                : COPY.teacherName.titleNext(teacherIndex + 1)
+            }
+            lead={COPY.teacherName.lead}
+            why={COPY.teacherName.why}
+            focusRef={primaryRef}
+            autoFocus
+            onSubmit={() => advance()}
+            actions={<ContinueButton>{COPY.teacherName.button}</ContinueButton>}
+          >
+            <LargeInput
+              ref={primaryRef}
+              id="cr-teacher-name"
+              label="Teacher name"
+              value={teacher?.name || ""}
+              onChange={(e) => {
+                dispatch({
+                  type: "teacherField",
+                  index: teacherIndex,
+                  field: "name",
+                  value: e.target.value,
+                });
+                if (error) setError(null);
+              }}
+              placeholder={COPY.teacherName.placeholder}
+              error={error}
+              autoCapitalize="words"
+            />
+          </QuestionStep>
+        );
+
+      case "teacherSubjects":
+        return (
+          <QuestionStep
+            {...base}
+            title={COPY.teacherSubjects.title(teacherLabel)}
+            lead={COPY.teacherSubjects.lead}
+            why={COPY.teacherSubjects.why}
+            focusRef={primaryRef}
+            onSubmit={() => advance()}
+            actions={<ContinueButton>{COPY.teacherSubjects.button}</ContinueButton>}
+          >
+            <ChipPicker
+              ref={primaryRef}
+              id="cr-teacher-subjects"
+              label={`Subjects for ${teacherLabel}`}
+              options={subjectOptions}
+              selected={list(teacher?.subjects)}
+              onToggle={(s) => toggleTeacherItem("subjects", subjectOptions, s)}
+              onSetAll={(all) => setTeacherList("subjects", subjectOptions, all)}
+              error={error}
+              emptyMessage={COPY.teacherSubjects.empty}
+            />
+          </QuestionStep>
+        );
+
+      case "teacherClasses":
+        return (
+          <QuestionStep
+            {...base}
+            title={COPY.teacherClasses.title(teacherLabel)}
+            lead={COPY.teacherClasses.lead}
+            why={COPY.teacherClasses.why}
+            focusRef={primaryRef}
+            onSubmit={() => advance()}
+            actions={<ContinueButton>{COPY.teacherClasses.button}</ContinueButton>}
+          >
+            <ChipPicker
+              ref={primaryRef}
+              id="cr-teacher-classes"
+              label={`Classes for ${teacherLabel}`}
+              options={classOptions}
+              selected={list(teacher?.classes)}
+              onToggle={(c) => toggleTeacherItem("classes", classOptions, c)}
+              onSetAll={(all) => setTeacherList("classes", classOptions, all)}
+              error={error}
+              emptyMessage={COPY.teacherClasses.empty}
+            />
+          </QuestionStep>
+        );
+
+      case "another": {
+        const done = formData.teachers.filter((t) => t.name.trim());
+        return (
+          <QuestionStep
+            {...base}
+            title={COPY.another.title}
+            lead={COPY.another.lead(done.length)}
+            why={COPY.another.why}
+            onSubmit={() => advance()}
+            actions={
+              <>
+                <ContinueButton type="button" secondary icon={null} onClick={addTeacher}>
+                  <Plus size={16} strokeWidth={2.2} aria-hidden="true" />
+                  {COPY.another.addButton}
+                </ContinueButton>
+                <ContinueButton>{COPY.another.button}</ContinueButton>
+              </>
+            }
+          >
+            <ul className="cr__teachers" style={{listStyle: "none", margin: 0, padding: 0}}>
+              <AnimatePresence initial={false}>
+                {formData.teachers.map((t, i) =>
+                  t.name.trim() ? (
+                    <TeacherCard
+                      key={t.id}
+                      teacher={t}
+                      canRemove={formData.teachers.length > 1}
+                      onEdit={() => editTeacher(i)}
+                      onRemove={() => removeTeacher(i)}
+                    />
+                  ) : null,
+                )}
+              </AnimatePresence>
+            </ul>
+          </QuestionStep>
+        );
+      }
+
+      case "review": {
+        const labels = list(formData.classLabels).map((l) => l.toUpperCase());
+        const min = formData.minLevel;
+        const max = formData.maxLevel;
+        const teachers = formData.teachers.filter((t) => t.name.trim());
+        const rows = [
+          {
+            id: "institution",
+            label: "Institution",
+            value: formData.schoolName || "Not set",
+            onEdit: () => jumpEdit("institution"),
+          },
+          {
+            id: "subjects",
+            label: "Subjects",
+            value: `${subjectOptions.length} ${
+              subjectOptions.length === 1 ? "subject" : "subjects"
+            }`,
+            sub: subjectOptions.join(", "),
+            onEdit: () => jumpEdit("subjects"),
+          },
+          {
+            id: "classes",
+            label: "Classes",
+            value: `${classOptions.length} ${classOptions.length === 1 ? "class" : "classes"}`,
+            sub: `${formData.classTypes || "—"} ${min || "?"}${
+              max && max !== min ? `–${max}` : ""
+            } · ${
+              labels.length ? `Sections ${labels.join(", ")}` : "No sections"
+            }`,
+            onEdit: () => jumpEdit("classType"),
+          },
+          {
+            id: "teachers",
+            label: "Teachers",
+            value: `${teachers.length} ${teachers.length === 1 ? "teacher" : "teachers"}`,
+            sub: teachers.map((t) => t.name.trim()).join(", "),
+            onEdit: () => jumpEdit("another"),
+          },
+        ];
+        return (
+          <QuestionStep
+            {...base}
+            title={COPY.review.title}
+            lead={COPY.review.lead}
+            why={COPY.review.why}
+            onSubmit={generate}
+            actions={
+              <ContinueButton disabled={issues.length > 0}>
+                {COPY.review.button}
+              </ContinueButton>
+            }
+          >
+            <ReviewSummary rows={rows} issues={issues} onFix={fixIssue} />
+          </QuestionStep>
+        );
+      }
+
+      case "generate":
+        return (
+          <GeneratingState
+            status={gen === "idle" ? "working" : gen}
+            onRetry={() => runGenerate(formData)}
+            onBack={() => {
+              setGen("idle");
+              setLocalError(null);
+              transition({step: "review", direction: -1});
+            }}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  // ── Render ─────────────────────────────────────────────────────────────
   if (authLoading) {
     return (
-      <div
-        style={{
-          background: t.bg,
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div className="create-loading-spinner" />
+      <div className="cr" style={{display: "grid", placeItems: "center"}}>
+        <style>{CREATE_CSS}</style>
+        <span
+          className="cr__spinner"
+          style={{margin: 0}}
+          aria-label="Loading"
+          role="status"
+        />
       </div>
     );
   }
 
   return (
-    <>
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .create-loading-spinner {
-          width: 40px; height: 40px;
-          border: 3px solid rgba(99,102,241,0.2);
-          border-top-color: #6366f1;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-        }
-      `}</style>
+    <main className="cr">
+      <style>{CREATE_CSS}</style>
 
-      
-
-      <main
-        style={{
-          minHeight: "100vh",
-          background: t.bg,
-          color: t.text,
-          overflowX: "hidden",
-          position: "relative",
-          paddingTop: "80px", // extra top margin for separation
-          paddingBottom: "80px",
-        }}
-      >
-        {/* Ambient glows removed */}
-        <div
-          style={{
-            position: "fixed",
-            top: -200,
-            left: -200,
-            width: 600,
-            height: 600,
-            background: "transparent",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-        />
-        <div
-          style={{
-            position: "fixed",
-            bottom: -100,
-            right: -100,
-            width: 400,
-            height: 400,
-            background: "transparent",
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
+      <div className="cr__shell">
+        <ProgressRail
+          title={COPY.railTitle}
+          subtitle={COPY.railSubtitle}
+          phases={phases}
+          status={draftStatus}
+          onRetry={() => persist(state)}
+          canStartOver={!isPristine(state) && step !== "generate"}
+          onStartOver={startOver}
         />
 
-        <div
-          style={{
-            position: "relative",
-            zIndex: 1,
-            maxWidth: 680,
-            margin: "0 auto",
-            padding: "0 24px",
-          }}
-        >
-          <motion.div
-            initial={{opacity: 0, y: 10}}
-            animate={{opacity: 1, y: 0}}
-            transition={{duration: 0.4}}
-            style={{marginBottom: 32}}
-          >
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 500,
-                color: "#6366f1",
-                textTransform: "uppercase",
-                letterSpacing: "0.6px",
-                marginBottom: 8,
-              }}
-            >
-              New schedule
-            </div>
-            <h1
-              style={{
-                fontSize: 24,
-                fontWeight: 500,
-                color: t.text,
-                letterSpacing: "-0.3px",
-                marginBottom: 6,
-              }}
-            >
-              Configure timetable
-            </h1>
-            <p style={{fontSize: 13, color: t.muted, lineHeight: 1.7}}>
-              Define your institution's structure and Protiba will generate an
-              optimized, conflict-free schedule automatically.
+        <div className="cr__main">
+          <ProgressCompact
+            position={phaseIndex + 1}
+            total={PHASES.length}
+            label={phaseIndex < 0 ? "Getting started" : PHASES[phaseIndex].label}
+            fraction={fraction}
+            status={draftStatus}
+            onRetry={() => persist(state)}
+          />
+
+          <div className="cr__stage">
+            <p className="cr__sr" role="status" aria-live="polite">
+              {phaseIndex < 0
+                ? "Getting started"
+                : `Step ${phaseIndex + 1} of ${PHASES.length}: ${PHASES[phaseIndex].label}`}
             </p>
-          </motion.div>
 
-          <motion.div
-            initial={{opacity: 0}}
-            animate={{opacity: 1}}
-            transition={{delay: 0.15}}
-          >
-            <StepIndicator current={currentStep} />
-          </motion.div>
-
-          <AnimatePresence>
-            {localError && (
-              <motion.div
-                initial={{opacity: 0, y: -8}}
-                animate={{opacity: 1, y: 0}}
-                exit={{opacity: 0, y: -8}}
-                style={{marginBottom: 20}}
-              >
-                <Notification
-                  message={localError}
-                  type="error"
-                  duration={8000}
-                  onClose={() => setLocalError(null)}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <form
-            onSubmit={handleSubmit}
-            style={{display: "flex", flexDirection: "column", gap: 12}}
-          >
-            {/* Section 1: Institution */}
-            <SectionCard
-              step={1}
-              title="Institution"
-              subtitle="Your school's identity"
-              active={currentStep === 1}
-            >
-              <Input
-                label="School name"
-                name="schoolName"
-                value={formData.schoolName}
-                onChange={handleChange}
-                placeholder="e.g. Nyeri High School"
-                required
-              />
-            </SectionCard>
-
-            {/* Section 2: Subjects */}
-            <SectionCard
-              step={2}
-              title="Subjects"
-              subtitle="Curriculum offered at your institution"
-              active={currentStep === 2}
-            >
-              <Input
-                label="Subjects taught"
-                name="subjectName"
-                value={formData.subjectName}
-                onChange={handleChange}
-                placeholder="Mathematics, English, Biology, Chemistry"
-                hint="Separate subjects with commas"
-              />
-            </SectionCard>
-
-            {/* Section 3: Classes */}
-            <SectionCard
-              step={3}
-              title="Classes"
-              subtitle="Define the class structure and groupings"
-              active={currentStep === 3}
-            >
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
-                  gap: 12,
-                }}
-              >
-                <Select
-                  label="Class type"
-                  value={formData.classTypes}
-                  placeholder="Select type"
-                  options={classTypeOptions}
-                  isOpen={dropdownsOpen.classType}
-                  onToggle={() => toggleDropdown("classType")}
-                  onSelect={handleClassTypeSelect}
-                  emptyMsg=""
-                />
-                <Input
-                  label="Min level"
-                  name="minLevel"
-                  type="number"
-                  value={formData.minLevel}
-                  onChange={handleChange}
-                  placeholder="1"
-                  required
-                />
-                <Input
-                  label="Max level"
-                  name="maxLevel"
-                  type="number"
-                  value={formData.maxLevel}
-                  onChange={handleChange}
-                  placeholder="6"
-                  required
-                />
-                <div style={{gridColumn: "span 1"}}>
-                  <Input
-                    label="Section labels"
-                    name="classLabels"
-                    value={formData.classLabels}
-                    onChange={handleChange}
-                    placeholder="A, B, C"
-                    hint="Optional — converted to uppercase"
-                  />
-                </div>
-              </div>
-
-              {classOptions.length > 0 && (
-                <div style={{marginTop: 16}}>
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: t.muted,
-                      marginBottom: 8,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.4px",
-                    }}
-                  >
-                    Generated classes · {classOptions.length} total
-                  </div>
-                  <div style={{display: "flex", flexWrap: "wrap", gap: 6}}>
-                    {classOptions.slice(0, 12).map((cls, i) => (
-                      <span
-                        key={i}
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 500,
-                          background: "rgba(99,102,241,0.1)",
-                          border: "1px solid rgba(99,102,241,0.25)",
-                          color: "#4338ca",
-                          padding: "3px 10px",
-                          borderRadius: 20,
-                        }}
-                      >
-                        {cls}
-                      </span>
-                    ))}
-                    {classOptions.length > 12 && (
-                      <span
-                        style={{
-                          fontSize: 11,
-                          color: t.muted,
-                          padding: "3px 10px",
-                        }}
-                      >
-                        +{classOptions.length - 12} more
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-            </SectionCard>
-
-            {/* Section 4: Teachers */}
-            <SectionCard
-              step={4}
-              title="Teachers"
-              subtitle="Assign subjects and classes to each teacher"
-              active={currentStep === 4}
-            >
-              <div style={{display: "flex", flexDirection: "column", gap: 10}}>
-                <AnimatePresence>
-                  {formData.teachers.map((teacher, index) => (
-                    <TeacherRow
-                      key={index}
-                      teacher={teacher}
-                      index={index}
-                      dropdownsOpen={dropdownsOpen}
-                      toggleDropdown={toggleDropdown}
-                      handleTeacherChange={handleTeacherChange}
-                      handleSubjectSelect={handleSubjectSelect}
-                      handleClassSelect={handleClassSelect}
-                      subjectOptions={subjectOptions}
-                      classOptions={classOptions}
-                      onRemove={() => removeTeacher(index)}
-                      canRemove={formData.teachers.length > 1}
-                    />
-                  ))}
-                </AnimatePresence>
-
-                <button
-                  type="button"
-                  onClick={addTeacher}
-                  style={{
-                    background: "transparent",
-                    border: `1px dashed ${t.border}`,
-                    borderRadius: 10,
-                    padding: "11px",
-                    fontSize: 12,
-                    fontWeight: 500,
-                    color: t.muted,
-                    cursor: "pointer",
-                    transition: "all 0.18s",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 6,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(99,102,241,0.4)";
-                    e.currentTarget.style.color = t.accentMid;
-                    e.currentTarget.style.background = "rgba(99,102,241,0.05)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = t.border;
-                    e.currentTarget.style.color = t.muted;
-                    e.currentTarget.style.background = "transparent";
-                  }}
+            <AnimatePresence>
+              {resumed && (
+                <motion.p
+                  className="cr__notice"
+                  initial={{opacity: 0, y: -6}}
+                  animate={{opacity: 1, y: 0}}
+                  exit={{opacity: 0, y: -6}}
+                  transition={{duration: 0.25}}
                 >
-                  <span style={{fontSize: 16, lineHeight: 1}}>+</span>
-                  Add teacher
-                </button>
-              </div>
-            </SectionCard>
+                  {COPY.resumed}
+                </motion.p>
+              )}
+            </AnimatePresence>
 
-            <motion.div
-              initial={{opacity: 0}}
-              animate={{opacity: 1}}
-              transition={{delay: 0.3}}
-              style={{marginTop: 8}}
+            <AnimatePresence>
+              {gen === "error" && localError && (
+                <motion.div
+                  initial={{opacity: 0, y: -8}}
+                  animate={{opacity: 1, y: 0}}
+                  exit={{opacity: 0, y: -8}}
+                  style={{marginBottom: 20}}
+                >
+                  <Notification
+                    message={localError}
+                    type="error"
+                    duration={8000}
+                    onClose={() => setLocalError(null)}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <StepTransition
+              stepKey={step === "teacherName" ? `${step}-${teacherIndex}` : step}
+              direction={direction}
             >
-              <SubmitButton isLoading={isLoading} />
-              <p
-                style={{
-                  fontSize: 11,
-                  color: t.dimmed,
-                  textAlign: "center",
-                  marginTop: 12,
-                  lineHeight: 1.6,
-                }}
-              >
-                Protiba will automatically resolve conflicts and generate an
-                optimized schedule.
-              </p>
-            </motion.div>
-          </form>
+              {renderStep()}
+            </StepTransition>
+          </div>
         </div>
-      </main>
-    </>
+      </div>
+    </main>
   );
 };
 
