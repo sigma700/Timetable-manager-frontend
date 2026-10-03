@@ -4,11 +4,7 @@ import protibaLogo from "/new-protiba-logo.png";
 import {useAuthStore} from "../store/authStore";
 import {NAV_CSS} from "./nav/navStyles";
 
-/**
- * School setup. A signed-in, verified user who has no school yet. The only
- * exits are "keep going" and "sign out" — no product navigation, because there
- * is no product to navigate until the school exists.
- */
+
 export default function OnboardingLayout() {
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
