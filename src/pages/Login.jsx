@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {useAuthStore} from "../store/authStore";
 import {useNavigate, Link} from "react-router-dom";
-import {Navigation} from "./components/navigation";
 import {GoogleButton} from "./components/GoogleButton";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -233,7 +232,7 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/home", {replace: true});
+      navigate("/app", {replace: true});
     }
   }, [isAuthenticated, navigate]);
 
@@ -264,12 +263,7 @@ const Login = () => {
   return (
     <>
       <style>{css}</style>
-      <Navigation
-        userName={userName}
-        institutionName={institutionName}
-        notificationCount={notificationCount}
-        onLogout={handleLogout}
-      />
+      
       <div className="li-root">
         {/* ── Left panel ── */}
         <div className="li-left">
@@ -368,9 +362,9 @@ const Login = () => {
                     <Icons.Lock /> Password{" "}
                     <span className="li-field__req">*</span>
                   </label>
-                  <Link to="/forgot-password" className="li-link li-link--sm">
-                    Forgot password?
-                  </Link>
+                  {/* "Forgot password?" removed: there is no reset page or reset
+                      endpoint yet, so the link led to a 404. Restore it when
+                      password recovery is built. */}
                 </div>
                 <div className="li-field__control">
                   <input

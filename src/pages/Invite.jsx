@@ -1,6 +1,5 @@
 import React, {useState, useEffect, useRef} from "react";
 import {useAuthStore} from "../store/authStore";
-import Navigation from "./components/navigation";
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
 // Updated to light palette while preserving brand accent colours
@@ -636,12 +635,7 @@ export default function Invite() {
         }
       `}</style>
 
-      <Navigation
-        userName={userName}
-        institutionName="Protiba"
-        notificationCount={3}
-        onLogout={handleLogout}
-      />
+      
 
       <div
         style={{

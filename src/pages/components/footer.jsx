@@ -509,10 +509,9 @@ const Footer = () => {
                 gap: 10,
               }}
             >
-              <FooterLink to="/home/demo">Demo</FooterLink>
-              <FooterLink to="/home/pricing">Pricing</FooterLink>
-              <FooterLink to="/home/manual">Documentation</FooterLink>
-              <FooterLink to="/home/story">Our story</FooterLink>
+              <FooterLink to="/demo">Demo</FooterLink>
+              <FooterLink to="/resources">Documentation</FooterLink>
+              <FooterLink to="/our-story">Our story</FooterLink>
             </ul>
           </div>
 

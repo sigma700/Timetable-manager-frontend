@@ -221,7 +221,7 @@ const Verif = () => {
   const [code, setCode] = useState("");
   const [resendCount, setResendCount] = useState(0);
   const [justResent, setJustResent] = useState(false);
-  const {verify, isLoading, error} = useAuthStore();
+  const {verify, resendCode, isLoading, error} = useAuthStore();
   const navigate = useNavigate();
   const {seconds, canResend, reset} = useCountdown(60);
 
@@ -233,17 +233,26 @@ const Verif = () => {
     if (!isComplete) return;
     try {
       await verify(code);
-      navigate("/home");
+      // Gate also moves verified users on automatically; this is just explicit.
+      navigate("/app", {replace: true});
     } catch {}
   };
 
-  const handleResend = () => {
+  // Previously this only played the "sent" animation and restarted the timer —
+  // no request was ever made. It now asks the server for a new code.
+  const handleResend = async () => {
     if (!canResend) return;
-    setResendCount((c) => c + 1);
-    setJustResent(true);
-    setCode("");
-    reset();
-    setTimeout(() => setJustResent(false), 3000);
+    try {
+      await resendCode();
+      setResendCount((c) => c + 1);
+      setJustResent(true);
+      setCode("");
+      reset();
+      setTimeout(() => setJustResent(false), 3000);
+    } catch {
+      // resendCode() already put the server's message into store.error, which
+      // the banner above renders.
+    }
   };
 
   const progress = ((6 - (6 - code.replace(/\D/g, "").length)) / 6) * 100;

@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {useAuthStore} from "../store/authStore";
 import {useNavigate, Link} from "react-router-dom";
-import {Navigation} from "./components/navigation";
 import {GoogleButton} from "./components/GoogleButton";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -274,7 +273,7 @@ const SignUp = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/home", {replace: true});
+      navigate("/app", {replace: true});
     }
   }, [isAuthenticated, navigate]);
 
@@ -392,12 +391,7 @@ const SignUp = () => {
     return (
       <>
         <style>{css}</style>
-        <Navigation
-          userName={userName}
-          institutionName={institutionName}
-          notificationCount={notificationCount}
-          onLogout={handleLogout}
-        />
+        
         <div className="su-root">
           <div
             style={{
@@ -418,12 +412,7 @@ const SignUp = () => {
   return (
     <>
       <style>{css}</style>
-      <Navigation
-        userName={userName}
-        institutionName={institutionName}
-        notificationCount={notificationCount}
-        onLogout={handleLogout}
-      />
+      
       <div className="su-root">
         {/* ── Left panel ── */}
         <div className="su-left">

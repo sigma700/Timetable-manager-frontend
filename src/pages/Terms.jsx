@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {Link} from "react-router-dom";
 import {Helmet} from "react-helmet";
-import {Navigation} from "./components/navigation";
 
 // ─── Brand tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -467,12 +466,7 @@ const Terms = () => {
       </Helmet>
 
       <div style={{background: C.bg, minHeight: "100vh"}}>
-        <Navigation
-          userName="Guest"
-          institutionName="Protiba"
-          notificationCount={0}
-          onLogout={() => {}}
-        />
+        
 
         {/* Header */}
         <header

@@ -27,7 +27,7 @@ export const useSubStore = create((set) => ({
 		} catch (error) {
 			set({
 				isLoading: false,
-				error: gottenData.message,
+				error: error.message,
 			});
 		}
 	},

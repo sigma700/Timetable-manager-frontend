@@ -1,11 +1,8 @@
 import React, {useState, useEffect, useRef} from "react";
 import {useAuthStore} from "../store/authStore";
-import {useGenStore} from "../store/generativeStore";
-import {useNavigate} from "react-router-dom";
 import {motion, AnimatePresence} from "framer-motion";
 
 import Notification from "./components/notification";
-import {Navigation} from "./components/navigation";
 
 // ─── Design tokens (light theme) ─────────────────────────────────────────────
 const t = {
@@ -562,7 +559,7 @@ function SubmitButton({isLoading}) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 const Create = () => {
-  const {user, isLoading: authLoading, logout} = useAuthStore();
+  const {isLoading: authLoading, completeOnboarding} = useAuthStore();
   const [formData, setFormData] = useState({
     schoolName: "",
     subjectName: "",
@@ -580,39 +577,8 @@ const Create = () => {
   });
 
   const [localError, setLocalError] = useState(null);
-  const {listName, listSubs, listClasses, listTichs, isLoading, error} =
-    useGenStore();
-  const navigate = useNavigate();
-
-  // User data for Navigation
-  const userName = user
-    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
-    : "Guest";
-  const institutionName = "St. Mary's Academy";
-  const notificationCount = 3;
-
-  const handleLogout = async () => {
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/logout`,
-        {
-          method: "POST",
-          credentials: "include",
-        },
-      );
-      if (res.ok) window.location.href = "/login";
-    } catch (err) {
-      console.error("Logout error", err);
-    }
-  };
-
-  useEffect(() => {
-    if (error) {
-      setLocalError(error);
-      const t = setTimeout(() => setLocalError(null), 8000);
-      return () => clearTimeout(t);
-    }
-  }, [error]);
+  const [submitting, setSubmitting] = useState(false);
+  const isLoading = submitting;
 
   const currentStep = (() => {
     if (formData.teachers.some((t) => t.name)) return 4;
@@ -745,49 +711,47 @@ const Create = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      setLocalError(null);
-      if (!formData.schoolName.trim())
-        throw new Error("School name is required");
-      if (!formData.minLevel || !formData.maxLevel)
-        throw new Error("Class levels are required");
-      const schoolData = await listName(formData.schoolName);
-      const schoolId = schoolData.data._id;
-      const subjectsArray = formData.subjectName
+    if (submitting) return;
+    setLocalError(null);
+
+    const list = (value) =>
+      String(value || "")
         .split(",")
-        .map((s) => s.trim())
+        .map((item) => item.trim())
         .filter(Boolean);
-      await listSubs(subjectsArray, schoolId);
-      await listClasses(
-        formData.minLevel.toString(),
-        formData.maxLevel.toString(),
-        formData.classTypes,
-        formData.classLabels
-          .split(",")
-          .map((l) => l.trim())
-          .filter(Boolean),
-        schoolId,
-      );
-      await Promise.all(
-        formData.teachers.map((teacher) =>
-          listTichs(
-            teacher.name,
-            teacher.subjects
-              .split(",")
-              .map((s) => s.trim())
-              .filter(Boolean),
-            teacher.classes
-              .split(",")
-              .map((c) => c.trim())
-              .filter(Boolean),
-            schoolId,
-          ),
-        ),
-      );
-      navigate("/home/gentable");
+
+    // Skip the untouched blank teacher row; a half-filled row IS sent so the
+    // server can tell the person exactly what is missing.
+    const teachers = formData.teachers
+      .filter((t) => t.name.trim() || t.subjects.trim() || t.classes.trim())
+      .map((t) => ({
+        name: t.name,
+        subjects: list(t.subjects),
+        classes: list(t.classes),
+      }));
+
+    setSubmitting(true);
+    try {
+      // ONE request. The server validates everything first and then saves the
+      // school, subjects, classes and teachers together — all or nothing. On
+      // success the store receives the updated user (it now has a school) and
+      // the router moves the person from /onboarding into the product.
+      await completeOnboarding({
+        school: {name: formData.schoolName},
+        subjects: list(formData.subjectName),
+        classes: {
+          type: formData.classTypes,
+          minLevel: formData.minLevel,
+          maxLevel: formData.maxLevel,
+          labels: list(formData.classLabels),
+        },
+        teachers,
+      });
     } catch (err) {
-      console.error("Submission failed:", err);
+      console.error("School setup failed:", err);
       setLocalError(err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -820,12 +784,7 @@ const Create = () => {
         }
       `}</style>
 
-      <Navigation
-        userName={userName}
-        institutionName={institutionName}
-        notificationCount={notificationCount}
-        onLogout={handleLogout}
-      />
+      
 
       <main
         style={{

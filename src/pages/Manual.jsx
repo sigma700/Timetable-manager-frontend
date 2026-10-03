@@ -2,7 +2,6 @@ import React, {useState, useEffect, useRef, useCallback} from "react";
 import {Link} from "react-router-dom";
 import {useAuthStore} from "../store/authStore";
 import Footer from "./components/footer";
-import Navigation from "./components/navigation";
 import {
   User,
   LayoutDashboard,
@@ -1171,7 +1170,7 @@ const UserManual = () => {
         }}
       />
 
-      <Navigation />
+      
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <div

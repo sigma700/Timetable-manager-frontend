@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useRef, useCallback} from "react";
 import {useQuery, useQueryClient} from "@tanstack/react-query";
 import {useAuthStore} from "../store/authStore";
-import {Navigation} from "./components/navigation";
 import {
   Calendar,
   Users,
@@ -207,12 +206,7 @@ function LoadingScreen({
   }, []);
   return (
     <>
-      <Navigation
-        userName={userName}
-        institutionName={institutionName}
-        notificationCount={notificationCount}
-        onLogout={onLogout}
-      />
+      
       <div
         style={{
           minHeight: "100vh",
@@ -370,12 +364,7 @@ function StateScreen({
 }) {
   return (
     <>
-      <Navigation
-        userName={userName}
-        institutionName={institutionName}
-        notificationCount={notificationCount}
-        onLogout={onLogout}
-      />
+      
       <div
         style={{
           minHeight: "100vh",
@@ -2562,7 +2551,7 @@ const Timetables = () => {
         body="Generate your first timetable to see it here."
         action={{
           label: "Generate timetable",
-          fn: () => (window.location.href = "/home/create-table"),
+          fn: () => (window.location.href = "/onboarding"),
         }}
         {...navProps}
       />
@@ -2650,7 +2639,7 @@ const Timetables = () => {
         }
       `}</style>
 
-      <Navigation {...navProps} />
+      
 
       <div
         style={{

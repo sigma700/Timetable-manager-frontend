@@ -2,7 +2,6 @@ import React, {useEffect, useRef, useState, useCallback} from "react";
 import {Link} from "react-router-dom";
 import {Helmet} from "react-helmet";
 import {useAuthStore} from "../store/authStore";
-import {Navigation} from "./components/navigation";
 
 // ─── Brand tokens (strict monochromatic) ──────────────────────────────────────
 const C = {
@@ -736,7 +735,7 @@ function AnalyticsShowcase() {
               </li>
             ))}
           </ul>
-          <Link to="/analytics" className="showcase__cta">
+          <Link to="/app/reports" className="showcase__cta">
             Explore Analytics <Ic.arrow />
           </Link>
         </div>
@@ -995,12 +994,7 @@ const Home = () => {
       </Helmet>
       <style>{CSS}</style>
 
-      <Navigation
-        userName={userName}
-        institutionName={institutionName}
-        notificationCount={notificationCount}
-        onLogout={handleLogout}
-      />
+      
 
       <div className="hp" style={{paddingTop: 68}}>
         <div className="hp-ambient" aria-hidden="true">
@@ -1035,7 +1029,7 @@ const Home = () => {
               <Link to="/signup" className="btn-primary">
                 Start for free <Ic.arrow />
               </Link>
-              <Link to="/home/demo" className="btn-ghost">
+              <Link to="/demo" className="btn-ghost">
                 <Ic.play /> See how it works
               </Link>
             </div>

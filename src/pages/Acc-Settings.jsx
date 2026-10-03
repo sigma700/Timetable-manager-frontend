@@ -1,6 +1,5 @@
 import React, {useState, useRef, useEffect} from "react";
 import {useAuthStore} from "../store/authStore";
-import Navigation from "./components/navigation";
 
 // ─── SVG Icons ──────────────────────────────────────────────────────────
 const Icon = {
@@ -1472,12 +1471,7 @@ const AccountSettings = () => {
   return (
     <>
       <style>{globalCSS}</style>
-      <Navigation
-        userName={userName}
-        institutionName={institutionName}
-        notificationCount={3}
-        onLogout={handleLogout}
-      />
+      
       <main className="as-page">
         <div className="as-container">
           {/* Header */}

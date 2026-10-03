@@ -37,7 +37,7 @@ export const useGenStore = create((set) => ({
 			return data;
 		} catch (error) {
 			set({
-				error: data.message,
+				error: error.message,
 				isLoading: false,
 			});
 			console.log(error);
@@ -74,7 +74,7 @@ export const useGenStore = create((set) => ({
 		} catch (error) {
 			set({
 				isLoading: false,
-				error: data.message,
+				error: error.message,
 			});
 		}
 	},
@@ -107,7 +107,7 @@ export const useGenStore = create((set) => ({
 			set({
 				isLoading: false,
 				isCreated: false,
-				error: data.message,
+				error: error.message,
 			});
 			console.log(error);
 			throw new Error(error);
@@ -146,7 +146,7 @@ export const useGenStore = create((set) => ({
 		} catch (error) {
 			set({
 				isCreated: false,
-				error: data.message,
+				error: error.message,
 				isLoading: false,
 			});
 			console.log(error);
@@ -181,7 +181,7 @@ export const useGenStore = create((set) => ({
 			return data;
 		} catch (error) {
 			set({
-				error: data.message,
+				error: error.message,
 				relValue: null,
 				isCreated: false,
 			});
@@ -256,7 +256,7 @@ export const useGenStore = create((set) => ({
 			return data;
 		} catch (error) {
 			set({
-				error: data.message,
+				error: error.message,
 				isCreated: false,
 			});
 			console.log(error);
@@ -292,7 +292,7 @@ export const useGenStore = create((set) => ({
 		} catch (error) {
 			set({
 				isCreated: false,
-				error: data.message,
+				error: error.message,
 			});
 
 			console.log(error);

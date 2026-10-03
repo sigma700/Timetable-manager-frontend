@@ -1,7 +1,6 @@
 import React, {useState, useCallback, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import {useGenStore} from "../store/generativeStore";
-import {Navigation} from "./components/navigation";
 import {useAuthStore} from "../store/authStore";
 import {
   Settings,
@@ -748,7 +747,7 @@ const Generation = () => {
       );
       if (data?.success || data?.data) {
         setSuccess(true);
-        setTimeout(() => navigate("/home/timetables"), 1200);
+        setTimeout(() => navigate("/app/timetables"), 1200);
       } else {
         setError(
           data?.message || "Generation failed. Please check your school data.",
@@ -801,12 +800,7 @@ const Generation = () => {
         }
       `}</style>
 
-      <Navigation
-        userName={userName}
-        institutionName={institutionName}
-        notificationCount={0}
-        onLogout={handleLogout}
-      />
+      
 
       <div
         style={{

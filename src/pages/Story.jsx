@@ -1,6 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Link} from "react-router-dom";
-import Navigation from "./components/navigation";
 
 // ─── Icons (unchanged) ───────────────────────────────────────────────────────
 const Icon = {
@@ -270,7 +269,7 @@ const Story = () => {
     <>
       <style>{css}</style>
       <div className="story-root">
-        <Navigation />
+        
 
         {/* Hero */}
         <section className="story-hero">

@@ -4,7 +4,6 @@ import {Link} from "react-router-dom";
 import {Calendar, ClipboardList, Clock, Users, Check} from "lucide-react";
 
 import HoverDevCards from "./components/gridOPtions";
-import {Navigation} from "./components/navigation";
 import {useTimetable} from "../hooks/useTimetable";
 
 // ─── Subject color palette ────────────────────────────────────────────────────
@@ -357,7 +356,7 @@ function EmptyTimetableState() {
         constraints and configuration.
       </p>
       <Link
-        to="/home/create-table"
+        to="/onboarding"
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -588,12 +587,7 @@ const MainPg = () => {
         `}
       </style>
 
-      <Navigation
-        userName={userName}
-        institutionName={institutionName}
-        notificationCount={notificationCount}
-        onLogout={handleLogout}
-      />
+      
 
       <main
         style={{
@@ -807,7 +801,7 @@ const MainPg = () => {
           {/* ── CTA: View timetables ── */}
           <div style={{...reveal(3), marginBottom: 36}}>
             <Link
-              to="/home/timetables"
+              to="/app/timetables"
               style={{
                 textDecoration: "none",
                 color: "inherit",
@@ -895,7 +889,7 @@ const MainPg = () => {
               </div>
               {timetableCount > 0 && (
                 <Link
-                  to="/home/timetables"
+                  to="/app/timetables"
                   style={{
                     fontSize: 12,
                     color: "#2B2B2B",
@@ -1158,7 +1152,7 @@ const MainPg = () => {
                       </span>
                     </div>
                     <Link
-                      to="/home/timetables"
+                      to="/app/timetables"
                       style={{
                         fontSize: 12,
                         color: "#2B2B2B",

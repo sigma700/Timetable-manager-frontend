@@ -1,6 +1,5 @@
 import React, {useState, useEffect, useRef, useCallback} from "react";
 import {useAuthStore} from "../store/authStore";
-import {Navigation} from "./components/navigation";
 import {
   Building2,
   GraduationCap,
@@ -2293,12 +2292,7 @@ const Settings = () => {
         }
       `}</style>
 
-      <Navigation
-        userName={userName}
-        institutionName={settings.name || "Your Institution"}
-        notificationCount={3}
-        onLogout={handleLogout}
-      />
+      
 
       <div
         style={{

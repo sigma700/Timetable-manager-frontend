@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useRef} from "react";
 import {useAuthStore} from "../store/authStore";
 import {useSubStore} from "../store/subsidiary";
-import Navigation from "./components/navigation";
 
 // ─── Tokens (light theme, semantic colors preserved) ──────────────────────────
 const tk = {
@@ -530,12 +529,7 @@ const Demo = () => {
         }
       `}</style>
 
-      <Navigation
-        userName={userName}
-        institutionName="Protiba"
-        notificationCount={3}
-        onLogout={handleLogout}
-      />
+      
 
       <div
         style={{

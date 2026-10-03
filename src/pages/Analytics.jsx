@@ -1500,7 +1500,7 @@ const Analytics = () => {
                 Generate your first timetable to start seeing analytics and
                 insights.
               </p>
-              <Link to="/home/create-table" className="analytics-cta-card__btn">
+              <Link to="/onboarding" className="analytics-cta-card__btn">
                 Start creating <ChevronRight size={16} strokeWidth={2} />
               </Link>
             </div>
