@@ -218,16 +218,16 @@ const Visual2 = () => (
         <div
           key={i}
           style={{
-            background: card.active ? "rgba(124,58,237,0.10)" : "#F8F8F8",
-            border: `1px solid ${card.active ? "rgba(124,58,237,0.30)" : "#E8E8E8"}`,
+            background: card.active ? "rgba(43,43,43,0.10)" : "#F8F8F8",
+            border: `1px solid ${card.active ? "rgba(43,43,43,0.30)" : "#E8E8E8"}`,
             borderRadius: 8,
             padding: "12px 10px",
-            boxShadow: card.active ? "0 2px 8px rgba(124,58,237,0.10)" : "none",
+            boxShadow: card.active ? "0 2px 8px rgba(43,43,43,0.10)" : "none",
           }}
         >
           <div
             style={{
-              color: card.active ? "#7C3AED" : "#898989",
+              color: card.active ? "#2B2B2B" : "#898989",
               marginBottom: 6,
             }}
           >
@@ -1017,9 +1017,9 @@ const UserManual = () => {
         'Click "Create Timetable" from the quick actions panel',
         "Choose AI-assisted generation for an optimized result",
       ],
-      accentColor: "#7C3AED",
-      iconBg: "rgba(124,58,237,0.10)",
-      borderColor: "rgba(124,58,237,0.30)",
+      accentColor: "#2B2B2B",
+      iconBg: "rgba(43,43,43,0.10)",
+      borderColor: "rgba(43,43,43,0.30)",
       visual: <Visual2 />,
     },
     {

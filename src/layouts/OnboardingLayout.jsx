@@ -1,15 +1,17 @@
-import React from "react";
+import React, {Suspense} from "react";
 import {Outlet, Link, useNavigate} from "react-router-dom";
 import protibaLogo from "/new-protiba-logo.png";
 import {useAuthStore} from "../store/authStore";
 import {NAV_CSS} from "./nav/navStyles";
+import Footer from "../pages/components/footer";
+import LoadingSpinner from "../pages/components/spinner";
 
 
 export default function OnboardingLayout() {
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="ui-layout">
       <header className="pn">
         <style>{NAV_CSS}</style>
         <div className="pn__inner">
@@ -24,7 +26,12 @@ export default function OnboardingLayout() {
           </div>
         </div>
       </header>
-      <main className="flex-grow"><Outlet /></main>
+      <main className="ui-layout__main">
+        <Suspense fallback={<LoadingSpinner />}>
+          <Outlet />
+        </Suspense>
+      </main>
+      <Footer />
     </div>
   );
 }

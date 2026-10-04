@@ -47,7 +47,6 @@ import {useRecentActivity} from "../hooks/useActivity.js";
 // import Badge, {HealthBadge} from "./components/ui/Badge.jsx";
 // import {MetricGridSkeleton} from "./components/ui/Skeleton.jsx";
 // import EmptyState from "./components/ui/EmptyState.jsx";
-import Footer from "./components/footer.jsx";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    DESIGN TOKENS
@@ -70,8 +69,8 @@ const TK = {
   text: "#2B2B2B",
   muted: "#898989",
   subtle: "#A0A0A0",
-  primary: "#0b69ff",
-  accent: "#7c3aed",
+  primary: "#2B2B2B",
+  accent: "#454545",
   success: "#10b981",
   warning: "#f59e0b",
   danger: "#ef4444",
@@ -148,14 +147,14 @@ const AnimatedMetricCard = memo(({label, value, Icon, color, description}) => {
 
   const colorMap = {
     primary: {
-      bg: "rgba(11,105,255,0.08)",
+      bg: "rgba(43,43,43,0.06)",
       text: TK.primary,
-      border: "rgba(11,105,255,0.15)",
+      border: "rgba(43,43,43,0.14)",
     },
     accent: {
-      bg: "rgba(124,58,237,0.08)",
+      bg: "rgba(43,43,43,0.06)",
       text: TK.accent,
-      border: "rgba(124,58,237,0.15)",
+      border: "rgba(43,43,43,0.14)",
     },
     success: {
       bg: "rgba(16,185,129,0.08)",
@@ -243,8 +242,8 @@ const SectionHeader = ({title, subtitle, action}) => (
    ═══════════════════════════════════════════════════════════════════════════ */
 const categoryConfig = {
   AUTH: {color: "#3b82f6", label: "Auth"},
-  INSTITUTION: {color: "#7c3aed", label: "Institution"},
-  TEACHER: {color: "#0b69ff", label: "Teacher"},
+  INSTITUTION: {color: "#454545", label: "Institution"},
+  TEACHER: {color: "#2B2B2B", label: "Teacher"},
   SUBJECT: {color: "#10b981", label: "Subject"},
   CLASS: {color: "#f59e0b", label: "Class"},
   TIMETABLE: {color: "#9aa4b2", label: "Timetable"},
@@ -1008,7 +1007,7 @@ const Analytics = () => {
                         />
                         <Tooltip
                           content={<PremiumTooltip />}
-                          cursor={{fill: "rgba(11,105,255,0.04)"}}
+                          cursor={{fill: "rgba(43,43,43,0.04)"}}
                         />
                         <Bar
                           dataKey="periodsAssigned"
@@ -1091,7 +1090,7 @@ const Analytics = () => {
                         />
                         <Tooltip
                           content={<PremiumTooltip />}
-                          cursor={{fill: "rgba(11,105,255,0.04)"}}
+                          cursor={{fill: "rgba(43,43,43,0.04)"}}
                         />
                         <Bar
                           dataKey="weeklyLoad"
@@ -1277,7 +1276,7 @@ const Analytics = () => {
                           />
                           <Tooltip
                             content={<PremiumTooltip />}
-                            cursor={{fill: "rgba(11,105,255,0.04)"}}
+                            cursor={{fill: "rgba(43,43,43,0.04)"}}
                           />
                           <Bar
                             dataKey="periodsAssigned"
@@ -1505,18 +1504,15 @@ const Analytics = () => {
             </div>
           </div>
         )}
-        <Footer/>
       </div>
     </>
   );
 };
 
 const analyticsCSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
   .analytics-page, .analytics-page * { box-sizing: border-box; }
   .analytics-page {
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: var(--ui-font-sans);
     background: #F8F8F8;
     color: #2B2B2B;
     min-height: 100vh;
@@ -1534,7 +1530,7 @@ const analyticsCSS = `
   .analytics-header__badge {
     display: inline-flex; align-items: center; gap: 6px;
     font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em;
-    color: #0b69ff; background: rgba(11,105,255,0.08); border: 1px solid rgba(11,105,255,0.15);
+    color: #2B2B2B; background: rgba(43,43,43,0.06); border: 1px solid rgba(43,43,43,0.14);
     border-radius: 20px; padding: 5px 13px; margin-bottom: 14px;
   }
   .analytics-header__title {
@@ -1559,7 +1555,7 @@ const analyticsCSS = `
     font-family: inherit; letter-spacing: -0.01em;
   }
   .analytics-tab:hover { color: #2B2B2B; }
-  .analytics-tab--active { color: #0b69ff; border-bottom-color: #0b69ff; font-weight: 600; }
+  .analytics-tab--active { color: #2B2B2B; border-bottom-color: #2B2B2B; font-weight: 600; }
 
   /* ── Grids ── */
   .analytics-grid { display: flex; flex-direction: column; gap: 24px; }
@@ -1718,9 +1714,9 @@ const analyticsCSS = `
   .analytics-teacher-card__header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .analytics-teacher-card__avatar {
     width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
-    background: rgba(11,105,255,0.1); border: 1px solid rgba(11,105,255,0.2);
+    background: rgba(43,43,43,0.06); border: 1px solid rgba(43,43,43,0.14);
     display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 700; color: #0b69ff;
+    font-size: 14px; font-weight: 700; color: #2B2B2B;
   }
   .analytics-teacher-card__info { flex: 1; min-width: 0; }
   .analytics-teacher-card__name { font-size: 14px; font-weight: 600; color: #2B2B2B; }
@@ -1741,9 +1737,9 @@ const analyticsCSS = `
   .analytics-table__user-cell { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; color: #2B2B2B; }
   .analytics-table__user-avatar {
     width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
-    background: rgba(11,105,255,0.1); border: 1px solid rgba(11,105,255,0.15);
+    background: rgba(43,43,43,0.06); border: 1px solid rgba(43,43,43,0.14);
     display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: #0b69ff;
+    font-size: 11px; font-weight: 700; color: #2B2B2B;
   }
   .analytics-table__number { font-weight: 600; color: #2B2B2B; font-variant-numeric: tabular-nums; }
   .analytics-table__muted { color: #898989; font-variant-numeric: tabular-nums; }

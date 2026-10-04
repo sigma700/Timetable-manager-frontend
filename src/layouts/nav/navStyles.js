@@ -19,20 +19,20 @@ export const NAV_CSS = `
   .pn,
   .pn-d {
     /* Colour */
-    --pn-ink: #171717;
-    --pn-ink-2: #6B6B6B;
-    --pn-ink-3: #969696;
-    --pn-line: #E5E5E5;
-    --pn-line-soft: #EEEEEE;
-    --pn-hover: #F4F4F5;
-    --pn-surface: #FFFFFF;
-    --pn-canvas: #F5F5F7;
-    --pn-brand: #0b69ff;
-    --pn-brand-hover: #0a5ee6;
-    --pn-focus: #0b69ff;
+    --pn-ink: var(--ui-text);
+    --pn-ink-2: var(--ui-text-muted);
+    --pn-ink-3: var(--ui-text-subtle);
+    --pn-line: var(--ui-border);
+    --pn-line-soft: var(--ui-border-subtle);
+    --pn-hover: var(--ui-surface-muted);
+    --pn-surface: var(--ui-surface);
+    --pn-canvas: var(--ui-bg);
+    --pn-brand: var(--ui-secondary-hover);
+    --pn-brand-hover: #1b6539;
+    --pn-focus: var(--ui-focus);
 
     /* Shape + rhythm */
-    --pn-header-h: 68px;
+    --pn-header-h: 74px;
     --pn-radius-sm: 8px;
     --pn-radius: 10px;
     --pn-radius-lg: 12px;
@@ -50,13 +50,13 @@ export const NAV_CSS = `
     right: 0;
     z-index: 40;
     padding-top: env(safe-area-inset-top, 0px);
-    background: #FFFFFF;
-    border-bottom: 1px solid #EDEDED;
+    background: var(--pn-surface);
+    border-bottom: 1px solid var(--pn-line-soft);
     box-shadow: 0 1px 2px rgba(16, 24, 40, 0.03);
   }
 
   .pn__inner {
-    max-width: 1200px;
+    max-width: var(--ui-content-width);
     margin: 0 auto;
     padding: 0 max(24px, env(safe-area-inset-right, 0px)) 0 max(24px, env(safe-area-inset-left, 0px));
     height: var(--pn-header-h);
@@ -74,7 +74,7 @@ export const NAV_CSS = `
     border-radius: var(--pn-radius-sm);
   }
   .pn__logo img {
-    height: 34px;
+    height: 38px;
     width: auto;
     display: block;
   }
@@ -92,7 +92,7 @@ export const NAV_CSS = `
     padding: 8px 16px;
     font-size: 14px;
     font-weight: 500;
-    color: #3F3F46;
+    color: var(--pn-ink-2);
     text-decoration: none;
     border-radius: var(--pn-radius-sm);
     white-space: nowrap;
@@ -100,13 +100,17 @@ export const NAV_CSS = `
   }
   .pn__link:hover {
     background: var(--pn-hover);
-    color: #18181B;
+    color: var(--pn-ink);
   }
   .pn__link--active,
   .pn__link--active:hover {
     color: var(--pn-brand);
-    background: #EAF2FF;
+    background: var(--ui-secondary-soft);
     font-weight: 500;
+  }
+  .dark .pn__link--active,
+  .dark .pn__link--active:hover {
+    color: var(--ui-secondary);
   }
 
   /* ── Right actions (desktop) ────────────────────────────────────────── */
@@ -144,13 +148,13 @@ export const NAV_CSS = `
     border-color: var(--pn-brand-hover);
   }
   .pn__btn--ghost {
-    background: #FFFFFF;
-    color: #18181B;
-    border-color: #D4D4D8;
+    background: var(--pn-surface);
+    color: var(--pn-ink);
+    border-color: var(--pn-line);
   }
   .pn__btn--ghost:hover {
     background: var(--pn-hover);
-    border-color: #A1A1AA;
+    border-color: var(--pn-ink-3);
   }
 
   /* ── User chip (desktop) ────────────────────────────────────────────── */
@@ -162,19 +166,19 @@ export const NAV_CSS = `
     gap: 10px;
     padding: 4px 12px 4px 4px;
     background: transparent;
-    border: 1px solid #E8E8E8;
+    border: 1px solid var(--pn-line);
     border-radius: 999px;
     cursor: pointer;
     font-family: inherit;
     transition: background 0.15s ease, border-color 0.15s ease;
   }
   .pn__userbtn:hover {
-    background: #F8F8F8;
-    border-color: #D0D0D0;
+    background: var(--pn-hover);
+    border-color: var(--pn-line);
   }
 
   .pn__chev {
-    color: #71717A;
+    color: var(--pn-ink-3);
     flex-shrink: 0;
     transition: transform 0.15s ease;
   }
@@ -184,7 +188,7 @@ export const NAV_CSS = `
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: var(--pn-ink);
+    background: var(--pn-brand);
     color: #FFFFFF;
     display: flex;
     align-items: center;
@@ -204,7 +208,7 @@ export const NAV_CSS = `
   .pn__uname {
     font-size: 13px;
     font-weight: 500;
-    color: #2B2B2B;
+    color: var(--pn-ink);
     max-width: 150px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -212,7 +216,7 @@ export const NAV_CSS = `
   }
   .pn__school {
     font-size: 10.5px;
-    color: #898989;
+    color: var(--pn-ink-3);
     font-weight: 400;
     margin-top: 1px;
     max-width: 150px;
@@ -227,8 +231,8 @@ export const NAV_CSS = `
     top: calc(100% + 8px);
     right: 0;
     min-width: 220px;
-    background: #FFFFFF;
-    border: 1px solid #E8E8E8;
+    background: var(--pn-surface);
+    border: 1px solid var(--pn-line);
     border-radius: var(--pn-radius-lg);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08),
                 0 2px 6px rgba(0, 0, 0, 0.04);
@@ -249,7 +253,7 @@ export const NAV_CSS = `
     width: 100%;
     padding: 9px 12px;
     font-size: 13.5px;
-    color: #2B2B2B;
+    color: var(--pn-ink);
     text-decoration: none;
     border-radius: 7px;
     background: transparent;
@@ -260,7 +264,7 @@ export const NAV_CSS = `
     transition: background 0.12s ease;
   }
   .pn__menuitem:hover { background: var(--pn-hover); }
-  .pn__menusep { height: 1px; background: #E8E8E8; margin: 6px 4px; }
+  .pn__menusep { height: 1px; background: var(--pn-line); margin: 6px 4px; }
 
   /* ── Marketing burger + panel (hidden on desktop) ───────────────────── */
   .pn__burger {
@@ -271,9 +275,9 @@ export const NAV_CSS = `
     height: 40px;
     padding: 0 14px;
     background: transparent;
-    border: 1px solid #E8E8E8;
+    border: 1px solid var(--pn-line);
     border-radius: var(--pn-radius);
-    color: #2B2B2B;
+    color: var(--pn-ink);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -316,8 +320,8 @@ export const NAV_CSS = `
       max-height: calc(100dvh - var(--pn-header-h) - env(safe-area-inset-top, 0px));
       overflow-y: auto;
       overscroll-behavior: contain;
-      background: #FFFFFF;
-      border-top: 1px solid #F0F0F0;
+      background: var(--pn-surface);
+      border-top: 1px solid var(--pn-line-soft);
     }
     .pn__panel .pn__link {
       display: flex;
@@ -563,7 +567,7 @@ export const APP_NAV_CSS = `
       .pn-d__create:hover { background: var(--pn-brand-hover); }
     }
     .pn-d__create[aria-current="page"] {
-      background: var(--pn-ink);
+      background: var(--pn-brand);
     }
 
     /* One white surface holds all navigation sections */
@@ -635,11 +639,11 @@ export const APP_NAV_CSS = `
       white-space: nowrap;
     }
 
-    /* Active: near-black pill */
+    /* Active: secondary-color pill */
     .pn-d__row--active,
     .pn-d__row--active:hover,
     .pn-d__row--active:active {
-      background: var(--pn-ink);
+      background: var(--pn-brand);
       color: #FFFFFF;
     }
     .pn-d__row--active .pn-d__icon { color: #FFFFFF; }
@@ -707,6 +711,14 @@ export const APP_NAV_CSS = `
       padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px)) 16px;
       background: var(--pn-canvas);
       border-top: 1px solid var(--pn-line);
+    }
+    .pn-d__foot--marketing {
+      justify-content: space-between;
+    }
+    .pn-d__signin-prompt {
+      min-width: 0;
+      color: var(--pn-ink-2);
+      font-size: 13px;
     }
     .pn-d__user {
       display: flex;

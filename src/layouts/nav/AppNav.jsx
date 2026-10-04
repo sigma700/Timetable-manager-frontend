@@ -41,7 +41,6 @@ const PRIMARY = [
 ];
 
 // "Settings" is a real grouping: both children live under /app/settings/.
-// Help lives at /resources, so it stays a flat row.
 const ACCOUNT = [
   {
     id: "settings",
@@ -52,7 +51,7 @@ const ACCOUNT = [
       { to: "/app/settings/preferences", label: "Timetable Preferences" },
     ],
   },
-  { to: "/resources", label: "Help & User Guide", icon: HelpCircle },
+  { to: "/app/manual", label: "Help & User Guide", icon: HelpCircle },
 ];
 
 // Desktop dropdown: same destinations, flattened.

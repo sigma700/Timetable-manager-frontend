@@ -1,7 +1,8 @@
-import React, {useEffect} from "react";
+import React, {Suspense, useEffect} from "react";
 import {Outlet, useLocation} from "react-router-dom";
 import MarketingNav from "./nav/MarketingNav";
 import Footer from "../pages/components/footer";
+import LoadingSpinner from "../pages/components/spinner";
 
 // "/#features" style links: react-router changes the URL but does not scroll.
 function ScrollToHash() {
@@ -17,10 +18,14 @@ function ScrollToHash() {
 /** Public website: navbar + content + footer. */
 export default function MarketingLayout() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="ui-layout">
       <ScrollToHash />
       <MarketingNav />
-      <main className="flex-grow"><Outlet /></main>
+      <main className="ui-layout__main">
+        <Suspense fallback={<LoadingSpinner />}>
+          <Outlet />
+        </Suspense>
+      </main>
       <Footer />
     </div>
   );

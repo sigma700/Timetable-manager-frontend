@@ -3,21 +3,21 @@ import {Link} from "react-router-dom";
 
 // ── Brand tokens ─────────────────────────────────────────────────────────────
 const C = {
-  bg: "#F8F8F8",
-  bg1: "#F5F5F5",
-  bg2: "#F1F1F1",
-  bg3: "#ECECEC",
-  bg4: "#E8E8E8",
-  border: "rgba(43,43,43,0.06)",
-  border2: "rgba(43,43,43,0.10)",
-  border3: "rgba(43,43,43,0.14)",
-  text: "#2B2B2B",
-  text2: "#6E6E6E",
-  text3: "#858585",
-  text4: "#9A9A9A",
-  accent: "#2B2B2B",
-  accent2: "#454545",
-  green: "#16A34A",
+  bg: "var(--ui-bg)",
+  bg1: "var(--ui-surface)",
+  bg2: "var(--ui-surface-muted)",
+  bg3: "var(--ui-surface-soft)",
+  bg4: "var(--ui-border-strong)",
+  border: "var(--ui-border-subtle)",
+  border2: "var(--ui-border)",
+  border3: "var(--ui-border-strong)",
+  text: "var(--ui-text)",
+  text2: "var(--ui-text-muted)",
+  text3: "var(--ui-text-subtle)",
+  text4: "var(--ui-text-faint)",
+  accent: "var(--ui-secondary-hover)",
+  accent2: "var(--ui-secondary)",
+  green: "var(--ui-secondary)",
   blue: "#2563EB",
   purple: "#7C3AED",
   teal: "#0D9488",
@@ -123,7 +123,7 @@ function NewsletterForm() {
             fontWeight: isSuccess ? 600 : 400,
             background: isSuccess
               ? "rgba(22,163,74,0.06)"
-              : "rgba(255,255,255,0.9)",
+              : "var(--ui-surface)",
             border: `1px solid ${isError ? "rgba(220,38,38,0.4)" : C.border2}`,
             borderRadius: 10,
             outline: "none",
@@ -392,21 +392,14 @@ const Footer = () => {
   return (
     <footer
       style={{
-        background: "rgba(248,248,248,0.8)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
+        background: "var(--ui-bg)",
         borderTop: `1px solid ${C.border}`,
         marginTop: "auto",
         padding: "80px 24px 32px",
 
-        // ✅ Full-bleed: escape any parent padding / max-width
-        width: "100vw",
-        maxWidth: "100vw",
-        marginLeft: "calc(50% - 50vw)",
-        marginRight: "calc(50% - 50vw)",
+        width: "100%",
+        maxWidth: "100%",
         boxSizing: "border-box",
-        position: "relative",
-        left: 0,
       }}
     >
       <style>{`
@@ -422,8 +415,7 @@ const Footer = () => {
           style={{
             padding: "40px 36px",
             borderRadius: 16,
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.3) 100%)",
+            background: "var(--ui-surface)",
             border: `1px solid ${C.border2}`,
             marginBottom: 48,
             boxShadow: "0 2px 12px rgba(0,0,0,0.02)",

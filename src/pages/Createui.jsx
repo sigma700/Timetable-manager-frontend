@@ -32,18 +32,18 @@ export const splitList = (value) =>
 // ─── Styles ──────────────────────────────────────────────────────────────────
 export const CREATE_CSS = `
   .cr {
-    --cr-bg: #F1F2F4;
-    --cr-surface: #FFFFFF;
-    --cr-rail: #F8F8F9;
-    --cr-ink: #171717;
-    --cr-ink-2: #5E5E63;
-    --cr-ink-3: #8A8A90;
-    --cr-line: #E4E4E7;
-    --cr-line-strong: #CFCFD4;
-    --cr-field: #FAFAFB;
-    --cr-accent: #0b69ff;
-    --cr-accent-hover: #0a5ee6;
-    --cr-accent-soft: #EAF2FF;
+    --cr-bg: var(--ui-bg);
+    --cr-surface: var(--ui-surface);
+    --cr-rail: var(--ui-surface-muted);
+    --cr-ink: var(--ui-text);
+    --cr-ink-2: var(--ui-text-muted);
+    --cr-ink-3: var(--ui-text-subtle);
+    --cr-line: var(--ui-border);
+    --cr-line-strong: var(--ui-border-strong);
+    --cr-field: var(--ui-surface);
+    --cr-accent: var(--ui-secondary-hover);
+    --cr-accent-hover: var(--ui-secondary);
+    --cr-accent-soft: var(--ui-secondary-soft);
     --cr-danger: #C93B2F;
     --cr-danger-soft: rgba(201, 59, 47, 0.12);
     --cr-ok: #1F7A4D;
@@ -116,11 +116,11 @@ export const CREATE_CSS = `
   .cr__steps { list-style: none; margin: 0; padding: 0; }
   .cr__stepitem {
     position: relative; display: flex; align-items: center; gap: 14px;
-    min-height: 28px; padding-bottom: 28px;
+    min-height: 36px; padding-bottom: 24px;
   }
   .cr__stepitem:last-child { padding-bottom: 0; }
   .cr__stepitem::before {
-    content: ""; position: absolute; left: 13px; top: 32px; bottom: 4px;
+    content: ""; position: absolute; left: 17px; top: 40px; bottom: 4px;
     width: 2px; background: var(--cr-line); transition: background 0.3s ease;
   }
   .cr__stepitem:last-child::before { display: none; }
@@ -128,7 +128,7 @@ export const CREATE_CSS = `
 
   .cr__dot {
     display: grid; place-items: center; flex-shrink: 0;
-    width: 28px; height: 28px; border-radius: 50%;
+    width: 36px; height: 36px; border-radius: 50%;
     background: #EAEAED; color: var(--cr-ink-3);
     font-size: 12px; font-weight: 600;
     transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
@@ -495,6 +495,17 @@ export const CREATE_CSS = `
 
   /* ── Generating ────────────────────────────────────────────────────── */
   .cr__gen { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .cr__gen--success { align-items: center; text-align: center; }
+  .cr__gen--success .cr__title { margin-bottom: 4px; }
+  .cr__gen--success .cr__lead { margin-bottom: 0; }
+  .cr__success-icon {
+    display: grid; place-items: center;
+    width: 88px; height: 88px; margin-bottom: 18px;
+    border-radius: 50%; color: #fff;
+    background: var(--cr-ok);
+    box-shadow: 0 12px 28px rgba(31, 122, 77, 0.22);
+  }
+  .cr__success-icon svg { width: 48px; height: 48px; overflow: visible; }
   .cr__spinner {
     width: 28px; height: 28px; margin-bottom: 18px;
     border-radius: 50%;
@@ -1271,7 +1282,7 @@ export function ReviewSummary({rows, issues, onFix}) {
         ))}
       </dl>
       {issues.length > 0 && (
-        <ul className="cr__issues" aria-label="Things to fix before generating">
+        <ul className="cr__issues" aria-label="Things to fix before saving">
           {issues.map((issue, i) => (
             <li key={`${issue.step}-${issue.teacherIndex}-${i}`} className="cr__issue">
               <span>{issue.message}</span>
@@ -1292,11 +1303,11 @@ export function GeneratingState({status, onRetry, onBack}) {
     return (
       <div className="cr__gen" role="alert">
         <h1 id={TITLE_ID} className="cr__title">
-          We couldn't generate your timetable.
+          We couldn't save your configuration.
         </h1>
         <p className="cr__lead">
-          Your setup is still here and nothing was lost. Try again, or go back
-          to review it.
+          Your setup is still here and nothing was lost. Try again, or go back to
+          review it.
         </p>
         <div className="cr__actions-right" style={{marginLeft: 0}}>
           <ContinueButton type="button" onClick={onRetry}>
@@ -1309,16 +1320,44 @@ export function GeneratingState({status, onRetry, onBack}) {
       </div>
     );
   }
+  const isDone = status === "done";
   return (
-    <div className="cr__gen" role="status" aria-live="polite">
-      {status === "working" && <span className="cr__spinner" aria-hidden="true" />}
+    <div
+      className={`cr__gen${isDone ? " cr__gen--success" : ""}`}
+      role="status"
+      aria-live="polite"
+    >
+      {isDone ? (
+        <motion.div
+          className="cr__success-icon"
+          initial={{scale: 0, opacity: 0, rotate: -18}}
+          animate={{scale: 1, opacity: 1, rotate: 0}}
+          transition={{type: "spring", stiffness: 260, damping: 17}}
+          aria-hidden="true"
+        >
+          <svg viewBox="0 0 48 48" fill="none">
+            <motion.path
+              d="M14 24.5 21 31l14-15"
+              stroke="currentColor"
+              strokeWidth="3.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{pathLength: 0}}
+              animate={{pathLength: 1}}
+              transition={{duration: 0.45, delay: 0.18, ease: "easeOut"}}
+            />
+          </svg>
+        </motion.div>
+      ) : (
+        <span className="cr__spinner" aria-hidden="true" />
+      )}
       <h1 id={TITLE_ID} className="cr__title">
-        {status === "done" ? "Your timetable is ready." : "Generating your timetable…"}
+        {isDone ? "Configuration saved." : "Saving your configuration…"}
       </h1>
       <p className="cr__lead">
-        {status === "done"
-          ? "Taking you to your timetable."
-          : "Protiba is working through your setup. This can take a moment."}
+        {isDone
+          ? "Redirecting you to the home page…"
+          : "Protiba is saving your setup. This can take a moment."}
       </p>
     </div>
   );

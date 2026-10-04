@@ -11,14 +11,14 @@ const tk = {
   bg4: "#DCDCDC",
   border: "rgba(0,0,0,0.06)",
   borderHov: "rgba(0,0,0,0.12)",
-  borderAccent: "rgba(79,110,247,0.28)",
+  borderAccent: "rgba(43,43,43,0.28)",
   text1: "#2B2B2B",
   text2: "#898989",
   text3: "#A0A0A0",
-  accent: "#4F6EF7",
-  accentHov: "#3D5CE8",
-  accentGlow: "rgba(79,110,247,0.06)",
-  accentSubtle: "rgba(79,110,247,0.06)",
+  accent: "#2B2B2B",
+  accentHov: "#454545",
+  accentGlow: "rgba(43,43,43,0.06)",
+  accentSubtle: "rgba(43,43,43,0.06)",
   success: "#22C55E",
   successSubtle: "rgba(34,197,94,0.06)",
   successBorder: "rgba(34,197,94,0.18)",
@@ -185,7 +185,7 @@ function TextInput({
       style={{
         width: "100%",
         boxSizing: "border-box",
-        background: focused ? "rgba(79,110,247,0.04)" : tk.bg2,
+        background: focused ? "rgba(43,43,43,0.04)" : tk.bg2,
         border: `1px solid ${hasError ? tk.errorBorder : focused ? tk.borderAccent : tk.border}`,
         borderRadius: 10,
         padding: "11px 14px",
@@ -536,7 +536,7 @@ const Demo = () => {
           minHeight: "100vh",
           background: tk.bg0,
           color: tk.text1,
-          fontFamily: "'Inter', 'SF Pro Text', system-ui, sans-serif",
+          fontFamily: "var(--ui-font-sans)",
           paddingTop: 64,
         }}
       >
@@ -1148,8 +1148,8 @@ const Demo = () => {
                             : "translateY(0)",
                         boxShadow:
                           btnHov && !isLoading
-                            ? "0 8px 24px rgba(79,110,247,0.32)"
-                            : "0 2px 8px rgba(79,110,247,0.16)",
+                            ? "0 8px 24px rgba(43,43,43,0.32)"
+                            : "0 2px 8px rgba(43,43,43,0.16)",
                         transition:
                           "background 0.18s, transform 0.18s, box-shadow 0.18s, opacity 0.18s",
                       }}

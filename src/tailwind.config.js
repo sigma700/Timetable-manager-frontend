@@ -11,22 +11,27 @@ export default {
       colors: {
         // Primary
         primary: {
-          DEFAULT: "#0b69ff",
-          dark: "#063b9e",
-          hover: "#0957d6",
+          DEFAULT: "#2B2B2B",
+          dark: "#171717",
+          hover: "#454545",
         },
         // Accent
         accent: {
-          DEFAULT: "#7c3aed",
-          hover: "#6d28d9",
+          DEFAULT: "#2B2B2B",
+          hover: "#454545",
+        },
+        secondary: {
+          DEFAULT: "#2B9C5A",
+          dark: "#217A45",
+          hover: "#1B6539",
         },
         // Brand backgrounds
         brand: {
-          bg: "#0b1220",
-          surface: "#0f1724",
-          card: "#151f2e",
-          border: "#1e2d42",
-          hover: "#1a2840",
+          bg: "#F8F8F8",
+          surface: "#FFFFFF",
+          card: "#FFFFFF",
+          border: "#E8E8E8",
+          hover: "#F1F1F1",
         },
         // Semantic
         success: "#10b981",
@@ -34,11 +39,19 @@ export default {
         danger: "#ef4444",
         info: "#3b82f6",
         // Text
-        muted: "#9aa4b2",
-        subtle: "#6b7a8f",
+        muted: "#6E6E6E",
+        subtle: "#858585",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+        sans: [
+          "Avenir Next",
+          "Nunito Sans",
+          "Trebuchet MS",
+          "ui-rounded",
+          "system-ui",
+          "-apple-system",
+          "sans-serif",
+        ],
       },
       fontSize: {
         h1: ["28px", {lineHeight: "1.2", fontWeight: "700"}],
@@ -54,12 +67,12 @@ export default {
         96: "24rem",
       },
       borderRadius: {
-        card: "8px",
+        card: "14px",
       },
       boxShadow: {
-        card: "0 1px 3px 0 rgba(0,0,0,0.4)",
-        modal: "0 8px 32px 0 rgba(0,0,0,0.5)",
-        subtle: "0 1px 2px 0 rgba(0,0,0,0.2)",
+        card: "0 1px 3px 0 rgba(43,43,43,0.04)",
+        modal: "0 8px 32px 0 rgba(43,43,43,0.12)",
+        subtle: "0 1px 2px 0 rgba(43,43,43,0.03)",
       },
       transitionDuration: {
         DEFAULT: "150ms",

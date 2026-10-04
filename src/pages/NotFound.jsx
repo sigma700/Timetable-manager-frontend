@@ -11,7 +11,7 @@ export default function NotFound() {
           display: "grid",
           placeItems: "center",
           padding: "96px 24px",
-          fontFamily: "Inter, system-ui, sans-serif",
+          fontFamily: "var(--ui-font-sans)",
         }}
       >
         <div style={{textAlign: "center", maxWidth: 480}}>
@@ -35,7 +35,7 @@ export default function NotFound() {
             to="/"
             style={{
               display: "inline-block",
-              background: "#0b69ff",
+              background: "#217A45",
               color: "#fff",
               padding: "12px 20px",
               borderRadius: 8,

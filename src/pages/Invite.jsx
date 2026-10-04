@@ -12,14 +12,14 @@ const tk = {
   bg4: "#DCDCDC",
   border: "rgba(0,0,0,0.06)",
   borderHov: "rgba(0,0,0,0.12)",
-  borderAccent: "rgba(79,110,247,0.28)",
+  borderAccent: "rgba(43,43,43,0.18)",
   borderAmber: "rgba(245,158,11,0.28)",
   text1: "#2B2B2B",
   text2: "#898989",
   text3: "#A0A0A0",
-  accent: "#4F6EF7",
-  accentHov: "#3D5CE8",
-  accentSubtle: "rgba(79,110,247,0.06)",
+  accent: "#2B2B2B",
+  accentHov: "#454545",
+  accentSubtle: "rgba(43,43,43,0.06)",
   amber: "#F59E0B",
   amberHov: "#D97706",
   amberSubtle: "rgba(245,158,11,0.06)",
@@ -274,7 +274,7 @@ function FocusInput({
       style={{
         width: "100%",
         boxSizing: "border-box",
-        background: focused ? "rgba(79,110,247,0.04)" : tk.bg2,
+        background: focused ? "rgba(43,43,43,0.04)" : tk.bg2,
         border: `1px solid ${focused ? tk.borderAccent : tk.border}`,
         borderRadius: 9,
         padding: "10px 13px",
@@ -302,7 +302,7 @@ function FocusTextarea({value, onChange, placeholder, rows = 3}) {
       style={{
         width: "100%",
         boxSizing: "border-box",
-        background: focused ? "rgba(79,110,247,0.04)" : tk.bg2,
+        background: focused ? "rgba(43,43,43,0.04)" : tk.bg2,
         border: `1px solid ${focused ? tk.borderAccent : tk.border}`,
         borderRadius: 9,
         padding: "10px 13px",
@@ -642,7 +642,7 @@ export default function Invite() {
           minHeight: "100vh",
           background: tk.bg0,
           color: tk.text1,
-          fontFamily: "'Inter', 'SF Pro Text', system-ui, sans-serif",
+          fontFamily: "var(--ui-font-sans)",
           paddingTop: 64,
         }}
       >
@@ -1310,8 +1310,8 @@ export default function Invite() {
                           ? "translateY(-1px)"
                           : "translateY(0)",
                         boxShadow: submitHov
-                          ? "0 8px 24px rgba(79,110,247,0.3)"
-                          : "0 2px 8px rgba(79,110,247,0.14)",
+                          ? "0 8px 24px rgba(43,43,43,0.3)"
+                          : "0 2px 8px rgba(43,43,43,0.14)",
                         transition:
                           "background 0.18s, transform 0.18s, box-shadow 0.18s",
                       }}

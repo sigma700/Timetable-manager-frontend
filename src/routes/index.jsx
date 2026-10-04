@@ -7,20 +7,20 @@ import AuthLayout from "../layouts/AuthLayout";
 import OnboardingLayout from "../layouts/OnboardingLayout";
 import AppLayout from "../layouts/AppLayout";
 
-// Marketing + auth are small and needed immediately → eager.
+// Keep only the primary landing route in the initial page bundle.
 import Home from "../pages/Home";
-import Story from "../pages/Story";
-import Contacts from "../pages/Contacts";
-import Demo from "../pages/Demo";
-import UserManual from "../pages/Manual";
-import Terms from "../pages/Terms";
-import Login from "../pages/Login";
-import SignUp from "../pages/SignUp";
-import Verif from "../pages/Verif";
-import Create from "../pages/Create"; // the onboarding wizard
 import NotFound from "../pages/NotFound";
 
-// Product pages are heavy → lazy, so public visitors never download them.
+// Non-landing pages load only when visited to keep the initial download lean.
+const Story = lazy(() => import("../pages/Story"));
+const Contacts = lazy(() => import("../pages/Contacts"));
+const Demo = lazy(() => import("../pages/Demo"));
+const UserManual = lazy(() => import("../pages/Manual"));
+const Terms = lazy(() => import("../pages/Terms"));
+const Login = lazy(() => import("../pages/Login"));
+const SignUp = lazy(() => import("../pages/SignUp"));
+const Verif = lazy(() => import("../pages/Verif"));
+const Create = lazy(() => import("../pages/Create"));
 const MainPg = lazy(() => import("../pages/MainPg"));
 const Timetables = lazy(() => import("../pages/Timetables"));
 const Generation = lazy(() => import("../pages/Generation"));
@@ -87,6 +87,7 @@ export const router = createBrowserRouter([
           {path: "/app", element: <MainPg />},
           {path: "/app/timetables", element: <Timetables />},
           {path: "/app/create", element: <Generation />},
+          {path: "/app/manual", element: <UserManual />},
           {path: "/app/reports", element: <div style={{paddingTop: 64}}><Analytics /></div>},
           {path: "/app/invite", element: <Invite />},
           {path: "/app/settings/account", element: <AccountSettings />},
@@ -102,7 +103,7 @@ export const router = createBrowserRouter([
   {path: "/home/gentable", element: to("/app/create")},
   {path: "/home/create-table", element: to("/onboarding")},
   {path: "/home/invite", element: to("/app/invite")},
-  {path: "/home/manual", element: to("/resources")},
+  {path: "/home/manual", element: to("/app/manual")},
   {path: "/home/story", element: to("/our-story")},
   {path: "/home/contacts", element: to("/contact")},
   {path: "/home/demo", element: to("/demo")},

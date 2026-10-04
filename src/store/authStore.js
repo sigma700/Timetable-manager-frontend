@@ -118,7 +118,7 @@ export const useAuthStore = create((set, get) => ({
     return data;
   },
 
-  completeOnboarding: async (payload) => {
+  completeOnboarding: async (payload, { beforeSessionUpdate } = {}) => {
     set({ error: null });
     const response = await fetch(`${API()}/api/onboarding`, {
       method: "POST",
@@ -141,6 +141,7 @@ export const useAuthStore = create((set, get) => ({
     }
 
     const user = data.data?.user ?? null;
+    if (beforeSessionUpdate) await beforeSessionUpdate();
     set({
       user,
       isAuthenticated: Boolean(user),

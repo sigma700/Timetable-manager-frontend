@@ -216,7 +216,7 @@ const contactItems = [
     Icon: Icons.Location,
     label: "Location",
     value: "Kimathi Street, Nyeri\nBoma Nyeri, Kenya",
-    accent: "#7c3aed",
+    accent: "#2B2B2B",
   },
   {
     Icon: Icons.Phone,
@@ -336,7 +336,7 @@ const Contacts = () => {
                         style={{"--accent": accent}}
                       >
                         <div className="contact-item__icon">
-                          <Icon />
+                          {React.createElement(Icon)}
                         </div>
                         <div className="contact-item__body">
                           <span className="contact-item__label">{label}</span>
@@ -362,7 +362,7 @@ const Contacts = () => {
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <Icon />
+                      {React.createElement(Icon)}
                     </a>
                   ))}
                 </div>
@@ -522,27 +522,26 @@ const Contacts = () => {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const css = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0d0d10;
-    --surface: #131316;
-    --surface-2: #1a1a1f;
-    --surface-3: #212128;
-    --border: rgba(255,255,255,0.07);
-    --border-focus: rgba(124,58,237,0.45);
-    --text: #f0f0f5;
-    --text-2: #9898a8;
-    --text-3: #55556a;
-    --accent: #7c3aed;
-    --accent-light: #a78bfa;
-    --accent-glow: rgba(124,58,237,0.14);
-    --green: #10b981;
-    --radius: 10px;
-    --radius-lg: 16px;
-    --font: 'Inter', -apple-system, sans-serif;
-    --t: 180ms cubic-bezier(0.4,0,0.2,1);
+    --bg: var(--ui-bg);
+    --surface: var(--ui-surface);
+    --surface-2: var(--ui-surface-muted);
+    --surface-3: var(--ui-surface-soft);
+    --border: var(--ui-border-subtle);
+    --border-focus: var(--ui-accent-border);
+    --text: var(--ui-text);
+    --text-2: var(--ui-text-muted);
+    --text-3: var(--ui-text-subtle);
+    --accent: var(--ui-accent);
+    --accent-light: var(--ui-accent-hover);
+    --accent-glow: var(--ui-accent-soft);
+    --green: var(--ui-success);
+    --radius: var(--ui-radius-md);
+    --radius-lg: var(--ui-radius-xl);
+    --font: var(--ui-font-sans);
+    --t: var(--ui-transition);
   }
 
   .contacts-root {
@@ -565,7 +564,7 @@ const css = `
     top: -100px; left: 50%;
     transform: translateX(-50%);
     width: 700px; height: 400px;
-    background: radial-gradient(ellipse, rgba(124,58,237,0.1) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(43,43,43,0.1) 0%, transparent 70%);
     pointer-events: none;
   }
   .contacts-header__inner {
@@ -583,7 +582,7 @@ const css = `
     letter-spacing: 0.1em;
     color: var(--accent-light);
     background: var(--accent-glow);
-    border: 1px solid rgba(124,58,237,0.2);
+    border: 1px solid rgba(43,43,43,0.2);
     padding: 5px 13px;
     border-radius: 20px;
     margin-bottom: 20px;
@@ -604,7 +603,7 @@ const css = `
     margin-bottom: 16px;
   }
   .contacts-header__title-accent {
-    background: linear-gradient(135deg, var(--accent-light) 0%, #c4b5fd 100%);
+    background: linear-gradient(135deg, var(--accent-light) 0%, #858585 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -649,7 +648,13 @@ const css = `
     align-items: start;
   }
   @media (max-width: 860px) { .contacts-grid { grid-template-columns: 1fr; } }
-  @media (max-width: 600px) { .contacts-body, .contacts-header { padding-left: 20px; padding-right: 20px; } }
+  @media (max-width: 600px) {
+    .contacts-body, .contacts-header { padding-left: 20px; padding-right: 20px; }
+    .stats-bar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
+    .stats-bar__item { min-width: 0; padding: 12px 6px; }
+    .stats-bar__value { font-size: 18px; }
+    .stats-bar__label { font-size: 9px; line-height: 1.3; text-align: center; white-space: normal; }
+  }
 
   /* ── Info Panel ── */
   .info-panel {
@@ -702,8 +707,8 @@ const css = `
     color: var(--accent-light);
     flex-shrink: 0;
     /* Fallback for browsers without color-mix */
-    background: rgba(124,58,237,0.12);
-    border: 1px solid rgba(124,58,237,0.22);
+    background: rgba(43,43,43,0.12);
+    border: 1px solid rgba(43,43,43,0.22);
   }
   .contact-item__body { display: flex; flex-direction: column; gap: 2px; }
   .contact-item__label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-3); }
@@ -801,7 +806,7 @@ const css = `
   .c-field__input:focus {
     border-color: var(--border-focus);
     background: var(--surface-3);
-    box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+    box-shadow: 0 0 0 3px rgba(43,43,43,0.1);
   }
   .c-field__textarea { min-height: 120px; }
   .c-field__count {
@@ -829,12 +834,12 @@ const css = `
     font-family: var(--font);
     cursor: pointer;
     transition: all var(--t);
-    box-shadow: 0 4px 16px rgba(124,58,237,0.3);
+    box-shadow: 0 4px 16px rgba(43,43,43,0.3);
     margin-top: 4px;
   }
   .btn-send:hover:not(:disabled) {
-    background: #6d28d9;
-    box-shadow: 0 6px 24px rgba(124,58,237,0.4);
+    background: #454545;
+    box-shadow: 0 6px 24px rgba(43,43,43,0.4);
     transform: translateY(-1px);
   }
   .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }

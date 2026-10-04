@@ -27,23 +27,23 @@ import {
 
 // ─── Tokens ────────────────────────────────────────────────────────────────────
 const tk = {
-  bg0: "#F7F7F8",
+  bg0: "#F8F8F8",
   bg1: "#FFFFFF",
-  bg2: "#F0F0F2",
-  bg3: "#E6E6EA",
-  border: "rgba(0,0,0,0.07)",
-  borderHov: "rgba(0,0,0,0.14)",
-  borderAccent: "rgba(79,110,247,0.3)",
-  text1: "#1A1A2E",
-  text2: "#6B6B80",
-  text3: "#9898A8",
-  accent: "#4F6EF7",
-  accentHov: "#3A58E0",
-  accentSubtle: "rgba(79,110,247,0.08)",
-  accentBorder: "rgba(79,110,247,0.22)",
-  violet: "#7C3AED",
-  violetSubtle: "rgba(124,58,237,0.08)",
-  violetBorder: "rgba(124,58,237,0.2)",
+  bg2: "#F1F1F1",
+  bg3: "#E8E8E8",
+  border: "rgba(43,43,43,0.06)",
+  borderHov: "rgba(43,43,43,0.14)",
+  borderAccent: "rgba(43,43,43,0.18)",
+  text1: "#2B2B2B",
+  text2: "#6E6E6E",
+  text3: "#858585",
+  accent: "#2B2B2B",
+  accentHov: "#454545",
+  accentSubtle: "rgba(43,43,43,0.06)",
+  accentBorder: "rgba(43,43,43,0.18)",
+  violet: "#2B2B2B",
+  violetSubtle: "rgba(43,43,43,0.08)",
+  violetBorder: "rgba(43,43,43,0.2)",
   success: "#16A34A",
   successSubtle: "rgba(22,163,74,0.08)",
   successBorder: "rgba(22,163,74,0.2)",
@@ -807,7 +807,7 @@ const Generation = () => {
           minHeight: "100vh",
           background: tk.bg0,
           paddingTop: 64,
-          fontFamily: "'Inter',system-ui,sans-serif",
+          fontFamily: "var(--ui-font-sans)",
         }}
       >
         {/* Hero */}
@@ -1269,7 +1269,7 @@ const Generation = () => {
                 background: success
                   ? "#16A34A"
                   : isLoading
-                    ? "rgba(79,110,247,0.7)"
+                    ? "rgba(43,43,43,0.7)"
                     : tk.accent,
                 border: "none",
                 borderRadius: 11,
@@ -1280,7 +1280,7 @@ const Generation = () => {
                 boxShadow:
                   isLoading || success
                     ? "none"
-                    : `0 4px 16px rgba(79,110,247,0.35)`,
+                    : `0 4px 16px rgba(43,43,43,0.35)`,
               }}
               onMouseEnter={(e) => {
                 if (!isLoading && !success)

@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef, useCallback} from "react";
 import {useAuthStore} from "../store/authStore";
+import useUiStore from "../store/uiStore";
 import {
   Building2,
   GraduationCap,
@@ -47,21 +48,21 @@ import {
 
 // ─── Tokens – light, premium palette (brand colours preserved) ────────────────
 const tk = {
-  bg0: "#F8F8F8",
-  bg1: "#FFFFFF",
-  bg2: "#F0F0F0",
-  bg3: "#E8E8E8",
-  bg4: "#DCDCDC",
-  border: "rgba(0,0,0,0.06)",
-  borderHov: "rgba(0,0,0,0.11)",
-  borderAccent: "rgba(79,110,247,0.28)",
-  text1: "#2B2B2B",
-  text2: "#898989",
-  text3: "#A0A0A0",
-  accent: "#4F6EF7",
-  accentHov: "#3D5CE8",
-  accentSubtle: "rgba(79,110,247,0.08)",
-  accentBorder: "rgba(79,110,247,0.2)",
+  bg0: "var(--ui-bg)",
+  bg1: "var(--ui-surface)",
+  bg2: "var(--ui-surface-muted)",
+  bg3: "var(--ui-surface-soft)",
+  bg4: "var(--ui-border-strong)",
+  border: "var(--ui-border-subtle)",
+  borderHov: "var(--ui-border-strong)",
+  borderAccent: "var(--ui-accent-border)",
+  text1: "var(--ui-text)",
+  text2: "var(--ui-text-muted)",
+  text3: "var(--ui-text-subtle)",
+  accent: "var(--ui-secondary-hover)",
+  accentHov: "var(--ui-secondary)",
+  accentSubtle: "var(--ui-secondary-soft)",
+  accentBorder: "var(--ui-secondary-border)",
   success: "#22C55E",
   successSubtle: "rgba(34,197,94,0.08)",
   successBorder: "rgba(34,197,94,0.2)",
@@ -71,12 +72,12 @@ const tk = {
   danger: "#F87171",
   dangerSubtle: "rgba(248,113,113,0.08)",
   dangerBorder: "rgba(248,113,113,0.2)",
-  violet: "#8B5CF6",
-  violetSubtle: "rgba(139,92,246,0.08)",
-  violetBorder: "rgba(139,92,246,0.2)",
-  teal: "#2DD4BF",
-  tealSubtle: "rgba(45,212,191,0.08)",
-  tealBorder: "rgba(45,212,191,0.2)",
+  violet: "var(--ui-accent)",
+  violetSubtle: "var(--ui-accent-soft)",
+  violetBorder: "var(--ui-accent-border)",
+  teal: "var(--ui-accent)",
+  tealSubtle: "var(--ui-accent-soft)",
+  tealBorder: "var(--ui-accent-border)",
 };
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
@@ -247,7 +248,7 @@ function TextInput({value, onChange, placeholder, type = "text"}) {
       style={{
         width: "100%",
         boxSizing: "border-box",
-        background: focused ? "rgba(79,110,247,0.04)" : tk.bg2,
+        background: focused ? "rgba(43,43,43,0.04)" : tk.bg2,
         border: `1px solid ${focused ? tk.borderAccent : tk.border}`,
         borderRadius: 8,
         padding: "8px 12px",
@@ -446,7 +447,7 @@ function SearchBar({value, onChange}) {
     <div
       style={{
         position: "relative",
-        background: focused ? "rgba(79,110,247,0.04)" : tk.bg2,
+        background: focused ? "rgba(43,43,43,0.04)" : tk.bg2,
         border: `1px solid ${focused ? tk.borderAccent : tk.border}`,
         borderRadius: 10,
         display: "flex",
@@ -1549,7 +1550,7 @@ function AppearanceSection({settings, onChange, search}) {
           >
             <div style={{display: "flex", gap: 10}}>
               {themes.map(({value, label, icon: Icon}) => {
-                const active = (settings.theme || "dark") === value;
+                const active = (settings.theme || "light") === value;
                 return (
                   <button
                     key={value}
@@ -1570,11 +1571,11 @@ function AppearanceSection({settings, onChange, search}) {
                       transition: "all 0.18s",
                     }}
                   >
-                    <Icon
-                      size={18}
-                      color={active ? tk.accent : tk.text3}
-                      strokeWidth={1.6}
-                    />
+                    {React.createElement(Icon, {
+                      size: 18,
+                      color: active ? tk.accent : tk.text3,
+                      strokeWidth: 1.6,
+                    })}
                     <span
                       style={{
                         fontSize: 11,
@@ -1677,7 +1678,7 @@ function SecuritySection({settings, onChange, search}) {
 }
 
 // ─── Data section ─────────────────────────────────────────────────────────────
-function DataSection({settings, onChange, search}) {
+function DataSection({settings, onChange}) {
   return (
     <div>
       <SectionHeader
@@ -1867,6 +1868,8 @@ function PlaceholderSection({id}) {
 // ─── Main Settings component ──────────────────────────────────────────────────
 const Settings = () => {
   const {user, isLoading: authLoading} = useAuthStore();
+  const uiTheme = useUiStore((state) => state.theme);
+  const setTheme = useUiStore((state) => state.setTheme);
   const [activeSection, setActiveSection] = useState("institution");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 900);
@@ -1922,7 +1925,7 @@ const Settings = () => {
     conflictAlerts: true,
     generationNotif: true,
     weeklySummary: false,
-    theme: "light",
+    theme: uiTheme,
     compactMode: false,
     twoFactor: false,
     sessionTimeout: "24h",
@@ -1963,6 +1966,9 @@ const Settings = () => {
         const data = await res.json();
         if (!cancelled && data?.data) {
           setSettings((prev) => ({...prev, ...data.data}));
+          if (["light", "dark", "system"].includes(data.data.theme)) {
+            setTheme(data.data.theme);
+          }
         }
       } catch (err) {
         if (!cancelled) console.error("Failed to load settings:", err);
@@ -1972,7 +1978,7 @@ const Settings = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [setTheme]);
 
   // Clear save success/error feedback after a few seconds
   useEffect(() => {
@@ -2005,10 +2011,11 @@ const Settings = () => {
 
   const handleChange = useCallback((key, value) => {
     setSettings((prev) => ({...prev, [key]: value}));
+    if (key === "theme") setTheme(value);
     setDirty(true);
     setSaveSuccess(false);
     setSaveError(null);
-  }, []);
+  }, [setTheme]);
 
   // ── Save to backend ─────────────────────────────────────────────────────────
   const handleSave = async () => {
@@ -2081,7 +2088,7 @@ const Settings = () => {
             alignItems: "center",
             justifyContent: "center",
             gap: 14,
-            fontFamily: "'Inter', system-ui, sans-serif",
+            fontFamily: "var(--ui-font-sans)",
           }}
         >
           <div
@@ -2130,7 +2137,7 @@ const Settings = () => {
           background: tk.bg0,
           color: tk.text1,
           paddingTop: 64,
-          fontFamily: "'Inter', 'SF Pro Text', system-ui, sans-serif",
+          fontFamily: "var(--ui-font-sans)",
         }}
       >
         <div

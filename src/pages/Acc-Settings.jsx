@@ -216,7 +216,7 @@ const globalCSS = `
   @keyframes toastIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
   .as-page{
-    font-family:'Inter',-apple-system,sans-serif;
+    font-family:var(--ui-font-sans);
     background:${C.bg};
     color:${C.text};
     min-height:100vh;

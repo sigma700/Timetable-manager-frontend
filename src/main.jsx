@@ -17,7 +17,6 @@ const queryClient = new QueryClient({
       retry: 2,
       refetchOnWindowFocus: true,
       refetchOnReconnect: true,
-      refetchInterval: 30000, // 30 seconds
     },
   },
 });
@@ -25,12 +24,7 @@ const queryClient = new QueryClient({
 // ─────────────────────────────────────────────
 // THEME INIT — apply before first paint
 // ─────────────────────────────────────────────
-const {isDark} = useUiStore.getState();
-if (isDark) {
-  document.documentElement.classList.add("dark");
-} else {
-  document.documentElement.classList.remove("dark");
-}
+useUiStore.getState().initTheme();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

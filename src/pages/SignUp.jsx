@@ -7,7 +7,7 @@ import {GoogleButton} from "./components/GoogleButton";
 const Icons = {
   Logo: () => (
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <rect width="32" height="32" rx="9" fill="#7c3aed" />
+      <rect width="32" height="32" rx="9" fill="#2B2B2B" />
       <path
         d="M8 16L12.5 11L17 16L22 9"
         stroke="white"
@@ -15,7 +15,7 @@ const Icons = {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="22" cy="23" r="3.5" fill="#a78bfa" />
+      <circle cx="22" cy="23" r="3.5" fill="#6E6E6E" />
     </svg>
   ),
   Eye: () => (
@@ -728,29 +728,28 @@ const SignUp = () => {
 
 // ─── CSS ──────────────────────────────────────────────────────────────────
 const css = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #F8F8F8;
-    --surface: #FFFFFF;
-    --surface-2: #F5F5F5;
-    --surface-3: #F1F1F1;
-    --border: rgba(43,43,43,0.06);
-    --border-focus: rgba(124,58,237,0.45);
-    --text: #2B2B2B;
-    --text-2: #6E6E6E;
-    --text-3: #858585;
-    --text-4: #9A9A9A;
-    --accent: #7c3aed;
-    --accent-light: #a78bfa;
-    --accent-glow: rgba(124,58,237,0.14);
-    --green: #10b981;
-    --red: #f43f5e;
-    --radius: 10px;
-    --radius-lg: 14px;
-    --font: 'Inter', -apple-system, sans-serif;
-    --t: 180ms cubic-bezier(0.4,0,0.2,1);
+    --bg: var(--ui-bg);
+    --surface: var(--ui-surface);
+    --surface-2: var(--ui-surface-muted);
+    --surface-3: var(--ui-surface-soft);
+    --border: var(--ui-border-subtle);
+    --border-focus: var(--ui-accent-border);
+    --text: var(--ui-text);
+    --text-2: var(--ui-text-muted);
+    --text-3: var(--ui-text-subtle);
+    --text-4: var(--ui-text-faint);
+    --accent: var(--ui-secondary-hover);
+    --accent-light: var(--ui-secondary);
+    --accent-glow: var(--ui-secondary-soft);
+    --green: var(--ui-success);
+    --red: var(--ui-danger);
+    --radius: var(--ui-radius-md);
+    --radius-lg: var(--ui-radius-lg);
+    --font: var(--ui-font-sans);
+    --t: var(--ui-transition);
   }
 
   .su-root {
@@ -758,7 +757,7 @@ const css = `
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    padding-top: 68px;
+    padding-top: 74px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     -webkit-font-smoothing: antialiased;
@@ -768,7 +767,7 @@ const css = `
     .su-root {
       grid-template-columns: 1fr;
       min-height: auto;
-      padding-top: 68px;
+      padding-top: 74px;
     }
   }
 
@@ -789,7 +788,7 @@ const css = `
     left: -80px;
     width: 500px;
     height: 500px;
-    background: radial-gradient(ellipse, rgba(124,58,237,0.08) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(43,43,43,0.08) 0%, transparent 70%);
     pointer-events: none;
   }
   .su-left::after {
@@ -997,7 +996,7 @@ const css = `
     transition: color var(--t);
   }
   .su-link:hover {
-    color: #6d28d9;
+    color: #454545;
   }
 
   .su-error {
@@ -1067,7 +1066,7 @@ const css = `
   .su-field__input:focus {
     border-color: var(--border-focus);
     background: var(--surface);
-    box-shadow: 0 0 0 3px rgba(124,58,237,0.09);
+    box-shadow: 0 0 0 3px rgba(43,43,43,0.09);
   }
   .su-field--error .su-field__input {
     border-color: var(--red);
@@ -1209,12 +1208,12 @@ const css = `
     font-family: var(--font);
     cursor: pointer;
     transition: all var(--t);
-    box-shadow: 0 4px 16px rgba(124,58,237,0.3);
+    box-shadow: 0 4px 16px rgba(43,43,43,0.3);
     margin-top: 4px;
   }
   .su-btn-submit:hover:not(:disabled) {
-    background: #6d28d9;
-    box-shadow: 0 6px 24px rgba(124,58,237,0.4);
+    background: #454545;
+    box-shadow: 0 6px 24px rgba(43,43,43,0.4);
     transform: translateY(-1px);
   }
   .su-btn-submit:disabled {

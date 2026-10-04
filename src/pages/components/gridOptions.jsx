@@ -166,35 +166,35 @@ const HoverDevCards = () => {
         <Card
           title="Create timetable"
           subtitle="Generate a new schedule"
-          path="create-table"
+          path="/app/create"
           Icon={FiPlus}
-          accent="#6366f1"
-          accentBg="rgba(99,102,241,0.12)"
+          accent="#2B2B2B"
+          accentBg="rgba(43,43,43,0.06)"
         />
         <Card
           title="User manual"
           subtitle="Guides and documentation"
-          path="manual"
+          path="/app/manual"
           Icon={FiBookOpen}
-          accent="#8b5cf6"
-          accentBg="rgba(139,92,246,0.12)"
+          accent="#2B2B2B"
+          accentBg="rgba(43,43,43,0.06)"
         />
         <Card
           title="Schedule demo"
           subtitle="Live guidance session"
-          path="demo"
+          path="/demo"
           Icon={RiLiveFill}
-          accent="#f59e0b"
-          accentBg="rgba(245,158,11,0.12)"
+          accent="#2B2B2B"
+          accentBg="rgba(43,43,43,0.06)"
           badge="Live"
         />
         <Card
           title="Invite others"
           subtitle="Share with your team"
-          path="invite"
+          path="/app/invite"
           Icon={CiShare2}
-          accent="#10b981"
-          accentBg="rgba(16,185,129,0.12)"
+          accent="#2B2B2B"
+          accentBg="rgba(43,43,43,0.06)"
         />
       </div>
     </div>

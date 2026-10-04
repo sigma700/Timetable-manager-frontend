@@ -9,14 +9,14 @@ const tk = {
   bg4: "#1F2130",
   border: "rgba(255,255,255,0.06)",
   borderHov: "rgba(255,255,255,0.12)",
-  borderAccent: "rgba(79,110,247,0.36)",
+  borderAccent: "rgba(43,43,43,0.36)",
   text1: "#EDEEF5",
   text2: "#8B90AA",
   text3: "#52566A",
-  accent: "#4F6EF7",
-  accentHov: "#3D5CE8",
-  accentSubtle: "rgba(79,110,247,0.09)",
-  accentBorder: "rgba(79,110,247,0.28)",
+  accent: "#2B2B2B",
+  accentHov: "#454545",
+  accentSubtle: "rgba(43,43,43,0.09)",
+  accentBorder: "rgba(43,43,43,0.28)",
   violet: "#8B5CF6",
   violetSubtle: "rgba(139,92,246,0.09)",
   violetBorder: "rgba(139,92,246,0.26)",
@@ -37,8 +37,8 @@ const tk = {
 // ─── Subject colour palette ───────────────────────────────────────────────────
 const SUBJECT_PALETTE = [
   {
-    bg: "rgba(79,110,247,0.12)",
-    border: "rgba(79,110,247,0.28)",
+    bg: "rgba(43,43,43,0.12)",
+    border: "rgba(43,43,43,0.28)",
     text: "#818cf8",
   },
   {

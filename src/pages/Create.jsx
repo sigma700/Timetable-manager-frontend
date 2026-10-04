@@ -39,7 +39,7 @@ const COPY = {
   intro: {
     title: "Let's set up your timetable.",
     lead: "A few short questions about your school. Protiba uses your answers to generate the schedule.",
-    why: "Your progress is saved on this device as you go, so you can leave and come back.",
+    why: "This information is saved and is used to curate your timetable later.",
     items: [
       {label: "Institution", desc: "Your school's name"},
       {label: "Subjects", desc: "What your school teaches"},
@@ -51,14 +51,14 @@ const COPY = {
   institution: {
     title: "What's your institution called?",
     lead: "Tell us the name of the school you're creating this timetable for.",
-    why: "Protiba uses your institution name to identify the timetable you're creating.",
+    why: "This information is saved and is used to curate your timetable later.",
     placeholder: "e.g. Nyeri High School",
     button: "Save & continue",
   },
   subjects: {
     title: "What subjects are taught at your institution?",
     lead: "Type a subject and press Enter. Add as many as you need.",
-    why: "Protiba needs your subjects to know which teaching resources the generated schedule has to cover.",
+    why: "This information is saved and is used to curate your timetable later.",
     placeholder: "e.g. Mathematics",
     hint: "You can also paste a comma-separated list.",
     button: "Continue to classes",
@@ -66,27 +66,27 @@ const COPY = {
   classType: {
     title: "What do you call your classes?",
     lead: "Pick the word your school uses for a year group.",
-    why: "Your class structure tells Protiba which student groups need to be scheduled.",
+    why: "This information is saved and is used to curate your timetable later.",
     button: "Continue",
   },
   minLevel: {
     title: "What's the lowest level?",
     lead: (type) => `The first level you teach. For example, ${type || "Form"} 1.`,
-    why: "Protiba creates one class for every level between your lowest and highest.",
+    why: "This information is saved and is used to curate your timetable later.",
     placeholder: "1",
     button: "Continue",
   },
   maxLevel: {
     title: "And the highest level?",
     lead: "The last level you teach.",
-    why: "Together with the lowest level, this sets how many classes Protiba schedules.",
+    why: "This information is saved and is used to curate your timetable later.",
     placeholder: "6",
     button: "Continue",
   },
   sections: {
     title: "Do your classes have sections?",
     lead: "Sections or streams, like A, B and C. Leave this blank if each level is a single class.",
-    why: "Each section becomes its own class, so Protiba can schedule them separately.",
+    why: "This information is saved and is used to curate your timetable later.",
     placeholder: "e.g. A",
     hint: "Letters are converted to uppercase.",
     buttonWith: "Continue to teachers",
@@ -96,36 +96,36 @@ const COPY = {
     titleFirst: "Let's add your first teacher.",
     titleNext: (n) => `Now teacher ${n}.`,
     lead: "What's their name?",
-    why: "Teacher assignments help Protiba avoid conflicting schedules by keeping each teacher to the subjects and classes you assign.",
+    why: "This information is saved and is used to curate your timetable later.",
     placeholder: "e.g. Mr. Kamau",
     button: "Continue",
   },
   teacherSubjects: {
     title: (name) => `What does ${name} teach?`,
     lead: "Choose every subject they teach.",
-    why: "Protiba only places a teacher in lessons for the subjects you select here.",
+    why: "This information is saved and is used to curate your timetable later.",
     empty: "There are no subjects yet. Go back and add some first.",
     button: "Continue",
   },
   teacherClasses: {
     title: (name) => `Which classes does ${name} teach?`,
     lead: "Choose every class they're responsible for.",
-    why: "Protiba only schedules a teacher for the classes you select here.",
+    why: "This information is saved and is used to curate your timetable later.",
     empty: "There are no classes yet. Go back and set up your classes first.",
     button: "Add teacher",
   },
   another: {
     title: "Add another teacher?",
     lead: (n) => `You've added ${n} ${n === 1 ? "teacher" : "teachers"} so far.`,
-    why: "Add everyone who teaches at your school. You can edit or remove anyone from this list.",
+    why: "This information is saved and is used to curate your timetable later.",
     addButton: "Add another teacher",
     button: "Review configuration",
   },
   review: {
     title: "Review your timetable setup",
-    lead: "Check everything below. You can edit any section before generating.",
-    why: "Generating sends your full setup to Protiba in one go and creates your timetable.",
-    button: "Generate timetable",
+    lead: "Check everything below. You can edit any section before saving.",
+    why: "This information is saved and is used to curate your timetable later.",
+    button: "Save configuration",
   },
   saveAndReview: "Save & review",
   resumed: "Welcome back. We've restored your progress from this device.",
@@ -413,9 +413,6 @@ function loadDraft() {
   }
 }
 
-/* ═════════════════════════════════════════════════════════════════════════
-   Reducer: typing only. Step transitions replace the whole state explicitly.
-   ═════════════════════════════════════════════════════════════════════════ */
 function reducer(state, action) {
   switch (action.type) {
     case "replace":
@@ -610,19 +607,27 @@ const Create = () => {
     try {
       // ONE request. The server validates everything and saves the school,
       // subjects, classes and teachers together — all or nothing.
-      await completeOnboarding({
-        school: {name: form.schoolName},
-        subjects: list(form.subjectName),
-        classes: {
-          type: form.classTypes,
-          minLevel: form.minLevel,
-          maxLevel: form.maxLevel,
-          labels: list(form.classLabels),
+      await completeOnboarding(
+        {
+          school: {name: form.schoolName},
+          subjects: list(form.subjectName),
+          classes: {
+            type: form.classTypes,
+            minLevel: form.minLevel,
+            maxLevel: form.maxLevel,
+            labels: list(form.classLabels),
+          },
+          teachers,
         },
-        teachers,
-      });
+        {
+          beforeSessionUpdate: () =>
+            new Promise((resolve) => {
+              if (mounted.current) setGen("done");
+              window.setTimeout(resolve, 1800);
+            }),
+        },
+      );
       clearDraft();
-      if (mounted.current) setGen("done");
     } catch (err) {
       console.error("School setup failed:", err);
       if (mounted.current) {

@@ -6,7 +6,7 @@ import {useNavigate, Link} from "react-router-dom";
 const Icons = {
   Logo: () => (
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <rect width="32" height="32" rx="9" fill="#7c3aed" />
+      <rect width="32" height="32" rx="9" fill="#2B2B2B" />
       <path
         d="M8 16L12.5 11L17 16L22 9"
         stroke="white"
@@ -14,7 +14,7 @@ const Icons = {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="22" cy="23" r="3.5" fill="#a78bfa" />
+      <circle cx="22" cy="23" r="3.5" fill="#6E6E6E" />
     </svg>
   ),
   Mail: () => (
@@ -472,29 +472,28 @@ const Verif = () => {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const css = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0d0d10;
-    --surface: #131316;
-    --surface-2: #1a1a1f;
-    --surface-3: #212128;
-    --border: rgba(255,255,255,0.07);
-    --border-focus: rgba(124,58,237,0.45);
-    --text: #f0f0f5;
-    --text-2: #9898a8;
-    --text-3: #55556a;
-    --accent: #7c3aed;
-    --accent-light: #a78bfa;
-    --accent-glow: rgba(124,58,237,0.14);
-    --green: #10b981;
-    --green-glow: rgba(16,185,129,0.12);
-    --red: #f43f5e;
-    --radius: 10px;
-    --radius-lg: 14px;
-    --font: 'Inter', -apple-system, sans-serif;
-    --t: 180ms cubic-bezier(0.4,0,0.2,1);
+    --bg: var(--ui-bg);
+    --surface: var(--ui-surface);
+    --surface-2: var(--ui-surface-muted);
+    --surface-3: var(--ui-surface-soft);
+    --border: var(--ui-border-subtle);
+    --border-focus: var(--ui-accent-border);
+    --text: var(--ui-text);
+    --text-2: var(--ui-text-muted);
+    --text-3: var(--ui-text-subtle);
+    --accent: var(--ui-secondary-hover);
+    --accent-light: var(--ui-secondary);
+    --accent-glow: var(--ui-secondary-soft);
+    --green: var(--ui-success);
+    --green-glow: rgba(22,163,74,0.12);
+    --red: var(--ui-danger);
+    --radius: var(--ui-radius-md);
+    --radius-lg: var(--ui-radius-lg);
+    --font: var(--ui-font-sans);
+    --t: var(--ui-transition);
   }
 
   .vf-root {
@@ -525,7 +524,7 @@ const css = `
     position: absolute;
     top: -120px; left: -80px;
     width: 500px; height: 500px;
-    background: radial-gradient(ellipse, rgba(124,58,237,0.12) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(43,43,43,0.12) 0%, transparent 70%);
     pointer-events: none;
   }
   .vf-left::after {
@@ -568,7 +567,7 @@ const css = `
     letter-spacing: 0.1em;
     color: var(--accent-light);
     background: var(--accent-glow);
-    border: 1px solid rgba(124,58,237,0.2);
+    border: 1px solid rgba(43,43,43,0.2);
     padding: 5px 12px;
     border-radius: 20px;
     margin-bottom: 16px;
@@ -592,7 +591,7 @@ const css = `
     margin-bottom: 14px;
   }
   .vf-left__title-accent {
-    background: linear-gradient(135deg, var(--accent-light) 0%, #c4b5fd 100%);
+    background: linear-gradient(135deg, var(--accent-light) 0%, #858585 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -618,7 +617,7 @@ const css = `
     width: 32px; height: 32px;
     border-radius: 8px;
     background: var(--accent-glow);
-    border: 1px solid rgba(124,58,237,0.2);
+    border: 1px solid rgba(43,43,43,0.2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -685,7 +684,7 @@ const css = `
     background: var(--accent-glow);
     border-color: var(--accent-light);
     color: var(--accent-light);
-    box-shadow: 0 0 10px rgba(124,58,237,0.25);
+    box-shadow: 0 0 10px rgba(43,43,43,0.25);
   }
   .vf-step__label {
     font-size: 13px;
@@ -739,7 +738,7 @@ const css = `
     position: absolute;
     inset: -6px;
     border-radius: 22px;
-    border: 1px solid rgba(124,58,237,0.15);
+    border: 1px solid rgba(43,43,43,0.15);
     animation: ringPulse 2.5s ease-in-out infinite;
   }
   @keyframes ringPulse {
@@ -839,11 +838,11 @@ const css = `
   .vf-otp__cell:focus {
     border-color: var(--border-focus);
     background: var(--surface-3);
-    box-shadow: 0 0 0 3px rgba(124,58,237,0.09);
+    box-shadow: 0 0 0 3px rgba(43,43,43,0.09);
     transform: translateY(-2px);
   }
   .vf-otp__cell--filled {
-    border-color: rgba(124,58,237,0.3);
+    border-color: rgba(43,43,43,0.3);
     background: var(--surface-3);
   }
   .vf-otp__cell--error {
@@ -885,11 +884,11 @@ const css = `
     font-family: var(--font);
     cursor: pointer;
     transition: all var(--t);
-    box-shadow: 0 4px 16px rgba(124,58,237,0.3);
+    box-shadow: 0 4px 16px rgba(43,43,43,0.3);
   }
   .vf-btn-submit:hover:not(:disabled) {
-    background: #6d28d9;
-    box-shadow: 0 6px 24px rgba(124,58,237,0.4);
+    background: #454545;
+    box-shadow: 0 6px 24px rgba(43,43,43,0.4);
     transform: translateY(-1px);
   }
   .vf-btn-submit:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; transform: none; }
@@ -927,11 +926,11 @@ const css = `
   .vf-resend__btn--active {
     cursor: pointer;
     color: var(--accent-light);
-    border-color: rgba(124,58,237,0.2);
+    border-color: rgba(43,43,43,0.2);
     background: var(--accent-glow);
   }
   .vf-resend__btn--active:hover {
-    background: rgba(124,58,237,0.2);
+    background: rgba(43,43,43,0.2);
     transform: translateY(-1px);
   }
   .vf-resend__count { font-size: 11px; color: var(--text-3); }

@@ -40,14 +40,14 @@ const tk = {
   bg4: "#DCDCDC",
   border: "rgba(0,0,0,0.06)",
   borderHov: "rgba(0,0,0,0.12)",
-  borderAccent: "rgba(79,110,247,0.28)",
+  borderAccent: "rgba(43,43,43,0.28)",
   text1: "#2B2B2B",
   text2: "#898989",
   text3: "#A0A0A0",
-  accent: "#4F6EF7",
-  accentHov: "#3D5CE8",
-  accentSubtle: "rgba(79,110,247,0.08)",
-  accentBorder: "rgba(79,110,247,0.2)",
+  accent: "#2B2B2B",
+  accentHov: "#454545",
+  accentSubtle: "rgba(43,43,43,0.08)",
+  accentBorder: "rgba(43,43,43,0.2)",
   violet: "#8B5CF6",
   violetSubtle: "rgba(139,92,246,0.08)",
   violetBorder: "rgba(139,92,246,0.2)",
@@ -68,8 +68,8 @@ const tk = {
 // ─── Subject colour palette ────────────────────────────────────────────────────
 const SUBJECT_PALETTE = [
   {
-    bg: "rgba(79,110,247,0.12)",
-    border: "rgba(79,110,247,0.28)",
+    bg: "rgba(43,43,43,0.12)",
+    border: "rgba(43,43,43,0.28)",
     text: "#818cf8",
   },
   {
@@ -215,7 +215,7 @@ function LoadingScreen({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontFamily: "'Inter',system-ui,sans-serif",
+          fontFamily: "var(--ui-font-sans)",
         }}
       >
         <div
@@ -373,7 +373,7 @@ function StateScreen({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontFamily: "'Inter',system-ui,sans-serif",
+          fontFamily: "var(--ui-font-sans)",
         }}
       >
         <div style={{textAlign: "center", maxWidth: 360, padding: "0 24px"}}>
@@ -1149,7 +1149,7 @@ function SlotEditModal({
                 background: success
                   ? tk.success
                   : saving
-                    ? "rgba(79,110,247,0.7)"
+                    ? "rgba(43,43,43,0.7)"
                     : tk.accent,
                 border: "none",
                 borderRadius: 9,
@@ -1162,7 +1162,7 @@ function SlotEditModal({
                 boxShadow:
                   saving || success
                     ? "none"
-                    : `0 2px 10px rgba(79,110,247,0.3)`,
+                    : `0 2px 10px rgba(43,43,43,0.3)`,
               }}
               onMouseEnter={(e) => {
                 if (!saving && !success)
@@ -1333,7 +1333,7 @@ function DesktopTimetable({
                     const subColor = period?.subject
                       ? getSubjectColor(period.subject.name)
                       : null;
-                    let bg = isToday ? "rgba(79,110,247,0.03)" : tk.bg1;
+                    let bg = isToday ? "rgba(43,43,43,0.03)" : tk.bg1;
                     let borderL = isToday
                       ? `2px solid ${tk.accentBorder}`
                       : `1px solid ${tk.border}`;
@@ -1593,7 +1593,7 @@ function MobileTimetable({
                 onMouseEnter={(e) => {
                   if (!isBreak) {
                     e.currentTarget.style.borderColor = tk.accentBorder;
-                    e.currentTarget.style.boxShadow = `0 2px 12px rgba(79,110,247,0.1)`;
+                    e.currentTarget.style.boxShadow = `0 2px 12px rgba(43,43,43,0.1)`;
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -1959,12 +1959,12 @@ function generateTimetablePDF(timetable, institutionName) {
               ? `<div style="color:#ef4444;font-size:10px;margin-top:4px;">⚠ No teacher assigned</div>`
               : "";
           const doubleBadge = isDouble
-            ? `<span style="display:inline-block;background:#ede9fe;color:#7c3aed;font-size:9px;font-weight:700;border-radius:3px;padding:1px 5px;margin-bottom:3px;text-transform:uppercase;">Double</span><br/>`
+            ? `<span style="display:inline-block;background:#F1F1F1;color:#2B2B2B;font-size:9px;font-weight:700;border-radius:3px;padding:1px 5px;margin-bottom:3px;text-transform:uppercase;">Double</span><br/>`
             : "";
           const subject = p.subject
             ? `<strong style="color:#1f2937;">${p.subject.name}</strong><br/><span style="color:#6b7280;font-size:11px;">${p.teacher?.name || "<em style='color:#ef4444'>Unassigned</em>"}</span>${noTeacher}${warnTag}`
             : `<span style="color:#9ca3af;font-size:11px;">Free period</span>`;
-          return `<td style="${cellStyle} ${isDouble ? "background:#faf5ff;" : ""}">${doubleBadge}${subject}</td>`;
+          return `<td style="${cellStyle} ${isDouble ? "background:#F8F8F8;" : ""}">${doubleBadge}${subject}</td>`;
         })
         .join("");
 
@@ -1984,7 +1984,7 @@ function generateTimetablePDF(timetable, institutionName) {
   <style>
     @page { size: A4 landscape; margin: 18mm 14mm; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', 'Segoe UI', Arial, sans-serif; color: #111827; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { font-family: var(--ui-font-sans); color: #111827; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #4f6ef7; }
     .header-left h1 { font-size: 20px; font-weight: 800; color: #1f2937; letter-spacing: -0.02em; }
     .header-left p { font-size: 12px; color: #6b7280; margin-top: 3px; }
@@ -2013,7 +2013,7 @@ function generateTimetablePDF(timetable, institutionName) {
     <tbody>${rows}</tbody>
   </table>
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#ede9fe;border:1px solid #ddd6fe;"></div> Double period</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#F1F1F1;border:1px solid #ddd6fe;"></div> Double period</div>
     <div class="legend-item"><div class="legend-dot" style="background:#fffbeb;border:1px solid #fde68a;"></div> Break</div>
     <div class="legend-item"><div class="legend-dot" style="background:#fef2f2;border:1px solid #fecaca;"></div> Unassigned / Warning</div>
   </div>
@@ -2084,18 +2084,18 @@ function DownloadButton({timetables, institutionName}) {
           fontWeight: 600,
           cursor: "pointer",
           fontFamily: "inherit",
-          boxShadow: `0 2px 10px rgba(79,110,247,0.3)`,
+          boxShadow: `0 2px 10px rgba(43,43,43,0.3)`,
           transition: "all 0.22s cubic-bezier(0.22,1,0.36,1)",
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = tk.accentHov;
           e.currentTarget.style.transform = "translateY(-1px)";
-          e.currentTarget.style.boxShadow = `0 6px 18px rgba(79,110,247,0.35)`;
+          e.currentTarget.style.boxShadow = `0 6px 18px rgba(43,43,43,0.35)`;
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.background = tk.accent;
           e.currentTarget.style.transform = "translateY(0)";
-          e.currentTarget.style.boxShadow = `0 2px 10px rgba(79,110,247,0.3)`;
+          e.currentTarget.style.boxShadow = `0 2px 10px rgba(43,43,43,0.3)`;
         }}
       >
         <Download size={14} />
@@ -2215,7 +2215,7 @@ function DownloadButton({timetables, institutionName}) {
                 transition: "all 0.15s",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "rgba(79,110,247,0.14)")
+                (e.currentTarget.style.background = "rgba(43,43,43,0.14)")
               }
               onMouseLeave={(e) =>
                 (e.currentTarget.style.background = tk.accentSubtle)
@@ -2647,7 +2647,7 @@ const Timetables = () => {
           background: tk.bg0,
           color: tk.text1,
           paddingTop: 64,
-          fontFamily: "'Inter','SF Pro Text',system-ui,sans-serif",
+          fontFamily: "var(--ui-font-sans)",
         }}
       >
         {/* Hero */}

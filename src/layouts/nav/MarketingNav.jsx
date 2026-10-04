@@ -1,20 +1,25 @@
-import React, { useEffect, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import React, {useCallback, useEffect, useRef, useState} from "react";
+import {createPortal} from "react-dom";
+import {Link, NavLink, useLocation} from "react-router-dom";
+import {BookOpen, House, Mail, PanelLeft, Sparkles, Workflow, X} from "lucide-react";
 import protibaLogo from "/new-protiba-logo.png";
 import { useAuthStore } from "../../store/authStore";
 import { deriveStage, homeForStage, STAGE } from "../../routes/stage";
-import { NAV_CSS } from "./navStyles";
+import {APP_NAV_CSS, NAV_CSS} from "./navStyles";
 
 // Only pages that really exist. "Pricing" is deliberately absent until real
 // plans exist — a nav item that leads nowhere is worse than no item.
 const LINKS = [
-  { to: "/", label: "Home", end: true },
-  { to: "/#how-it-works", label: "How It Works", hash: true },
-  { to: "/#features", label: "Features", hash: true },
-  { to: "/our-story", label: "Our Story" },
-  { to: "/resources", label: "Resources" },
-  { to: "/contact", label: "Contact" },
+  {to: "/", label: "Home", end: true, icon: House},
+  {to: "/#how-it-works", label: "How It Works", hash: true, icon: Workflow},
+  {to: "/#features", label: "Features", hash: true, icon: Sparkles},
+  {to: "/our-story", label: "Our Story", icon: BookOpen},
+  {to: "/resources", label: "Resources", icon: BookOpen},
+  {to: "/contact", label: "Contact", icon: Mail},
 ];
+const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const MOBILE_QUERY = "(max-width: 900px)";
+const ICON_PROPS = {size: 17, strokeWidth: 1.75, "aria-hidden": "true"};
 
 /**
  * Public site navigation. The call-to-action reflects the visitor's real
@@ -25,27 +30,76 @@ const LINKS = [
  * (APP_NAV_CSS) are intentionally not loaded here.
  */
 export default function MarketingNav({ minimal = false }) {
-  const [open, setOpen] = useState(false);
+  const [drawer, setDrawer] = useState(false);
   const location = useLocation();
+  const triggerRef = useRef(null);
+  const closeRef = useRef(null);
+  const sheetRef = useRef(null);
+  const wasDrawerOpen = useRef(false);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
   const stage = deriveStage({ isAuthenticated, user });
   const signedIn = stage !== STAGE.SIGNED_OUT;
 
-  // Close the panel whenever the route or hash changes.
+  const closeDrawer = useCallback(() => setDrawer(false), []);
+
+  // Close the drawer whenever the route or hash changes.
   useEffect(() => {
-    setOpen(false);
+    setDrawer(false);
   }, [location.pathname, location.hash]);
 
-  // Escape closes the panel.
+  // Match the authenticated navigation drawer's scroll and keyboard behavior.
   useEffect(() => {
-    if (!open) return;
+    if (!drawer) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const onKey = (e) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closeDrawer();
+      if (e.key !== "Tab" || !sheetRef.current) return;
+      const nodes = [...sheetRef.current.querySelectorAll(FOCUSABLE)].filter(
+        (node) =>
+          node.getClientRects().length > 0 &&
+          getComputedStyle(node).visibility !== "hidden",
+      );
+      if (nodes.length === 0) return;
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
+    const frame = requestAnimationFrame(() => closeRef.current?.focus());
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKey);
+      cancelAnimationFrame(frame);
+    };
+  }, [drawer, closeDrawer]);
+
+  useEffect(() => {
+    if (drawer) {
+      wasDrawerOpen.current = true;
+      return;
+    }
+    if (wasDrawerOpen.current) {
+      wasDrawerOpen.current = false;
+      triggerRef.current?.focus({preventScroll: true});
+    }
+  }, [drawer]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(MOBILE_QUERY);
+    const onChange = (event) => {
+      if (!event.matches) closeDrawer();
+    };
+    mediaQuery.addEventListener("change", onChange);
+    return () => mediaQuery.removeEventListener("change", onChange);
+  }, [closeDrawer]);
 
   const cta = signedIn
     ? {
@@ -54,14 +108,119 @@ export default function MarketingNav({ minimal = false }) {
       }
     : { to: "/signup", label: "Set Up Your School" };
 
-  const close = () => setOpen(false);
-
   const navLinkClass = ({ isActive }) =>
     `pn__link${isActive ? " pn__link--active" : ""}`;
 
+  const drawerEl = (
+    <div className="pn-d" data-open={drawer ? "true" : "false"}>
+      <div
+        className="pn-d__backdrop"
+        onClick={closeDrawer}
+        aria-hidden="true"
+      />
+      <aside
+        id="pn-drawer"
+        ref={sheetRef}
+        className="pn-d__sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation"
+      >
+        <div className="pn-d__head">
+          <h2 className="pn-d__title">
+            <span className="pn-d__mark" aria-hidden="true">
+              <PanelLeft size={15} strokeWidth={1.75} />
+            </span>
+            Menu
+          </h2>
+          <button
+            ref={closeRef}
+            type="button"
+            className="pn-d__close"
+            aria-label="Close navigation"
+            onClick={closeDrawer}
+          >
+            <span className="pn-d__close-ui">
+              <X size={16} strokeWidth={1.9} />
+            </span>
+          </button>
+        </div>
+
+        <div className="pn-d__body">
+          <Link
+            to={cta.to}
+            className="pn-d__create"
+            onClick={closeDrawer}
+          >
+            {cta.label}
+          </Link>
+          {!minimal && (
+            <nav className="pn-d__nav" aria-label="Protiba">
+              <div className="pn-d__section">
+                <h3 className="pn-d__section-label">Explore Protiba</h3>
+                <ul className="pn-d__list">
+                  {LINKS.map((item) => {
+                    const active =
+                      !item.hash &&
+                      location.pathname === item.to &&
+                      (item.end ? location.pathname === "/" : true);
+                    return (
+                      <li key={item.to}>
+                        {item.hash ? (
+                          <Link
+                            to={item.to}
+                            onClick={closeDrawer}
+                            className="pn-d__row"
+                          >
+                            {React.createElement(item.icon, {
+                              ...ICON_PROPS,
+                              className: "pn-d__icon",
+                            })}
+                            <span className="pn-d__label">{item.label}</span>
+                          </Link>
+                        ) : (
+                          <NavLink
+                            to={item.to}
+                            end={item.end}
+                            onClick={closeDrawer}
+                            aria-current={active ? "page" : undefined}
+                            className={`pn-d__row${active ? " pn-d__row--active" : ""}`}
+                          >
+                            {React.createElement(item.icon, {
+                              ...ICON_PROPS,
+                              className: "pn-d__icon",
+                            })}
+                            <span className="pn-d__label">{item.label}</span>
+                          </NavLink>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </nav>
+          )}
+        </div>
+
+        {!signedIn && (
+          <div className="pn-d__foot pn-d__foot--marketing">
+            <span className="pn-d__signin-prompt">Already have an account?</span>
+            <Link
+              to="/login"
+              className="pn-d__signout"
+              onClick={closeDrawer}
+            >
+              Sign In
+            </Link>
+          </div>
+        )}
+      </aside>
+    </div>
+  );
+
   return (
     <header className="pn">
-      <style>{NAV_CSS}</style>
+      <style>{NAV_CSS}{APP_NAV_CSS}</style>
       <nav className="pn__inner" aria-label="Main">
         <Link to="/" className="pn__logo" aria-label="Protiba home">
           <img src={protibaLogo} alt="Protiba" />
@@ -100,52 +259,22 @@ export default function MarketingNav({ minimal = false }) {
         </div>
 
         <button
+          ref={triggerRef}
           type="button"
-          className="pn__burger"
-          aria-expanded={open}
-          aria-controls="pn-panel"
-          aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((o) => !o)}
+          className="pn__trigger"
+          aria-haspopup="dialog"
+          aria-expanded={drawer}
+          aria-controls="pn-drawer"
+          aria-label={drawer ? "Close menu" : "Open menu"}
+          onClick={() => setDrawer(true)}
         >
-          {open ? "Close" : "Menu"}
+          <PanelLeft size={16} strokeWidth={1.75} aria-hidden="true" />
+          <span className="pn__trigger-label">Menu</span>
         </button>
       </nav>
 
-      {open && (
-        <div id="pn-panel" className="pn__panel">
-          {!minimal &&
-            LINKS.map((l) =>
-              l.hash ? (
-                <Link
-                  key={l.to}
-                  to={l.to}
-                  className="pn__link"
-                  onClick={close}
-                >
-                  {l.label}
-                </Link>
-              ) : (
-                <NavLink
-                  key={l.to}
-                  to={l.to}
-                  end={l.end}
-                  className={navLinkClass}
-                  onClick={close}
-                >
-                  {l.label}
-                </NavLink>
-              ),
-            )}
-          <Link to={cta.to} className="pn__btn pn__btn--primary" onClick={close}>
-            {cta.label}
-          </Link>
-          {!signedIn && (
-            <Link to="/login" className="pn__btn pn__btn--ghost" onClick={close}>
-              Sign In
-            </Link>
-          )}
-        </div>
-      )}
+      {typeof document !== "undefined" &&
+        createPortal(drawerEl, document.body)}
     </header>
   );
 }
