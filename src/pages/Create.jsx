@@ -28,11 +28,9 @@ import {
   TagInput,
   TeacherCard,
   splitList as list,
-} from "./createUi";
+} from "./Createui";
 
-/* ═════════════════════════════════════════════════════════════════════════
-   COPY — every user-facing string lives here so it's easy to replace.
-   ═════════════════════════════════════════════════════════════════════════ */
+
 const COPY = {
   railTitle: "Configure timetable",
   railSubtitle: "New schedule",
