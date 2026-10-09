@@ -701,7 +701,7 @@ const Story = () => {
                   </Reveal>
                   <Reveal delay={0.08} className="feature__visual">
                     <f.Visual />
-                  </Reveal>
+                </Reveal>
                 </div>
               ))}
             </div>
@@ -757,7 +757,7 @@ const Story = () => {
             <h2 className="cta__title">
               Make timetable season easier.
             </h2>
-            <p className="cta__body">
+                <p className="cta__body">
               Add your classes, teachers and rooms, then see them come
               together in a weekly timetable.
             </p>
