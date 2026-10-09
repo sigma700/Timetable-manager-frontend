@@ -133,7 +133,7 @@ const Icons = {
 // ─── OTP Input ────────────────────────────────────────────────────────────────
 const OtpInput = ({value, onChange, hasError, isSuccess}) => {
   const inputsRef = useRef([]);
-  const digits = value.padEnd(6, "").split("").slice(0, 6);
+  const digits = Array.from({length: 6}, (_, idx) => value[idx] || "");
 
   const handleChange = (idx, e) => {
     const val = e.target.value.replace(/\D/g, "").slice(-1);
@@ -188,6 +188,7 @@ const OtpInput = ({value, onChange, hasError, isSuccess}) => {
           onFocus={(e) => e.target.select()}
           className={`vf-otp__cell ${d && d !== " " ? "vf-otp__cell--filled" : ""} ${hasError ? "vf-otp__cell--error" : ""} ${isSuccess ? "vf-otp__cell--success" : ""}`}
           aria-label={`Digit ${i + 1}`}
+          aria-invalid={hasError}
         />
       ))}
     </div>
@@ -816,12 +817,15 @@ const css = `
 
   .vf-otp {
     display: flex;
-    gap: 10px;
+    gap: clamp(6px, 2vw, 10px);
     justify-content: center;
+    width: 100%;
   }
   .vf-otp__cell {
-    width: 52px;
-    height: 60px;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 52px;
+    height: clamp(48px, 14vw, 60px);
     background: var(--surface-2);
     border: 1.5px solid var(--border);
     border-radius: var(--radius);
@@ -863,8 +867,7 @@ const css = `
     80% { transform: translateX(3px); }
   }
   @media (max-width: 400px) {
-    .vf-otp__cell { width: 42px; height: 52px; font-size: 18px; }
-    .vf-otp { gap: 7px; }
+    .vf-otp__cell { font-size: 18px; }
   }
 
   /* Submit */
