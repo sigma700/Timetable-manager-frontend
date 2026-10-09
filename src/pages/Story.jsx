@@ -776,10 +776,7 @@ const Story = () => {
   );
 };
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   Styles — scoped to .story-root so nothing leaks into the rest of the app.
-   Tokens first, then layout, then components.
-   ═══════════════════════════════════════════════════════════════════════════ */
+
 const css = `
   .story-root {
     /* colour */
