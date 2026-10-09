@@ -958,11 +958,6 @@ const Home = () => {
 
   return (
     <>
-        <title>Protiba: Academic Scheduling for Schools</title>
-        <meta
-          name="description"
-          content="Protiba automates school timetable generation for high schools and primary schools. Zero conflicts, instant updates, built for educators. Now in early access."
-        />
       <style>{CSS}</style>
 
       

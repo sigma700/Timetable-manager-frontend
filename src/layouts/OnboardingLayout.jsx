@@ -5,6 +5,7 @@ import {useAuthStore} from "../store/authStore";
 import {NAV_CSS} from "./nav/navStyles";
 import Footer from "../pages/components/footer";
 import LoadingSpinner from "../pages/components/spinner";
+import PageSeo from "../seo/PageSeo";
 
 
 export default function OnboardingLayout() {
@@ -12,6 +13,7 @@ export default function OnboardingLayout() {
   const navigate = useNavigate();
   return (
     <div className="ui-layout">
+      <PageSeo privateRoute />
       <header className="pn">
         <style>{NAV_CSS}</style>
         <div className="pn__inner">

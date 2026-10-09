@@ -1,0 +1,22 @@
+# Protiba
+
+> Protiba helps schools create and manage weekly timetables for classes, teachers, subjects, and rooms.
+
+## Product
+
+Protiba is web-based school timetable software. School teams can organize scheduling information, generate a weekly timetable, review teacher and room conflicts, and manage schedules from one place. The public website describes support for primary and secondary schools.
+
+## Public pages
+
+- [Home](https://protiba.app/): Product overview and early access information.
+- [Demo](https://protiba.app/demo): Example of how a school timetable is created and reviewed.
+- [Resources](https://protiba.app/resources): Guide to using Protiba and planning school schedules.
+- [Our story](https://protiba.app/our-story): Background on the product and its development.
+- [Contact](https://protiba.app/contact): Contact details and ways to reach the team.
+- [Terms](https://protiba.app/terms): Terms for using the service.
+
+## Product topics
+
+School timetable generation, class scheduling, teacher scheduling, room allocation, timetable conflict detection, school administration, and academic scheduling.
+
+For current product capabilities and availability, use the public pages above as the source of truth.

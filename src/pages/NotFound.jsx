@@ -1,10 +1,12 @@
 import React from "react";
 import {Link} from "react-router-dom";
 import Footer from "./components/footer";
+import PageSeo from "../seo/PageSeo";
 
 export default function NotFound() {
   return (
     <>
+      <PageSeo privateRoute />
       <div
         style={{
           minHeight: "70vh",

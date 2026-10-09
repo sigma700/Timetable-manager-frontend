@@ -3,6 +3,7 @@ import {Outlet, useLocation} from "react-router-dom";
 import MarketingNav from "./nav/MarketingNav";
 import Footer from "../pages/components/footer";
 import LoadingSpinner from "../pages/components/spinner";
+import PageSeo from "../seo/PageSeo";
 
 // "/#features" style links: react-router changes the URL but does not scroll.
 function ScrollToHash() {
@@ -19,6 +20,7 @@ function ScrollToHash() {
 export default function MarketingLayout() {
   return (
     <div className="ui-layout">
+      <PageSeo />
       <ScrollToHash />
       <MarketingNav />
       <main className="ui-layout__main">

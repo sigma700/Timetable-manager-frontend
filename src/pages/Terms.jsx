@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from "react";
 import {Link} from "react-router-dom";
-import {Helmet} from "react-helmet";
 
 // ─── Brand tokens ─────────────────────────────────────────────────────────────
 const C = {
@@ -457,13 +456,6 @@ const Terms = () => {
   return (
     <>
       <style>{css}</style>
-      <Helmet>
-        <title>Terms & Conditions — Protiba</title>
-        <meta
-          name="description"
-          content="Protiba terms and conditions governing use of the academic scheduling platform."
-        />
-      </Helmet>
 
       <div style={{background: C.bg, minHeight: "100vh"}}>
         
