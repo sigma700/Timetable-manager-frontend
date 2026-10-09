@@ -1275,7 +1275,8 @@ const CSS = `
   .btn-ghost:hover{color:${C.text};background:rgba(43,43,43,0.05);transform:translateY(-2px);}
 
   .hero{position:relative;z-index:1;padding:160px 24px 80px;text-align:center;}
-  .hero__inner{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}
+  .hero::before{content:"";position:absolute;top:0;left:0;right:0;height:900px;z-index:0;pointer-events:none;background-image:linear-gradient(to bottom,rgba(248,248,248,0.48),rgba(248,248,248,0.78)),url("https://res.cloudinary.com/dnadawobi/image/upload/v1791548948/Sunlit_Classroom_Timetable_Workspace_bhiknl.png");background-size:cover;background-position:center 42%;opacity:0.68;mask-image:linear-gradient(to bottom,#000 0%,#000 62%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 62%,transparent 100%);}
+  .hero__inner{position:relative;z-index:1;max-width:1100px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}
 
   .hero__badge{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:${C.accentL};background:${C.accentG};border:1px solid ${C.border3};padding:6px 15px 6px 11px;border-radius:24px;margin-bottom:30px;text-decoration:none;transition:background 0.22s,border-color 0.22s,transform 0.22s;backdrop-filter:blur(10px);}
   .hero__badge:hover{background:${C.accentGS};border-color:${C.accentB};transform:translateY(-1px);}
@@ -1482,6 +1483,7 @@ const CSS = `
 
   @media(max-width:600px){
     .hero{padding:120px 16px 60px;}
+    .hero::before{height:680px;background-position:55% top;}
     .float-card--left,.float-card--right{display:none;}
     .cta{padding:80px 16px;}
     .section-head{margin-bottom:44px;}

@@ -1,10 +1,34 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Link} from "react-router-dom";
+import {motion, useInView, useReducedMotion} from "framer-motion";
 
-// ─── Icons (unchanged) ───────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════════════════════
+   Motion tokens — one place for every duration, curve and offset on the page.
+   Entrances: ease-out. State changes: ease-in-out. Small interactions are fast,
+   storytelling transitions are slower.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const EASE_OUT = [0.22, 1, 0.36, 1];
+const EASE_IN_OUT = [0.65, 0, 0.35, 1];
+const DURATION = {fast: 0.2, base: 0.5, slow: 0.7};
+const OFFSET = 14;
+
+const heroContainer = {
+  hidden: {},
+  show: {transition: {staggerChildren: 0.09, delayChildren: 0.05}},
+};
+const heroItem = {
+  hidden: {opacity: 0, y: OFFSET},
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {duration: DURATION.base, ease: EASE_OUT},
+  },
+};
+
+/* ─── Icons ─────────────────────────────────────────────────────────────── */
 const Icon = {
   Arrow: () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path
         d="M3 8h10M9 4l4 4-4 4"
         stroke="currentColor"
@@ -14,19 +38,8 @@ const Icon = {
       />
     </svg>
   ),
-  ChevronLeft: () => (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M10 4L6 8l4 4"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
   Check: () => (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
       <path
         d="M2.5 7L5.5 10L11.5 4"
         stroke="currentColor"
@@ -37,7 +50,7 @@ const Icon = {
     </svg>
   ),
   Clock: () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
       <path
         d="M10 6v4l2.5 2"
@@ -48,7 +61,7 @@ const Icon = {
     </svg>
   ),
   Conflict: () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <path
         d="M10 3L17 15H3L10 3Z"
         stroke="currentColor"
@@ -64,393 +77,672 @@ const Icon = {
     </svg>
   ),
   Chart: () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <rect
-        x="3"
-        y="11"
-        width="3"
-        height="6"
-        rx="1"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <rect
-        x="8.5"
-        y="7"
-        width="3"
-        height="10"
-        rx="1"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <rect
-        x="14"
-        y="3"
-        width="3"
-        height="14"
-        rx="1"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-    </svg>
-  ),
-  Logo: () => (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-      <rect width="28" height="28" rx="8" fill="#2B2B2B" />
-      <path
-        d="M7 14L11 10L15 14L19 8"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="19" cy="20" r="3" fill="#6E6E6E" />
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <rect x="3" y="11" width="3" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="8.5" y="7" width="3" height="10" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="14" y="3" width="3" height="14" rx="1" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   ),
 };
 
-// ─── useInView hook ──────────────────────────────────────────────────────────
-const useInView = (threshold = 0.15) => {
-  const ref = useRef(null);
-  const [inView, setInView] = useState(false);
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setInView(true);
-          obs.disconnect();
-        }
-      },
-      {threshold},
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [threshold]);
-  return [ref, inView];
-};
-
-// ─── Reveal wrapper ──────────────────────────────────────────────────────────
-const Reveal = ({children, delay = 0, className = ""}) => {
-  const [ref, inView] = useInView();
+/* ─── Reveal: scroll-triggered entrance, once, reduced-motion safe ──────── */
+const Reveal = ({children, delay = 0, className = "", as = "div"}) => {
+  const reduced = useReducedMotion();
+  const Tag = motion[as];
   return (
-    <div
-      ref={ref}
+    <Tag
       className={className}
-      style={{
-        opacity: inView ? 1 : 0,
-        transform: inView ? "translateY(0)" : "translateY(24px)",
-        transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
-      }}
+      initial={reduced ? false : {opacity: 0, y: OFFSET}}
+      whileInView={{opacity: 1, y: 0}}
+      viewport={{once: true, margin: "0px 0px -80px 0px"}}
+      transition={{duration: DURATION.base, ease: EASE_OUT, delay}}
     >
       {children}
-    </div>
+    </Tag>
   );
 };
 
-// ─── Data (unchanged) ────────────────────────────────────────────────────────
-const currentDate = new Date();
-const currentMonth = currentDate.toLocaleString("default", {month: "long"});
-const currentYear = currentDate.getFullYear();
-
+/* ─── Content ───────────────────────────────────────────────────────────── */
 const timelineData = [
   {
     month: "June",
     year: 2025,
-    title: "The Spark",
+    title: "The first idea",
     description:
-      "After witnessing the struggles of school administrators during timetable creation season, the concept for Protiba was born. Research into the complexities of educational scheduling began.",
+      "We saw school teams spend weeks building timetables by hand. That sparked the idea for Protiba.",
   },
   {
     month: "July",
     year: 2025,
-    title: "Algorithm Development",
+    title: "Building the engine",
     description:
-      "Dedicated to designing the core scheduling algorithm that would become the foundation. Countless hours perfecting the conflict resolution system.",
+      "We began building the scheduling engine and teaching it to spot clashes between classes, teachers and rooms.",
   },
   {
     month: "August",
     year: 2025,
-    title: "Prototyping",
+    title: "The first prototype",
     description:
-      "First interactive prototypes created, focusing on making complex scheduling intuitive and accessible for educators of all technical abilities.",
+      "The first working screens made timetable planning easier to follow, even if you are not a tech expert.",
   },
   {
     month: "September",
     year: 2025,
-    title: "Frontend Build",
+    title: "Making it usable",
     description:
-      "React application built with a focus on performance and user experience , dashboard and timetable visualization components took shape.",
+      "The dashboard and timetable views took shape, with a focus on keeping everyday tasks clear and quick.",
   },
   {
     month: "October",
     year: 2025,
-    title: "Backend Integration",
+    title: "Connecting the pieces",
     description:
-      "API and database architecture developed to handle complex scheduling operations. User authentication and data persistence implemented.",
+      "We connected the app to the services it needs to save school data and build schedules.",
   },
   {
     month: "November",
     year: 2025,
-    title: "Testing & Feedback",
+    title: "Learning from schools",
     description:
-      "Extensive testing with sample data from real schools. Feedback from educators drove crucial improvements to the algorithm.",
+      "Educators tried sample schedules and shared what worked. Their feedback helped us improve the product.",
   },
   {
-    month: currentMonth,
-    year: currentYear,
-    title: "Launch",
+    month: "Now",
+    year: null,
+    title: "Getting ready to launch",
     description:
-      "Final polish, performance optimization, and deployment. Getting ready to share Protiba with institutions around the world.",
+      "We are polishing Protiba and preparing to bring it to more schools.",
   },
 ];
 
 const problems = [
-  "Manual timetable creation consumes weeks of administrator time each semester",
-  "Scheduling conflicts cause downstream disruption for teachers and students",
-  "Last-minute changes cascade into operational chaos with no fast resolution",
-  "Physical and human resources are routinely underutilized",
-];
-
-const features = [
-  {
-    icon: Icon.Clock,
-    title: "Automated Scheduling",
-    description:
-      "Optimal timetables generated in minutes. What used to take weeks now takes seconds.",
-  },
-  {
-    icon: Icon.Conflict,
-    title: "Conflict Resolution",
-    description:
-      "The engine detects and eliminates scheduling conflicts before they reach the timetable.",
-  },
-  {
-    icon: Icon.Chart,
-    title: "Resource Optimization",
-    description:
-      "Classrooms, teachers, and facilities are allocated for maximum institutional efficiency.",
-  },
+  "Building a timetable by hand can take weeks each term.",
+  "One clash can affect teachers and students.",
+  "A last-minute change can disrupt the whole week.",
+  "Rooms and teachers can be left underused.",
 ];
 
 const credits = [
   {
     name: "Robert Kirimi",
-    role: "Emotional Support & Inspiration",
+    role: "Support and encouragement",
     description:
-      "My father, whose unwavering belief and constant encouragement made this journey possible. His support sustained me through the hardest development phases.",
+      "My father believed in this idea from the start. His support helped me keep going through the hard parts.",
     initial: "RK",
   },
   {
     name: "Zeno Rocha",
-    role: "Technical Inspiration",
+    role: "Product inspiration",
     description:
-      "One of the Resend developers whose work and dedication to developer experience shaped many aspects of Protiba's architecture and interface.",
+      "Zeno's work at Resend inspired the care we put into Protiba's design and developer experience.",
     initial: "ZR",
   },
   {
     name: "Early Testers",
-    role: "The Real Heroes",
+    role: "Early feedback",
     description:
-      "To every educator and administrator who believed in Protiba early and provided the feedback that made it genuinely useful.",
+      "Thank you to every educator and administrator who tried Protiba early and helped us make it more useful.",
     initial: "🙏",
   },
 ];
 
-// ─── Main Component ─────────────────────────────────────────────────────────
-const Story = () => {
-  const [scrollY, setScrollY] = useState(0);
+const heroFacts = [
+  ["2025", "Started"],
+  ["1", "Builder"],
+  ["Kenya", "Made in"],
+];
+
+/* ─── Shared timetable data (illustrative) ──────────────────────────────── */
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
+const TIMES = ["08:00", "08:40", "09:20", "10:20"];
+
+const SUBJECTS = {
+  Mathematics: {short: "Maths", tone: "math"},
+  English: {short: "Eng", tone: "lang"},
+  Kiswahili: {short: "Kisw", tone: "lang"},
+  Chemistry: {short: "Chem", tone: "sci"},
+  Biology: {short: "Bio", tone: "sci"},
+  Physics: {short: "Phys", tone: "sci"},
+  History: {short: "Hist", tone: "hum"},
+  Geography: {short: "Geo", tone: "hum"},
+};
+
+// SCHEDULE[day][period]
+const SCHEDULE = [
+  ["Mathematics", "English", "Chemistry", "Kiswahili"],
+  ["Biology", "Mathematics", "History", "English"],
+  ["English", "Physics", "Mathematics", "Geography"],
+  ["Kiswahili", "Chemistry", "English", "Mathematics"],
+  ["Mathematics", "Biology", "Geography", "History"],
+];
+
+/* ─── Scene 2: the scheduling problem ───────────────────────────────────── */
+const TEACHER_WEEK = [
+  [["F1E"], null, ["F2E"], null, ["F1W"]],
+  [null, ["F1W"], ["F1E", "F2W"], ["F2E"], null],
+  [["F2W"], null, null, ["F1E"], ["F2E"]],
+];
+const TEACHER_SLOTS = ["08:00", "08:40", "09:20"];
+
+const ConflictDemo = () => {
+  const reduced = useReducedMotion();
+  const ref = useRef(null);
+  const inView = useInView(ref, {once: true, amount: 0.5});
+  const [flagged, setFlagged] = useState(false);
+
   useEffect(() => {
-    const handler = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handler, {passive: true});
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
+    if (!inView) return undefined;
+    if (reduced) {
+      setFlagged(true);
+      return undefined;
+    }
+    const t = setTimeout(() => setFlagged(true), 900);
+    return () => clearTimeout(t);
+  }, [inView, reduced]);
+
+  return (
+    <figure className="frame frame--compact" ref={ref}>
+      <div className="frame__bar">
+        <span className="frame__title">Mr. Otieno · Mathematics</span>
+        <span className="frame__tag">Illustrative example</span>
+      </div>
+      <div className="frame__body">
+        <div className="mini" aria-hidden="true">
+          <div className="mini__corner" />
+          {DAYS.map((d) => (
+            <div key={d} className="mini__day">
+              {d}
+            </div>
+          ))}
+          {TEACHER_SLOTS.map((time, r) => (
+            <React.Fragment key={time}>
+              <div className="mini__time">{time}</div>
+              {TEACHER_WEEK[r].map((cell, d) => {
+                const clash = cell && cell.length > 1;
+                return (
+                  <div
+                    key={`${r}-${d}`}
+                    className={[
+                      "mini__cell",
+                      cell ? "mini__cell--on" : "",
+                      clash ? "mini__cell--clash" : "",
+                      clash && flagged ? "is-flagged" : "",
+                    ].join(" ")}
+                  >
+                    {cell && cell.map((c) => <span key={c}>{c}</span>)}
+                  </div>
+                );
+              })}
+            </React.Fragment>
+          ))}
+        </div>
+        <figcaption className={`mini__caption ${flagged ? "is-on" : ""}`}>
+          <Icon.Conflict />
+          <span>
+            Mr. Otieno is assigned to two classes at 08:40 on Wednesday.
+          </span>
+        </figcaption>
+      </div>
+    </figure>
+  );
+};
+
+/* ─── Scene 3 + 4: how it works, and the result ─────────────────────────── */
+const STEPS = [
+  {
+    title: "Add classes and subjects",
+    body: "Add your classes, streams and subjects.",
+  },
+  {
+    title: "Assign teachers and rooms",
+    body: "Choose who teaches each subject and where lessons take place.",
+  },
+  {
+    title: "Generate the timetable",
+    body: "Protiba fits lessons into the school week.",
+  },
+  {
+    title: "Review the week",
+    body: "Check the weekly plan and make sure it works for your school.",
+  },
+];
+
+const INPUTS = [
+  {label: "Classes", from: 0, items: ["Form 1 East", "Form 1 West", "Form 2 East"]},
+  {label: "Subjects", from: 0, items: ["Mathematics", "English", "Chemistry", "Biology"]},
+  {label: "Teachers", from: 1, items: ["Ms. Wanjiru", "Mr. Otieno", "Ms. Achieng"]},
+  {label: "Rooms", from: 1, items: ["Lab 1", "Room 4", "Room 7"]},
+];
+
+const STATUS = [
+  "Classes and subjects are ready.",
+  "Teachers and rooms are assigned.",
+  "Adding lessons to the week.",
+  "Example timetable ready, with no double-bookings.",
+];
+
+const TimetableGrid = ({filled}) => {
+  const reduced = useReducedMotion();
+  return (
+    <div className="tt" aria-hidden="true">
+      <div className="tt__corner" />
+      {DAYS.map((d) => (
+        <div key={d} className="tt__day">
+          {d}
+        </div>
+      ))}
+      {TIMES.map((time, r) => (
+        <React.Fragment key={time}>
+          <div className="tt__time">{time}</div>
+          {DAYS.map((day, d) => {
+            const name = SCHEDULE[d][r];
+            const meta = SUBJECTS[name];
+            const order = r * DAYS.length + d;
+            return (
+              <div key={day} className="tt__slot">
+                <motion.div
+                  className={`lesson lesson--${meta.tone}`}
+                  initial={false}
+                  animate={{opacity: filled ? 1 : 0, scale: filled ? 1 : 0.96}}
+                  transition={
+                    reduced
+                      ? {duration: 0}
+                      : {
+                          duration: DURATION.fast + 0.1,
+                          ease: EASE_OUT,
+                          delay: filled ? order * 0.035 : 0,
+                        }
+                  }
+                >
+                  <span className="lesson__full">{name}</span>
+                  <span className="lesson__short">{meta.short}</span>
+                </motion.div>
+              </div>
+            );
+          })}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+};
+
+const HowItWorks = () => {
+  const reduced = useReducedMotion();
+  const frameRef = useRef(null);
+  const inView = useInView(frameRef, {once: true, margin: "0px 0px -20% 0px"});
+  const [stage, setStage] = useState(0);
+  const timers = useRef([]);
+
+  useEffect(() => {
+    if (!inView) return undefined;
+    if (reduced) {
+      setStage(3);
+      return undefined;
+    }
+    timers.current = [1600, 3400, 5200].map((ms, i) =>
+      setTimeout(() => setStage(i + 1), ms),
+    );
+    return () => timers.current.forEach(clearTimeout);
+  }, [inView, reduced]);
+
+  const choose = (i) => {
+    timers.current.forEach(clearTimeout);
+    setStage(i);
+  };
+
+  return (
+    <div className="how">
+      <ol className="steps">
+        {STEPS.map((s, i) => (
+          <li key={s.title}>
+            <button
+              type="button"
+              className={`step ${i === stage ? "is-active" : ""} ${i < stage ? "is-done" : ""}`}
+              aria-current={i === stage ? "step" : undefined}
+              onClick={() => choose(i)}
+            >
+              <span className="step__num">
+                {i < stage ? <Icon.Check /> : i + 1}
+              </span>
+              <span className="step__text">
+                <span className="step__title">{s.title}</span>
+                <span className="step__body">{s.body}</span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ol>
+
+      <div className="frame" ref={frameRef}>
+        <div className="frame__bar">
+          <span className="frame__dots" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span className="frame__title">Protiba · Timetable</span>
+          <span className="frame__tag">Illustrative demo</span>
+        </div>
+        <div className="frame__body">
+          <div className="inputs">
+            {INPUTS.map((g) => (
+              <div
+                key={g.label}
+                className={`inputs__group ${stage >= g.from ? "is-active" : ""}`}
+              >
+                <span className="inputs__label">{g.label}</span>
+                <div className="inputs__chips">
+                  {g.items.map((it) => (
+                    <span key={it} className="chip">
+                      {it}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="tt__head">
+            <span>Form 1 East</span>
+            <span>Week view</span>
+          </div>
+          <TimetableGrid filled={stage >= 2} />
+
+          <motion.p
+            key={stage}
+            className={`frame__status ${stage === 3 ? "is-done" : ""}`}
+            initial={reduced ? false : {opacity: 0, y: 4}}
+            animate={{opacity: 1, y: 0}}
+            transition={{duration: DURATION.fast, ease: EASE_IN_OUT}}
+            aria-live="polite"
+          >
+            {stage === 3 && <Icon.Check />}
+            {STATUS[stage]}
+          </motion.p>
+        </div>
+      </div>
+
+      <p className="sr-only">
+        A sample Form 1 East weekly timetable, Monday to Friday, with four
+        lessons per day, shown as an illustration of the generated result.
+      </p>
+    </div>
+  );
+};
+
+/* ─── Scene 5: features with small purposeful visuals ───────────────────── */
+const FvGenerate = () => {
+  const cells = [
+    "math", "lang", "sci", "hum", "lang",
+    "sci", "math", "hum", "lang", "math",
+    "lang", "sci", "math", "hum", "sci",
+  ];
+  return (
+    <div className="fv" aria-hidden="true">
+      <p className="fv__label">Form 1 East · one week</p>
+      <div className="fv__grid">
+        {cells.map((t, i) => (
+          <span key={i} className={`fv__cell lesson--${t}`} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const FvConflict = () => (
+  <div className="fv" aria-hidden="true">
+    <p className="fv__label">Example</p>
+    <div className="fv__list">
+      <div className="fv__item fv__item--warn">
+        <Icon.Conflict />
+        <span>
+          <strong>Detected</strong> · Mr. Kamau is assigned to two classes at
+          09:20 on Thursday.
+        </span>
+      </div>
+      <div className="fv__item fv__item--ok">
+        <Icon.Check />
+        <span>
+          <strong>Avoided</strong> · Each lesson is placed in a slot with no
+          overlap.
+        </span>
+      </div>
+    </div>
+  </div>
+);
+
+const ROOMS = [
+  ["Lab 1", [1, 1, 0, 1, 1]],
+  ["Room 4", [1, 1, 1, 1, 0]],
+  ["Room 7", [0, 1, 1, 0, 1]],
+];
+
+const FvResources = () => (
+  <div className="fv" aria-hidden="true">
+    <p className="fv__label">Room use across a week · example</p>
+    <div className="fv__rooms">
+      {ROOMS.map(([name, days]) => (
+        <div key={name} className="fv__room">
+          <span className="fv__room-name">{name}</span>
+          <span className="fv__room-days">
+            {days.map((on, i) => (
+              <i key={i} className={on ? "is-on" : ""} />
+            ))}
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const FEATURES = [
+  {
+    icon: Icon.Clock,
+    title: "Automated scheduling",
+    description:
+      "Create a timetable from your classes, subjects, teachers and rooms instead of starting from scratch.",
+    benefit: "Less time lost to spreadsheets and rework at the start of every term.",
+    Visual: FvGenerate,
+  },
+  {
+    icon: Icon.Conflict,
+    title: "Conflict resolution",
+    description:
+      "Protiba checks for clashes, like a teacher or room booked for two lessons at once.",
+    benefit: "Catch timetable clashes before teachers and students rely on the plan.",
+    Visual: FvConflict,
+  },
+  {
+    icon: Icon.Chart,
+    title: "Resource optimization",
+    description:
+      "Plan the use of classrooms, teachers and facilities across the school week.",
+    benefit: "Make better use of rooms and labs throughout the week.",
+    Visual: FvResources,
+  },
+];
+
+/* ─── Timeline item ─────────────────────────────────────────────────────── */
+const TimelineItem = ({milestone, index}) => {
+  const reduced = useReducedMotion();
+  return (
+    <motion.div
+      className="timeline__item"
+      initial={reduced ? false : {opacity: 0, y: OFFSET}}
+      whileInView={{opacity: 1, y: 0}}
+      viewport={{once: true, margin: "0px 0px -60px 0px"}}
+      transition={{duration: DURATION.base, ease: EASE_OUT}}
+    >
+      <div className="timeline__content">
+        <div className="timeline__month">
+          {milestone.month}
+          {milestone.year ? ` ${milestone.year}` : ""}
+        </div>
+        <h3 className="timeline__title">{milestone.title}</h3>
+        <p className="timeline__desc">{milestone.description}</p>
+      </div>
+      <div className="timeline__node" aria-hidden="true">
+        <div className="timeline__node-inner">{index + 1}</div>
+      </div>
+      <div className="timeline__spacer" />
+    </motion.div>
+  );
+};
+
+/* ─── Page ──────────────────────────────────────────────────────────────── */
+const Story = () => {
+  const reduced = useReducedMotion();
+  const heroInitial = reduced ? "show" : "hidden";
 
   return (
     <>
       <style>{css}</style>
       <div className="story-root">
-        
-
         {/* Hero */}
-        <section className="story-hero">
-          <div
-            className="story-hero__bg"
-            style={{transform: `translateY(${scrollY * 0.3}px)`}}
-          />
-          <div className="story-hero__inner">
-            <div className="story-hero__eyebrow">
-              <span className="story-hero__dot" />
-              Company Story
-            </div>
-            <h1 className="story-hero__title">
-              Built for the people
+        <section className="hero">
+          <div className="hero__bg" aria-hidden="true" />
+          <motion.div
+            className="hero__inner"
+            variants={heroContainer}
+            initial={heroInitial}
+            animate="show"
+          >
+            <motion.div variants={heroItem} className="pill">
+              <span className="pill__dot" />
+              Company story
+            </motion.div>
+            <motion.h1 variants={heroItem} className="hero__title">
+              Made for the people
               <br />
-              <span className="story-hero__title-accent">
-                who keep schools running.
-              </span>
-            </h1>
-            <p className="story-hero__subtitle">
-              Protiba started with a simple observation: the administrators who
-              shape education were spending weeks on paperwork that software
-              should handle in seconds.
-            </p>
-            <div className="story-hero__stats">
-              {[
-                ["2025", "Founded"],
-                ["7", "Months to launch"],
-                ["1", "Core engineer"],
-                ["∞", "Schools to help"],
-              ].map(([v, l]) => (
-                <div key={l} className="hero-stat">
-                  <span className="hero-stat__value">{v}</span>
-                  <span className="hero-stat__label">{l}</span>
+              <span className="hero__accent">who keep schools running.</span>
+            </motion.h1>
+            <motion.p variants={heroItem} className="hero__subtitle">
+              We saw school teams spending weeks building timetables by hand.
+              Protiba helps turn classes, teachers and rooms into a workable
+              schedule in minutes.
+            </motion.p>
+            <motion.dl variants={heroItem} className="facts">
+              {heroFacts.map(([v, l]) => (
+                <div key={l} className="facts__item">
+                  <dd className="facts__value">{v}</dd>
+                  <dt className="facts__label">{l}</dt>
                 </div>
               ))}
-            </div>
-          </div>
-          <div className="story-hero__scroll-hint">
-            <span>Scroll to explore</span>
-            <div className="story-hero__scroll-line" />
-          </div>
+            </motion.dl>
+          </motion.div>
         </section>
 
-        {/* Problem */}
-        <section className="story-section">
-          <div className="story-container story-container--split">
-            <Reveal className="story-split__text">
-              <div className="section-eyebrow">The Problem</div>
-              <h2 className="section-title">
-                Scheduling is broken.
-                <br />
-                We fixed it.
-              </h2>
-              <p className="section-body">
-                Creating school timetables has always been a tedious,
-                error-prone process that takes administrators away from what
-                matters , supporting teachers and students.
-              </p>
-              <ul className="problem-list">
+        {/* Scene 2 — The problem */}
+        <section className="section">
+          <div className="container split">
+            <div className="split__text">
+              <Reveal>
+                <div className="eyebrow">The problem</div>
+                <h2 className="title">
+                  Making a school timetable
+                  <br />
+                  is a lot to juggle.
+                </h2>
+                <p className="body">
+                  Classes, subjects, teachers and rooms all need to fit
+                  together. Doing it by hand takes time away from supporting
+                  teachers and students.
+                </p>
+              </Reveal>
+              <ul className="problems">
                 {problems.map((p, i) => (
-                  <Reveal key={i} delay={i * 80}>
-                    <li className="problem-item">
-                      <span className="problem-item__icon">
-                        <Icon.Check />
-                      </span>
-                      <span>{p}</span>
-                    </li>
+                  <Reveal key={p} as="li" className="problem" delay={i * 0.06}>
+                    <span className="problem__mark" aria-hidden="true" />
+                    <span>{p}</span>
                   </Reveal>
                 ))}
               </ul>
-            </Reveal>
-
-            <Reveal delay={150} className="story-split__visual">
-              <div className="problem-visual">
-                <div className="problem-visual__card problem-visual__card--1">
-                  <div className="pvc__header">
-                    <span className="pvc__dot pvc__dot--red" />
-                    <span className="pvc__title">Manual Schedule — Week 3</span>
-                  </div>
-                  <div className="pvc__grid">
-                    {Array.from({length: 20}).map((_, i) => (
-                      <div
-                        key={i}
-                        className={`pvc__cell ${[2, 5, 9, 14, 17].includes(i) ? "pvc__cell--conflict" : "pvc__cell--filled"}`}
-                      />
-                    ))}
-                  </div>
-                  <p className="pvc__label">5 conflicts detected</p>
-                </div>
-                <div className="problem-visual__card problem-visual__card--2">
-                  <div className="pvc__header">
-                    <span className="pvc__dot pvc__dot--green" />
-                    <span className="pvc__title">
-                      Protiba — Generated in 4s
-                    </span>
-                  </div>
-                  <div className="pvc__grid">
-                    {Array.from({length: 20}).map((_, i) => (
-                      <div key={i} className="pvc__cell pvc__cell--ok" />
-                    ))}
-                  </div>
-                  <p className="pvc__label pvc__label--green">Zero conflicts</p>
-                </div>
-              </div>
+            </div>
+            <Reveal delay={0.1} className="split__visual">
+              <ConflictDemo />
             </Reveal>
           </div>
         </section>
 
-        {/* Solution */}
-        <section className="story-section story-section--tinted">
-          <div className="story-container">
-            <Reveal className="section-centered">
-              <div className="section-eyebrow">The Solution</div>
-              <h2 className="section-title">
-                Intelligence built for institutions.
-              </h2>
-              <p className="section-body section-body--centered">
-                We built a scheduling engine that understands the real-world
-                constraints of schools , and eliminates the manual work
-                entirely.
+        {/* Scene 3 + 4 — How it works, and the result */}
+        <section className="section section--tinted">
+          <div className="container">
+            <Reveal className="head">
+              <div className="eyebrow">How it works</div>
+              <h2 className="title">From school data to a weekly timetable.</h2>
+              <p className="body body--centered">
+                Follow a sample school as Protiba builds a weekly timetable.
               </p>
             </Reveal>
+            <HowItWorks />
+          </div>
+        </section>
 
-            <div className="feature-grid">
-              {features.map((f, i) => (
-                <Reveal key={i} delay={i * 100}>
-                  <div className="feature-card">
-                    <div className="feature-card__icon">
+        {/* Scene 5 — Features */}
+        <section className="section">
+          <div className="container">
+            <Reveal className="head">
+              <div className="eyebrow">Why it matters</div>
+              <h2 className="title">Tools for the everyday work of running a school.</h2>
+            </Reveal>
+            <div className="features">
+              {FEATURES.map((f, i) => (
+                <div
+                  key={f.title}
+                  className={`feature ${i % 2 ? "feature--flip" : ""}`}
+                >
+                  <Reveal className="feature__text">
+                    <div className="feature__icon">
                       <f.icon />
                     </div>
-                    <h3 className="feature-card__title">{f.title}</h3>
-                    <p className="feature-card__desc">{f.description}</p>
-                  </div>
-                </Reveal>
+                    <h3 className="feature__title">{f.title}</h3>
+                    <p className="feature__desc">{f.description}</p>
+                    <p className="feature__benefit">{f.benefit}</p>
+                  </Reveal>
+                  <Reveal delay={0.08} className="feature__visual">
+                    <f.Visual />
+                  </Reveal>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
         {/* Timeline */}
-        <section className="story-section">
-          <div className="story-container">
-            <Reveal className="section-centered" style={{marginBottom: 56}}>
-              <div className="section-eyebrow">The Journey</div>
-              <h2 className="section-title">
-                Seven months.
-                <br />
-                One mission.
-              </h2>
+        <section className="section section--tinted">
+          <div className="container">
+            <Reveal className="head">
+              <div className="eyebrow">The journey</div>
+              <h2 className="title">How Protiba came together.</h2>
             </Reveal>
-
             <div className="timeline">
-              <div className="timeline__line" />
+              <div className="timeline__line" aria-hidden="true" />
               {timelineData.map((m, i) => (
-                <TimelineItem key={i} milestone={m} index={i} />
+                <TimelineItem key={m.title} milestone={m} index={i} />
               ))}
             </div>
           </div>
         </section>
 
         {/* Credits */}
-        <section className="story-section story-section--tinted">
-          <div className="story-container">
-            <Reveal className="section-centered">
-              <div className="section-eyebrow">Gratitude</div>
-              <h2 className="section-title">None of this happens alone.</h2>
-              <p className="section-body section-body--centered">
-                Protiba exists because of people who believed before there was
-                anything to believe in.
+        <section className="section">
+          <div className="container">
+            <Reveal className="head">
+              <div className="eyebrow">Gratitude</div>
+              <h2 className="title">None of this happens alone.</h2>
+              <p className="body body--centered">
+                Protiba grew with help from people who shared their time,
+                ideas and honest feedback.
               </p>
             </Reveal>
-
-            <div className="credits-grid">
+            <div className="credits">
               {credits.map((c, i) => (
-                <Reveal key={i} delay={i * 100}>
-                  <div className="credit-card">
-                    <div className="credit-card__avatar">{c.initial}</div>
-                    <h3 className="credit-card__name">{c.name}</h3>
-                    <p className="credit-card__role">{c.role}</p>
-                    <p className="credit-card__desc">{c.description}</p>
+                <Reveal key={c.name} delay={i * 0.08}>
+                  <div className="credit">
+                    <div className="credit__avatar">{c.initial}</div>
+                    <h3 className="credit__name">{c.name}</h3>
+                    <p className="credit__role">{c.role}</p>
+                    <p className="credit__desc">{c.description}</p>
                   </div>
                 </Reveal>
               ))}
@@ -458,545 +750,489 @@ const Story = () => {
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="story-cta">
-          <div className="story-cta__inner">
-            <Reveal>
-              <div className="section-eyebrow section-eyebrow--center">
-                Ready?
-              </div>
-              <h2 className="story-cta__title">
-                Transform your institution's scheduling.
-              </h2>
-              <p className="story-cta__body">
-                Join the educators who've taken weeks of manual work off their
-                plate , permanently.
-              </p>
-              <div className="story-cta__actions">
-                <Link to="/signup" className="btn-primary">
-                  Get Started <Icon.Arrow />
-                </Link>
-                <Link to="/" className="btn-ghost">
-                  View Demo
-                </Link>
-              </div>
-            </Reveal>
-          </div>
-          <div className="story-cta__glow" />
+        {/* Scene 6 — Invitation */}
+        <section className="cta">
+          <Reveal className="cta__inner">
+            <div className="eyebrow eyebrow--center">Ready when you are</div>
+            <h2 className="cta__title">
+              Make timetable season easier.
+            </h2>
+            <p className="cta__body">
+              Add your classes, teachers and rooms, then see them come
+              together in a weekly timetable.
+            </p>
+            <div className="cta__actions">
+              <Link to="/signup" className="btn btn--primary">
+                Set up your school <Icon.Arrow />
+              </Link>
+              <Link to="/" className="btn btn--ghost">
+                View demo
+              </Link>
+            </div>
+          </Reveal>
         </section>
       </div>
     </>
   );
 };
 
-// ─── Timeline Item (unchanged) ───────────────────────────────────────────────
-const TimelineItem = ({milestone, index}) => {
-  const [ref, inView] = useInView(0.2);
-  const isRight = index % 2 === 0;
-
-  return (
-    <div
-      ref={ref}
-      className={`timeline__item ${isRight ? "timeline__item--right" : "timeline__item--left"}`}
-      style={{
-        opacity: inView ? 1 : 0,
-        transform: inView ? "translateY(0)" : "translateY(20px)",
-        transition: `opacity 0.55s ease ${index * 80}ms, transform 0.55s ease ${index * 80}ms`,
-      }}
-    >
-      <div className="timeline__content">
-        <div className="timeline__month">
-          {milestone.month} {milestone.year}
-        </div>
-        <h3 className="timeline__title">{milestone.title}</h3>
-        <p className="timeline__desc">{milestone.description}</p>
-      </div>
-      <div className="timeline__node">
-        <div className="timeline__node-inner">{index + 1}</div>
-      </div>
-      <div className="timeline__spacer" />
-    </div>
-  );
-};
-
-// ─── Styles (light theme, brand accent preserved) ────────────────────────────
+/* ═══════════════════════════════════════════════════════════════════════════
+   Styles — scoped to .story-root so nothing leaks into the rest of the app.
+   Tokens first, then layout, then components.
+   ═══════════════════════════════════════════════════════════════════════════ */
 const css = `
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: var(--ui-bg);
-    --surface: var(--ui-surface);
-    --surface-2: var(--ui-surface-muted);
-    --surface-3: var(--ui-surface-soft);
-    --border: var(--ui-border-subtle);
-    --text: var(--ui-text);
-    --text-2: var(--ui-text-muted);
-    --text-3: var(--ui-text-subtle);
-    --accent: var(--ui-accent);
-    --accent-light: var(--ui-accent-hover);
-    --accent-glow: var(--ui-accent-soft);
-    --amber: var(--ui-warning);
-    --amber-dim: rgba(245,158,11,0.12);
-    --green: var(--ui-success);
-    --red: var(--ui-danger);
-    --radius: var(--ui-radius-md);
-    --radius-lg: var(--ui-radius-lg);
-    --radius-xl: var(--ui-radius-xl);
-    --font: var(--ui-font-sans);
-    --transition: var(--ui-transition);
-    --max-w: 960px;
-  }
-
   .story-root {
-    font-family: var(--font);
+    /* colour */
+    --bg: var(--ui-bg, #f8f8f8);
+    --surface: var(--ui-surface, #ffffff);
+    --surface-2: var(--ui-surface-muted, #f5f5f5);
+    --border: var(--ui-border-subtle, rgba(43, 43, 43, 0.06));
+    --text: var(--ui-text, #2b2b2b);
+    --text-2: var(--ui-text-muted, #6e6e6e);
+    --text-3: var(--ui-text-subtle, #858585);
+    --accent: var(--ui-secondary, #2b9c5a);
+    --warn: var(--ui-warning, #f59e0b);
+    --danger: var(--ui-danger, #ef4444);
+
+    /* layout */
+    --w: 1040px;
+    --pad: clamp(20px, 5vw, 32px);
+    --section-y: clamp(72px, 10vw, 112px);
+
+    /* shape */
+    --r-sm: 8px;
+    --r-md: 12px;
+    --r-lg: 16px;
+    --btn-h: 44px;
+    --shadow-sm: 0 1px 2px rgba(20, 24, 22, 0.04);
+    --shadow-md: 0 16px 40px -16px rgba(20, 24, 22, 0.16);
+
+    /* motion (CSS-side) */
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --t-fast: 160ms;
+    --t-base: 260ms;
+
+    font-family: var(--ui-font-sans, "Avenir Next", "Nunito Sans", "Trebuchet MS", system-ui, sans-serif);
     background: var(--bg);
     color: var(--text);
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    overflow-x: clip;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .story-root { --t-fast: 0ms; --t-base: 0ms; }
   }
 
-  /* ── Nav (light glassmorphism) ── */
-  .story-nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
+  .story-root *, .story-root *::before, .story-root *::after { box-sizing: border-box; }
+  .story-root h1, .story-root h2, .story-root h3, .story-root p,
+  .story-root ul, .story-root ol, .story-root dl, .story-root dd,
+  .story-root figure { margin: 0; }
+  .story-root ul, .story-root ol { padding: 0; list-style: none; }
+  .story-root :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .story-root .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
   }
-  .story-nav__inner {
-    max-width: var(--max-w);
-    margin: 0 auto;
-    padding: 0 32px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .story-nav__logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: -0.02em;
-  }
-  .story-nav__back {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-2);
-    text-decoration: none;
-    transition: color var(--transition);
-  }
-  .story-nav__back:hover { color: var(--text); }
 
-  /* ── Hero ── */
-  .story-hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 100px 32px 80px;
-    overflow: hidden;
-  }
-  .story-hero__bg {
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(43,43,43,0.08) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 40% at 80% 60%, rgba(245,158,11,0.04) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .story-hero__inner {
-    position: relative;
-    max-width: 720px;
-    text-align: center;
-    z-index: 1;
-    animation: heroFadeIn 0.9s ease both;
-  }
-  @keyframes heroFadeIn {
-    from { opacity: 0; transform: translateY(32px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .story-hero__eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--accent-light);
-    margin-bottom: 24px;
-    background: var(--accent-glow);
-    border: 1px solid rgba(43,43,43,0.2);
-    padding: 5px 14px;
-    border-radius: 20px;
-  }
-  .story-hero__dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 8px rgba(43,43,43,0.4);
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
-  .story-hero__title {
-    font-size: clamp(32px, 5vw, 52px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    color: var(--text);
-    margin-bottom: 20px;
-  }
-  .story-hero__title-accent {
-    background: linear-gradient(135deg, var(--accent) 0%, #6E6E6E 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .story-hero__subtitle {
-    font-size: 17px;
-    color: var(--text-2);
-    line-height: 1.65;
-    max-width: 540px;
-    margin: 0 auto 48px;
-  }
-  .story-hero__stats {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-    overflow: hidden;
-    animation: heroFadeIn 0.9s ease 0.2s both;
-  }
-  .hero-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 28px;
-    border-right: 1px solid var(--border);
-  }
-  .hero-stat:last-child { border-right: none; }
-  .hero-stat__value { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.03em; }
-  .hero-stat__label { font-size: 11px; color: var(--text-3); font-weight: 500; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .story-hero__scroll-hint {
-    position: absolute;
-    bottom: 36px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    opacity: 0.35;
-    animation: heroFadeIn 1s ease 0.8s both;
-  }
-  .story-hero__scroll-hint span { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); }
-  .story-hero__scroll-line {
-    width: 1px; height: 40px;
-    background: linear-gradient(to bottom, var(--text-3), transparent);
-    animation: scrollPulse 2s ease-in-out infinite;
-  }
-  @keyframes scrollPulse { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(0.6)} }
+  /* ── Lesson tones (shared by timetable + feature visuals) ── */
+  .lesson--sci  { background: #e8f3ec; border-color: #cfe5d8; color: #1e5a3d; }
+  .lesson--lang { background: #f1efea; border-color: #e2dfd7; color: #4a4d49; }
+  .lesson--hum  { background: #f8efe0; border-color: #eddcb9; color: #7a5a1d; }
+  .lesson--math { background: #e9eef5; border-color: #d3dceb; color: #35496b; }
 
-  /* ── Sections ── */
-  .story-section { padding: 96px 32px; }
-  .story-section--tinted { background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  .story-container { max-width: var(--max-w); margin: 0 auto; }
-  .story-container--split { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-  @media (max-width: 760px) { .story-container--split { grid-template-columns: 1fr; gap: 40px; } }
+  /* ── Layout primitives ── */
+  .section { padding: var(--section-y) var(--pad); }
+  .section--tinted { background: var(--surface-2); border-block: 1px solid var(--border); }
+  .container { max-width: var(--w); margin: 0 auto; }
+  .head { text-align: center; max-width: 640px; margin: 0 auto clamp(40px, 6vw, 64px); }
 
-  .section-eyebrow {
+  .eyebrow {
     display: inline-block;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
     color: var(--accent);
     margin-bottom: 14px;
   }
-  .section-eyebrow--center { display: block; text-align: center; }
-  .section-title {
-    font-size: clamp(24px, 3.5vw, 36px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1.15;
+  .eyebrow--center { display: block; text-align: center; }
+  .title {
+    font-size: clamp(26px, 3.6vw, 38px);
+    font-weight: 700; letter-spacing: 0; line-height: 1.15;
     color: var(--text);
     margin-bottom: 16px;
+    text-wrap: balance;
   }
-  .section-body {
-    font-size: 15px;
-    color: var(--text-2);
-    line-height: 1.7;
-    margin-bottom: 28px;
-  }
-  .section-body--centered { text-align: center; max-width: 560px; margin: 0 auto 48px; }
-  .section-centered { text-align: center; }
+  .body { font-size: 16px; line-height: 1.7; color: var(--text-2); max-width: 52ch; }
+  .body--centered { margin-inline: auto; }
 
-  /* ── Problem list ── */
-  .problem-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-  .problem-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 14px;
-    color: var(--text-2);
-    line-height: 1.55;
-  }
-  .problem-item__icon {
-    width: 22px; height: 22px;
-    border-radius: 6px;
-    background: rgba(16,185,129,0.1);
-    border: 1px solid rgba(16,185,129,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--green);
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  /* ── Problem Visual ── */
-  .problem-visual { position: relative; }
-  .problem-visual__card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 18px;
-    transition: transform 0.3s ease;
-  }
-  .problem-visual__card--1 { margin-bottom: 12px; }
-  .problem-visual__card--2 { transform: translateX(16px); }
-  .problem-visual__card:hover { transform: translateY(-3px); }
-  .problem-visual__card--2:hover { transform: translateX(16px) translateY(-3px); }
-  .pvc__header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-  .pvc__dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .pvc__dot--red { background: var(--red); box-shadow: 0 0 6px rgba(244,63,94,0.4); }
-  .pvc__dot--green { background: var(--green); box-shadow: 0 0 6px rgba(16,185,129,0.4); }
-  .pvc__title { font-size: 12px; font-weight: 500; color: var(--text-2); }
-  .pvc__grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 10px; }
-  .pvc__cell { height: 22px; border-radius: 4px; }
-  .pvc__cell--filled { background: rgba(43,43,43,0.1); border: 1px solid rgba(43,43,43,0.15); }
-  .pvc__cell--conflict { background: rgba(244,63,94,0.08); border: 1px solid rgba(244,63,94,0.25); animation: conflictPulse 2s ease infinite; }
-  @keyframes conflictPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-  .pvc__cell--ok { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.15); }
-  .pvc__label { font-size: 11px; color: var(--text-3); }
-  .pvc__label--green { color: var(--green); }
-
-  /* ── Feature grid ── */
-  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  @media (max-width: 720px) { .feature-grid { grid-template-columns: 1fr; } }
-  .feature-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 28px 24px;
-    transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
-  }
-  .feature-card:hover { border-color: rgba(43,43,43,0.25); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.06); }
-  .feature-card__icon {
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    background: var(--accent-glow);
-    border: 1px solid rgba(43,43,43,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent);
-    margin-bottom: 16px;
-  }
-  .feature-card__title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
-  .feature-card__desc { font-size: 13px; color: var(--text-2); line-height: 1.6; }
-
-  /* ── Timeline ── */
-  .timeline {
+  /* ── Hero ── */
+  .hero {
     position: relative;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px 0;
-  }
-  .timeline__line {
-    position: absolute;
-    left: 50%;
-    top: 0; bottom: 0;
-    width: 1px;
-    background: linear-gradient(to bottom, transparent, var(--border) 10%, var(--border) 90%, transparent);
-    transform: translateX(-50%);
-  }
-  .timeline__item {
-    display: grid;
-    grid-template-columns: 1fr 40px 1fr;
-    gap: 0;
-    margin-bottom: 48px;
-    align-items: center;
-  }
-  .timeline__item--right .timeline__content { grid-column: 1; grid-row: 1; text-align: right; padding-right: 32px; }
-  .timeline__item--right .timeline__node { grid-column: 2; grid-row: 1; }
-  .timeline__item--right .timeline__spacer { grid-column: 3; grid-row: 1; }
-  .timeline__item--left .timeline__spacer { grid-column: 1; grid-row: 1; }
-  .timeline__item--left .timeline__node { grid-column: 2; grid-row: 1; }
-  .timeline__item--left .timeline__content { grid-column: 3; grid-row: 1; text-align: left; padding-left: 32px; }
-  .timeline__node { display: flex; align-items: center; justify-content: center; z-index: 2; }
-  .timeline__node-inner {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    background: var(--surface);
-    border: 2px solid var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--accent);
-    box-shadow: 0 0 12px var(--accent-glow);
-  }
-  .timeline__month { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 6px; }
-  .timeline__title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: -0.01em; }
-  .timeline__desc { font-size: 13px; color: var(--text-2); line-height: 1.65; }
-  .timeline__content {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    transition: border-color var(--transition);
-  }
-  .timeline__content:hover { border-color: rgba(43,43,43,0.2); }
-  @media (max-width: 640px) {
-    .timeline__line { left: 16px; }
-    .timeline__item { grid-template-columns: 32px 1fr; gap: 16px; }
-    .timeline__item--right .timeline__content,
-    .timeline__item--left .timeline__content { grid-column: 2; grid-row: 1; text-align: left; padding: 16px; }
-    .timeline__item--right .timeline__node,
-    .timeline__item--left .timeline__node { grid-column: 1; grid-row: 1; }
-    .timeline__item--right .timeline__spacer,
-    .timeline__item--left .timeline__spacer { display: none; }
-  }
-
-  /* ── Credits ── */
-  .credits-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  @media (max-width: 720px) { .credits-grid { grid-template-columns: 1fr; } }
-  .credit-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 28px 24px;
-    transition: border-color var(--transition), transform var(--transition);
-  }
-  .credit-card:hover { border-color: rgba(0,0,0,0.1); transform: translateY(-3px); }
-  .credit-card__avatar {
-    width: 48px; height: 48px;
-    border-radius: 12px;
-    background: var(--surface-3);
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--accent);
-    margin-bottom: 16px;
-    letter-spacing: -0.03em;
-  }
-  .credit-card__name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-  .credit-card__role { font-size: 12px; font-weight: 500; color: var(--accent); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
-  .credit-card__desc { font-size: 13px; color: var(--text-2); line-height: 1.65; }
-
-  /* ── CTA ── */
-  .story-cta {
-    position: relative;
-    padding: 120px 32px;
+    padding: clamp(96px, 14vw, 160px) var(--pad) clamp(72px, 10vw, 112px);
     text-align: center;
+  }
+  .hero__bg {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 70% 50% at 50% 0%,
+      color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%);
+  }
+  .hero__inner { position: relative; max-width: 760px; margin: 0 auto; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+    padding: 6px 14px; border-radius: 999px;
+    margin-bottom: 24px;
+  }
+  .pill__dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .hero__title {
+    font-size: clamp(36px, 5.4vw, 60px);
+    font-weight: 800; letter-spacing: 0; line-height: 1.08;
+    margin-bottom: 22px;
+    text-wrap: balance;
+  }
+  .hero__accent { color: var(--accent); }
+  .hero__subtitle {
+    font-size: clamp(16px, 2vw, 18px); line-height: 1.65; color: var(--text-2);
+    max-width: 520px; margin: 0 auto 36px;
+  }
+  .facts {
+    display: inline-flex; flex-wrap: wrap; justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
   }
-  .story-cta__glow {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 600px; height: 400px;
-    border-radius: 50%;
-    background: radial-gradient(ellipse, rgba(43,43,43,0.04) 0%, transparent 70%);
-    pointer-events: none;
+  .facts__item {
+    display: flex; flex-direction: column-reverse; align-items: center;
+    flex: 1 1 130px; padding: 18px 28px;
+    border-right: 1px solid var(--border);
   }
-  .story-cta__inner { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
-  .story-cta__title {
-    font-size: clamp(28px, 4vw, 44px);
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    color: var(--text);
-    margin-bottom: 16px;
-    line-height: 1.1;
+  .facts__item:last-child { border-right: 0; }
+  .facts__value { font-size: 22px; font-weight: 700; letter-spacing: 0; }
+  .facts__label {
+    font-size: 11px; font-weight: 500; color: var(--text-3);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;
   }
-  .story-cta__body { font-size: 16px; color: var(--text-2); line-height: 1.65; margin-bottom: 40px; }
-  .story-cta__actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
 
-  /* ── Buttons ── */
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--accent);
-    color: #fff;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 12px 24px;
-    border-radius: var(--radius);
-    transition: all var(--transition);
-    box-shadow: 0 4px 16px rgba(43,43,43,0.3);
-    font-family: var(--font);
+  /* ── Problem ── */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 7vw, 72px); align-items: center; }
+  .problems { display: grid; gap: 12px; margin-top: 28px; }
+  .problem { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; line-height: 1.6; color: var(--text-2); }
+  .problem__mark {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--warn); flex-shrink: 0; margin-top: 9px;
   }
-  .btn-primary:hover { background: #454545; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(43,43,43,0.4); }
-  .btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+
+  /* ── Product frame (shared) ── */
+  .frame {
     background: var(--surface);
     border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    min-width: 0;
+  }
+  .frame__bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+  }
+  .frame__dots { display: inline-flex; gap: 5px; }
+  .frame__dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--border); display: block; }
+  .frame__title { font-size: 12px; font-weight: 500; color: var(--text-2); }
+  .frame__tag {
+    margin-left: auto;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-3);
+  }
+  .frame__body { padding: 16px; }
+  .frame--compact .frame__body { padding: 16px 16px 14px; }
+
+  /* ── Mini teacher week (problem) ── */
+  .mini {
+    display: grid;
+    grid-template-columns: 40px repeat(5, minmax(0, 1fr));
+    gap: 5px;
+  }
+  .mini__day, .tt__day {
+    font-size: 11px; font-weight: 600; color: var(--text-3);
+    text-align: center; padding-bottom: 2px;
+  }
+  .mini__time, .tt__time {
+    font-size: 10px; color: var(--text-3);
+    display: flex; align-items: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .mini__cell {
+    min-height: 44px;
+    border-radius: 6px;
+    border: 1px dashed var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    font-size: 10.5px; font-weight: 600; color: #35496b;
+    transition: background var(--t-base) var(--ease), border-color var(--t-base) var(--ease);
+  }
+  .mini__cell--on { background: #e9eef5; border: 1px solid #d3dceb; }
+  .mini__cell--clash.is-flagged {
+    background: color-mix(in srgb, var(--danger) 9%, var(--surface));
+    border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+    color: var(--danger);
+  }
+  .mini__caption {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-top: 14px; min-height: 40px;
+    font-size: 13px; line-height: 1.5; color: var(--danger);
+    opacity: 0; transform: translateY(4px);
+    transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+  }
+  .mini__caption svg { flex-shrink: 0; margin-top: 1px; }
+  .mini__caption.is-on { opacity: 1; transform: none; }
+
+  /* ── How it works ── */
+  .how { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 5vw, 56px); align-items: start; }
+  .steps { display: grid; gap: 4px; }
+  .step {
+    width: 100%; text-align: left; font: inherit; color: inherit;
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 14px 16px;
+    background: transparent;
+    border: 1px solid transparent; border-radius: var(--r-md);
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity var(--t-base) var(--ease), background var(--t-base) var(--ease), border-color var(--t-base) var(--ease);
+  }
+  .step:hover { opacity: 0.85; }
+  .step.is-done { opacity: 0.75; }
+  .step.is-active { opacity: 1; background: var(--surface); border-color: var(--border); box-shadow: var(--shadow-sm); }
+  .step__num {
+    width: 26px; height: 26px; flex-shrink: 0;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
     color: var(--text-2);
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 12px 24px;
-    border-radius: var(--radius);
-    transition: all var(--transition);
-    font-family: var(--font);
+    background: var(--surface); border: 1px solid var(--border);
+    transition: background var(--t-base) var(--ease), color var(--t-base) var(--ease), border-color var(--t-base) var(--ease);
   }
-  .btn-ghost:hover { border-color: rgba(0,0,0,0.14); color: var(--text); }
+  .step.is-active .step__num, .step.is-done .step__num { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .step__text { display: grid; gap: 4px; }
+  .step__title { font-size: 15px; font-weight: 600; letter-spacing: 0; }
+  .step__body { font-size: 13.5px; line-height: 1.55; color: var(--text-2); }
 
-  /* ── Footer ── */
-  .story-footer {
+  .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin-bottom: 16px; }
+  .inputs__group { opacity: 0.35; transition: opacity var(--t-base) var(--ease); min-width: 0; }
+  .inputs__group.is-active { opacity: 1; }
+  .inputs__label {
+    display: block; font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 6px;
+  }
+  .inputs__chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip {
+    font-size: 11px; color: var(--text-2);
+    background: var(--surface-2); border: 1px solid var(--border);
+    padding: 3px 8px; border-radius: 6px; white-space: nowrap;
+  }
+
+  .tt__head {
+    display: flex; justify-content: space-between;
+    font-size: 11px; font-weight: 600; color: var(--text-3);
+    padding-top: 14px; margin-bottom: 8px;
     border-top: 1px solid var(--border);
-    padding: 24px 32px;
   }
-  .story-footer__inner {
-    max-width: var(--max-w);
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
+  .tt { display: grid; grid-template-columns: 40px repeat(5, minmax(0, 1fr)); gap: 5px; }
+  .tt__slot { border-radius: 6px; border: 1px dashed var(--border); min-height: 38px; }
+  .lesson {
+    height: 100%; min-height: 36px;
+    border: 1px solid; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 4px;
+    font-size: 11px; font-weight: 600; text-align: center; line-height: 1.2;
   }
-  .story-footer__copy { font-size: 13px; color: var(--text-3); }
-  .story-footer__link { font-size: 13px; color: var(--text-2); text-decoration: none; transition: color var(--transition); }
-  .story-footer__link:hover { color: var(--accent); }
+  .lesson__short { display: none; }
 
-  @media (max-width: 480px) {
-    .story-hero__stats { flex-wrap: wrap; }
-    .hero-stat { padding: 14px 18px; }
-    .story-section { padding: 64px 20px; }
-    .story-cta { padding: 80px 20px; }
+  .frame__status {
+    display: flex; align-items: center; gap: 8px;
+    min-height: 40px; margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 13px; color: var(--text-2);
+  }
+  .frame__status.is-done { color: var(--accent); font-weight: 500; }
+
+  /* ── Features ── */
+  .features { display: grid; }
+  .feature {
+    display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 6vw, 72px); align-items: center;
+    padding-block: clamp(32px, 5vw, 56px);
+    border-top: 1px solid var(--border);
+  }
+  .feature:first-child { border-top: 0; padding-top: 0; }
+  .feature--flip .feature__text { order: 2; }
+  .feature__icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+    margin-bottom: 18px;
+  }
+  .feature__title { font-size: 22px; font-weight: 700; letter-spacing: 0; margin-bottom: 10px; }
+  .feature__desc { font-size: 15px; line-height: 1.65; color: var(--text-2); margin-bottom: 14px; max-width: 46ch; }
+  .feature__benefit { font-size: 14px; line-height: 1.6; font-weight: 500; color: var(--text); max-width: 46ch; }
+
+  .fv {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 20px; box-shadow: var(--shadow-sm);
+  }
+  .fv__label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 14px;
+  }
+  .fv__grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .fv__cell { height: 30px; border-radius: 6px; border: 1px solid; }
+  .fv__list { display: grid; gap: 8px; }
+  .fv__item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px 14px; font-size: 13px; line-height: 1.5; color: var(--text-2);
+    border: 1px solid var(--border); border-radius: var(--r-md);
+  }
+  .fv__item svg { flex-shrink: 0; margin-top: 1px; }
+  .fv__item strong { color: var(--text); font-weight: 600; }
+  .fv__item--warn {
+    color: var(--warn);
+    background: color-mix(in srgb, var(--warn) 7%, var(--surface));
+    border-color: color-mix(in srgb, var(--warn) 30%, var(--border));
+  }
+  .fv__item--warn span { color: var(--text-2); }
+  .fv__item--ok {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
+  }
+  .fv__item--ok span { color: var(--text-2); }
+  .fv__rooms { display: grid; gap: 10px; }
+  .fv__room { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; }
+  .fv__room-name { font-size: 12px; font-weight: 500; color: var(--text-2); }
+  .fv__room-days { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+  .fv__room-days i {
+    height: 22px; border-radius: 5px; display: block;
+    background: var(--surface-2); border: 1px dashed var(--border);
+  }
+  .fv__room-days i.is-on {
+    background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  }
+
+  /* ── Timeline ── */
+  .timeline { position: relative; max-width: 760px; margin: 0 auto; padding: 8px 0; }
+  .timeline__line {
+    position: absolute; left: 20px; top: 0; bottom: 0; width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--border) 8%, var(--border) 92%, transparent);
+  }
+  .timeline__item {
+    display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 20px;
+    margin-bottom: 24px; align-items: start;
+  }
+  .timeline__item:last-child { margin-bottom: 0; }
+  .timeline__item .timeline__content { grid-column: 2; grid-row: 1; text-align: left; }
+  .timeline__item .timeline__node { grid-column: 1; grid-row: 1; }
+  .timeline__item .timeline__spacer { display: none; }
+  .timeline__node { display: flex; align-items: center; justify-content: center; z-index: 1; }
+  .timeline__node-inner {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--surface); border: 2px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: var(--accent);
+  }
+  .timeline__content {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 20px 22px;
+    transition: border-color var(--t-base) var(--ease);
+  }
+  .timeline__content:hover { border-color: color-mix(in srgb, var(--accent) 30%, var(--border)); }
+  .timeline__month {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--accent); margin-bottom: 6px;
+  }
+  .timeline__title { font-size: 17px; font-weight: 700; letter-spacing: 0; margin-bottom: 8px; }
+  .timeline__desc { font-size: 14px; line-height: 1.65; color: var(--text-2); }
+
+  /* ── Credits ── */
+  .credits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .credit {
+    height: 100%;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-lg); padding: 28px 24px;
+  }
+  .credit__avatar {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 700; color: var(--accent);
+    margin-bottom: 16px; letter-spacing: 0;
+  }
+  .credit__name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .credit__role {
+    font-size: 12px; font-weight: 600; color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .credit__desc { font-size: 13.5px; line-height: 1.65; color: var(--text-2); }
+
+  /* ── CTA ── */
+  .cta { padding: clamp(80px, 12vw, 128px) var(--pad); text-align: center; }
+  .cta__inner { max-width: 600px; margin: 0 auto; }
+  .cta__title {
+    font-size: clamp(30px, 4.4vw, 46px); font-weight: 800;
+    letter-spacing: 0; line-height: 1.1; margin-bottom: 16px;
+    text-wrap: balance;
+  }
+  .cta__body { font-size: 16px; line-height: 1.65; color: var(--text-2); margin: 0 auto 36px; max-width: 48ch; }
+  .cta__actions { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: var(--btn-h); padding: 0 22px;
+    border-radius: var(--r-md);
+    font: inherit; font-size: 14px; font-weight: 600; text-decoration: none;
+    transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease),
+      color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+  }
+  .btn--primary {
+    background: var(--accent); color: #fff; border: 1px solid var(--accent);
+    box-shadow: 0 1px 2px rgba(20, 24, 22, 0.12);
+  }
+  .btn--primary:hover {
+    background: color-mix(in srgb, var(--accent) 88%, #000);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+  .btn--ghost { background: var(--surface); color: var(--text-2); border: 1px solid var(--border); }
+  .btn--ghost:hover { color: var(--text); border-color: color-mix(in srgb, var(--text) 25%, var(--border)); }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .how { grid-template-columns: 1fr; }
+    .split { grid-template-columns: 1fr; }
+    .feature, .feature--flip { grid-template-columns: 1fr; gap: 28px; }
+    .feature--flip .feature__text { order: 0; }
+    .credits { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .timeline__line { left: 15px; }
+    .timeline__item { grid-template-columns: 32px minmax(0, 1fr); gap: 12px; }
+    .timeline__content { padding: 16px; }
+  }
+  @media (max-width: 520px) {
+    .facts { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; }
+    .facts__item { padding: 14px 8px; }
+    .inputs { grid-template-columns: 1fr; }
+    .frame__body { padding: 12px; }
+    .mini, .tt { grid-template-columns: 34px repeat(5, minmax(0, 1fr)); gap: 4px; }
+    .lesson { font-size: 10px; padding: 0 2px; }
+    .lesson__full { display: none; }
+    .lesson__short { display: inline; }
+    .cta__actions .btn { width: 100%; }
   }
 `;
 
